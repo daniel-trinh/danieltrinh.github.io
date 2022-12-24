@@ -1,0 +1,1939 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Daniel Trinh</title>
+	<meta name="author" content="Daniel Trinh">
+
+	
+	<meta name="description" content="Jul 12th, 2016 golang, project Filtering Duplicate Messages in Twitch Chat I recently built this toy command line interface (CLI) app for fun. You &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Daniel Trinh" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://danieltrinh.com/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-45587019-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<img src="http://www.gravatar.com/avatar/685bb9c0f2d690d3e4a910995a13f811?s=160" alt="Profile Picture" style="width: 160px;" />
+	
+</div>
+<hgroup>
+  <h1><a href="/">Daniel Trinh</a></h1>
+  
+</hgroup>
+<nav id="main-nav"><hgroup>
+  <h2>Articles</h2>
+  
+</hgroup>
+<ul class="main-navigation">
+  <li><a href="/blog/categories">Categories</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+<hgroup>
+  <h2 class="main-navigation">
+    <a href="/blog/categories/project/">Open Source Projects</a>
+  </h2>
+</hgroup>
+<ul>
+  <li>
+    <a href="/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/">Filtering Twitch Chat</a>
+  </li>
+  <li>
+    <a href="/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/">OCRemix RSS to Twitter</a></li>
+  <li>
+    <a href="/blog/2014/02/05/improving-scalariform/">Scalariform</a>
+  </li>
+</ul>
+
+<section class="aboutme">
+  <p>
+    Generalist Backend Software Engineer. This is my blog on tech related things.
+
+  </p>
+</section>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+			<a class="email" href="mailto:daniel.s.trinh@gmail.com" title="Email">Email</a>
+		
+		
+		
+		
+			<a class="github" href="https://github.com/daniel-trinh" title="GitHub">GitHub</a>
+		
+		
+		
+		
+			<a class="linkedin" href="http://www.linkedin.com/pub/daniel-trinh/26/229/314" title="LinkedIn">LinkedIn</a>
+		
+		
+		
+		
+		
+		
+		
+			<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner">
+<div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-07-12T12:14:00-07:00" data-updated="true" itemprop="datePublished">Jul 12<span>th</span>, 2016</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/golang/'>golang</a>, <a class='category' href='/blog/categories/project/'>project</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/" itemprop="url">Filtering Duplicate Messages in Twitch Chat</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.</p>
+
+<p><a href="https://www.youtube.com/watch?v=i8sRO7_qvOY" title="Twitch Chat Filterer"><img src="http://i.imgur.com/m50Kii1.gif" alt="Twitch Chat Filterer" /></a></p>
+
+<p>The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on <a href="https://www.twitch.tv/">Twitch.tv</a>. It shows the filtering in action, in the middle of a burst of the <code>WutFace</code> spam, which you can see in the lower left of the above video.</p>
+
+<h2>Twitch.tv Overview</h2>
+
+<p>For the uninitiated, <a href="https://www.twitch.tv/">Twitch.tv</a> is a streaming video website that allows anyone to share live video with viewers over the internet, with twitch. The most popular use case by a wide margin for streaming players playing video games, although it is also sometimes used for sharing live music, where the video streamer might be playing an instrument (or instruments, if it&rsquo;s a band.</p>
+
+<p>Several thousand people can be watching the same video stream at the same time &mdash; it&rsquo;s not uncommon to see streams that have 100,000 simultaneous viewers. Since viewers who watch the same video stream are also put into the same chat room (there&rsquo;s no chat room splitting that happens automatically), the chat room messages can become incredibly difficult to parse.</p>
+
+<p>To (sort of) solve this problem, I wrote a simple CLI Twitch/IRC chat client that supports the ability to filter out duplicate messages within a sliding time window in realtime.</p>
+
+<h2>Implementation Details</h2>
+
+<p>Although this was built specifically for Twitch, it works with any chat that supports IRC as a protocol.</p>
+
+<p>The fully functional IRC client was written in Golang. The choice of Golang was purely out of my desire to learn the language. If I was to build something beyond for toy usage, I&rsquo;d probably write it as a Chrome extension, since native Twitch chat is in the browser, and it&rsquo;s where users are accustomed to chatting.</p>
+
+<p>I used <a href="https://github.com/gizak/termui">termui</a> for the UI. The usecase for termui is pretty niche &mdash; I&rsquo;d say it&rsquo;s useful for interfaces when a browser is out of the question, such as while SSHed onto a remote server. Unless performance is a problem or golang is absolutely necessary, <a href="https://github.com/yaronn/blessed-contrib">blessed-contrib</a> using JavaScript looks to be a better option for building CLI UIs. I&rsquo;d avoid building CLI UIs over browser based ones in general though &mdash; these frameworks for building CLI UIs is not like working with the DOM in the browser, and the kinds of UIs you can build using <code>termui</code> or <code>blessed-contrib</code> are limited in scope.</p>
+
+<p>There are the following widgets in this client:</p>
+
+<p>  1) Message Rate Monitor (Rate of messages over sliding window)</p>
+
+<p>  2) Message Stats Monitor (Min, Max, Avg messages over sliding window)</p>
+
+<p>  3) Duplicate Message Aggregator (List of messages sorted by number of occurrences over sliding window)</p>
+
+<p>The trickiest implementation detail was the duplicate message aggregator. It involved maintaining a sorted list of <code>(message, count)</code> pairs in realtime as messages arrived, and then decrementing / removing the message from the sorted list of (message, count) pairs, while also preventing concurrent updates from malforming the sorted list counts.</p>
+
+<p>Despite the complexity, Golang made this process quite easy. Concurrent updates were handled by serializing all updates through a queueing channel, and goroutines with <code>time.Sleep(duration)</code> were used to decrement counts.</p>
+
+<h2>Further Thoughts on Golang</h2>
+
+<p>Golang was a bit of a pain at times &mdash; the lack of generics in the language shows. I had to duplicate methods like <code>math.Max</code> for <code>int</code> types, since the builtin <code>math.Max</code> only works with <code>float64</code>. Also, the extra overhead of thinking about when to pass a pointer to a struct vs just the struct got in the way of thinking about the higher level functionality of the application.</p>
+
+<p>On the flip side, I spent almost no time learning Golang and was able to build something functional almost immediately. This hasn&rsquo;t been the case with other languages I&rsquo;ve learned, such as <code>TypeScript</code> or <code>Scala</code>. The expediency experienced with Golang comes from two things &mdash; firstly, the amazing tooling that has gone into the language ecosystem, and secondly, the sheer simplicity of the language and lack of language features.</p>
+
+<p>I wouldn&rsquo;t use Golang as my first language choice for prototyping a product, but for system level programming, network intensive applications, or performance critical backends, Golang seems like the perfect choice for development. I&rsquo;ll stick to Python, Scala, or TypeScript for prototyping products quickly, and use Golang when the extra performance is necessary.</p>
+
+<h2>Using the Client</h2>
+
+<p>The source code and instructions for usage of the project described earlier can be found at my github page <a href="https://github.com/daniel-trinh/twitch_chat_filter">here</a>. All that is needed is a golang installation and a Twitch account.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-07T21:05:00-08:00" data-updated="true" itemprop="datePublished">Feb 7<span>th</span>, 2014</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/performance/'>performance</a>, <a class='category' href='/blog/categories/snippet/'>snippet</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2014/02/07/numbers-every-software-engineer-should-know/" itemprop="url">Numbers Every Software Engineer Should Know</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>This article is a collection of runtime and memory usage numbers that
+might be useful to keep in mind when building performance critical software.</p>
+
+<h2>Big-O Absolute Numbers</h2>
+
+<p>This chart shows how well or poorly certain algorithm complexities scale
+when <code>n</code> grows.</p>
+
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)  | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|-------------|---------------|---------------------
+log(n)     | 3         | 6           | 10            | 32
+n          | 8         | 64          | 1024          | 4294967296
+n*log(n)   | 24        | 384         | 10240         | 1.374...E11
+n^2        | 64        | 4096        | 1048576       | 1.844...E19
+n^2*log(n) | 192       | 24576       | 1.048...E7    | -
+n^3        | 512       | 262144      | -             | -
+2^n        | 256       | 1.844...E19 | -             | -
+n!         | 40320     | 1.268...E89 | -             | -
+</code></pre>
+
+<h2>Runtime Performance Numbers</h2>
+
+<h4>Big-O Runtime Performance Numbers</h4>
+
+<p>This chart shows how well or poorly certain algorithm complexities scale when <code>n</code> grows,
+in the context of CPU runtime. Exponentials and factorial algorithms clearly
+do not scale to values of <code>n</code> of any significant size.</p>
+
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)       | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|------------------|---------------|---------------------
+log(n)     | 3   ns    | 6   ns           | 10 ns         | 32  ns
+n          | 8   ns    | 64  ns           | 1  µs         | 4.2 seconds
+n*log(n)   | 24  ns    | 384 ns           | 10 µs         | 137 seconds
+n^2        | 64  ns    | 4   µs           | 1  ms         | 584 years
+n^2*log(n) | 192 ns    | 24  µs           | 10 ms         | forever
+n^3        | 512 ns    | 262 µs           | 1  second     | forever
+2^n        | 256 ns    | 584 years        | forever       | forever
+n!         | 40  µs    | forever          | forever       | forever
+
+ns      = Nanoseconds, about the time it takes for a CPU instruction cycle to run
+µs      = 1,000 ns
+ms      = 1,000 µs
+forever = way way longer than the lifetime of the universe of 13.798 billion years
+</code></pre>
+
+<h4>Latency Numbers</h4>
+
+<p>This chart shows the round trip latency for certain computing actions.</p>
+
+<pre><code> Action                             | Time     | Comparisons
+------------------------------------|----------|-----------------------------
+ L1 cache reference                 | 0.5   ns |
+ Branch mispredict                  | 5     ns |
+ L2 cache reference                 | 7     ns | 14x L1 cache
+ Mutex lock/unlock                  | 25    ns |
+ Main memory reference              | 100   ns | 20x L2 cache, 200x L1 cache
+ Compress 1K bytes with Zippy       | 3,000 ns |
+ Send 1K bytes over 1 Gbps network  | 10    µs |
+ Read 4K randomly from SSD*         | 150   µs |
+ Read 1 MB sequentially from memory | 250   µs |
+ Round trip within same datacenter  | 500   µs |
+ Read 1 MB sequentially from SSD*   | 1     ms | 4X memory
+ Disk seek                          | 10    ms | 20x datacenter roundtrip
+ Read 1 MB sequentially from disk   | 20    ms | 80x memory, 20X SSD
+ Send packet CA-&gt;Netherlands-&gt;CA    | 150   ms |
+
++ By Jeff Dean: http://research.google.com/people/jeff/
++ Originally by Peter Norvig: http://norvig.com/21-days.html#answers
++ Retrieved from Jonas Bonér: https://gist.github.com/jboner/2841832
+</code></pre>
+
+<h2>Memory and Storage Numbers</h2>
+
+<h4>Big-O Storage size</h4>
+
+<p>This chart shows how well or poorly certain algorithm complexities scale when <code>n</code> grows,
+in the context of memory and storage.</p>
+
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)    | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|---------------|---------------|---------------------
+log(n)     | 3   B     | 6   B         | 10 B          | 32 B
+n          | 8   B     | 64  B         | 1  KB         | 4 GB
+n*log(n)   | 24  B     | 384 B         | 10 KB         | 128 GB
+n^2        | 64  B     | 40  KB        | 1  MB         | 16 exabytes
+n^2*log(n) | 192 B     | 24  KB        | 10 MB         | ...
+n^3        | 512 B     | 256 KB        | 1  GB         | ...
+2^n        | 256 B     | 16  exaBytes  | ...           | ...
+n!         | 40  KB    | ...           | ...           | ...
+
+B       = 1 Byte, or 8 Bits
+KB      = kilobyte (1024 B)
+MB      = megabyte (1024 KB)
+GB      = gigabyte (1024 MB)
+TB      = terabyte (1024 GB)
+TB      = petabyte (1024 TB)
+exabyte = 1024 petabytes, or 1 million computers with 1 terabyte HDs
+...     = there isn't enough room on earth to store the required computers.
+</code></pre>
+
+<h4>Powers of Two Table</h4>
+
+<p>This chart shows how much memory is required to store bits in powers of two. For example, it takes
+4GB of memory to store 2<sup>32</sup> bits in memory, and would require 16GB of memory to store
+an array of 32-bit integers. This is useful for knowing when a hash table is appropriate for a problem.</p>
+
+<pre><code>Power of 2 | Exact Value       | Storage size
+-----------|-------------------|-------------
+7          | 128               | 128 B
+8          | 256               | 256 B
+10         | 1024              | 1   KB
+16         | 65,536            | 64  KB
+20         | 1,048,576         | 1   MB
+30         | 1,073,741,824     | 1   GB
+32         | 4,294,967,296     | 4   GB
+40         | 1,099,511,627,776 | 1   TB
+64         | 1.844...E19       | 16  exabytes
+
++ Modified from _Cracking the Coding Interview_ By Gayle L. McDowell (p. 47)
+</code></pre>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-06T00:00:00-08:00" data-updated="true" itemprop="datePublished">Feb 6<span>th</span>, 2014</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/project/'>project</a>, <a class='category' href='/blog/categories/scala/'>scala</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/" itemprop="url">Converting the OverClocked Remix RSS to a Twitter Feed</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p><a href="http://ocremix.org">OverClocked Remix (OCRemix)</a> is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.</p>
+
+<p>This post is about a server daemon project I wrote a year ago &mdash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at <a href="https://twitter.com/newOCRemixes">@newOCRemixes</a> on Twitter. It&rsquo;s been running on Heroku 24/7 for the past year without any problems. Source code is <a href="http://github.com/daniel-trinh/ocremix">here</a>.</p>
+
+<p>The rest of this post goes into the design and development of this project, so if that doesn&rsquo;t sound interesting to you, now is a good time to hop off this train.</p>
+
+<h2>Motivation and design</h2>
+
+<p>I&rsquo;ve been listening to music off of OCRemix ever since 2002. The way I used
+to find new songs was to repeatedly visit their website, look for new songs,
+and then click through three or four links for every new song that was posted.</p>
+
+<p>I got tired of checking the website, only to end up finding out there were no new songs,
+or finding out there are ten new songs, and having to click 30 times to hear all of them.</p>
+
+<p>So I set out to figure out how to make it much, much easier to hear new songs and download
+them if I liked them.</p>
+
+<h4>Existing OCRemix Feeds</h4>
+
+<p>OCRemix has it&rsquo;s <a href="https://twitter.com/ocremix">own Twitter feed</a>, which they will use
+to post new remixes, but it&rsquo;s not exclusive to providing just new songs:</p>
+
+<p><img class="center" src="/images/ocremix/official_unrelated.png" width="500" height="450" title="Official OCRemix Twitter Feed" alt="Official OCRemix Twitter Feed picture"></p>
+
+<p>Twitter happens to have this nice feature that they call <a href="https://dev.twitter.com/docs/cards">cards</a>. Cards are essentially a feature that detect certain types of URLs, and display information within the tweet that would only be accessible from visiting the URL. One of the
+supported card types are Youtube links, which will embed a Youtube video into a Tweet
+whenever a Youtube link is detected.</p>
+
+<p>Sometimes the links to new songs include a Youtube link to the remix for easy listening&hellip;</p>
+
+<p><img class="center" src="/images/ocremix/official_link.png" width="400" height="450" title="Official OCRemix Twitter Feed -- Embedded Youtube" alt="Official OCRemix Twitter Feed picture, embedded Youtube"></p>
+
+<p>and sometimes they don&rsquo;t:</p>
+
+<p><img class="center" src="/images/ocremix/official_no_link.png" width="400" height="450" title="Official OCRemix Twitter Feed -- no Embedded Youtube" alt="Official OCRemix Twitter Feed picture, no Youtube"></p>
+
+<p>They also have their own <a href="https://www.youtube.com/channel/UC8Wh7qpPGJm3K1eZ6DHjpKA">Youtube channel</a>
+where new songs are posted, but similarly to their Twitter feed, it is not exclusive to new songs.</p>
+
+<h4>My OCRemix Feed</h4>
+
+<p>Since I was already using Twitter as a news feed, I chose that as my target platform for
+receiving new song notifications. The following is a list of some of the things I wanted
+out of my Twitter feed system.</p>
+
+<blockquote><ul>
+<li><p>Only new songs should be posted &mdash; no reposts.</p></li>
+<li><p>Only songs should be posted &mdash; nothing else but new OCRemix songs.</p></li>
+<li><p>Every single song must contain a link to the Youtube song link.</p></li>
+<li><p>Show the video game, remixer, and composer the song is remixed from,
+ if it fits in 140 characters along with the Youtube link.</p></li>
+<li><p>This system should not require any input from me (automated).</p></li>
+<li><p>If something is broken, I should be notified of the breakage.</p></li>
+</ul>
+</blockquote>
+
+<p>Initially, I wanted to implement direct download links within each Tweet in order to simplify the process of downloading the mp3 for new songs. However, because ocremix.org is non-profit and receives advertising money from the main website to pay for bandwidth, I chose to just link to their site to download out of politeness.</p>
+
+<p>This is what the final version of my implementation looks like:</p>
+
+<p><img class="center" src="/images/ocremix/my_version.png" width="500" height="550" title="My Unofficial Twitter Feed" alt="My Unofficial Twitter Feed picture"></p>
+
+<p>Assuming this information fits into the 140 character limit, each one of these song tweets is composed of the following:</p>
+
+<pre><code>songId     - Integer, official remix number (currently at 2827 at the time of writing). 
+title      - Song title, given to the song by the remixers.
+remixers   - The remix artists that created the remix.
+composers  - The original artists that created the original song.
+youtubeUrl - Link to the remix on Youtube.
+writeupUrl - Official OCRemix link with remix information and a download link.
+</code></pre>
+
+<h2>Programming Details</h2>
+
+<p>The actual project was implemented using Scala. The main libraries used were
+Dispatch for OAuth and talking with Twitter&rsquo;s API, and <a href="akka.io">Akka</a> for the periodic
+polling of the RSS feed.</p>
+
+<h4>Fitting Info into a Tweet</h4>
+
+<p>Trying to detect whether or not a Tweet will fit in 140 characters is tricky, especially
+if there are URLs in the Tweet. Twitter will automatically shorten URLs for you &mdash; the caveat
+is that the length of the shortened URL is what counts to the 140 character limit,
+and not the size of the original URL.</p>
+
+<p>So how do you figure out what the shortened URL size will be?
+Twitter happens to have a <a href="https://dev.twitter.com/docs/api/1.1/get/help/configuration">configuration API</a> that will tell you the current length
+of URLs (https links are one character longer than http). Since this number can
+change, it can&rsquo;t be hardcoded into the system. It&rsquo;s also not a number that is likely
+to change often.</p>
+
+<p>To take this varying URL length into consideration, the previously known shortened URL length is cached in memory for quick usage. I poll the configuration API
+every 24 hours to check for and update the URL length cache if necessary.</p>
+
+<p>This polling is done using Akka&rsquo;s scheduler:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">twitterConfigUpdaterSchedule</span> <span class="k">=</span> <span class="nc">MySystem</span><span class="o">().</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">initialDelay</span> <span class="k">=</span> <span class="mi">0</span> <span class="n">seconds</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">frequency</span>    <span class="k">=</span> <span class="mi">1</span> <span class="n">day</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">receiver</span>     <span class="k">=</span> <span class="n">configUpdater</span><span class="o">,</span>
+</span><span class='line'>  <span class="c1">// If I was writing this again, I probably wouldn&#39;t use a &quot;doit&quot; message</span>
+</span><span class='line'>  <span class="c1">// for initiating an update.</span>
+</span><span class='line'>  <span class="n">message</span>      <span class="k">=</span> <span class="s">&quot;doit&quot;</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sometimes there&rsquo;s just too much information to include in 140 characters. Going back
+to my design goal of making it easy to hear new songs, the Youtube link is the
+most important thing to include in the Tweet.</p>
+
+<p>Here&rsquo;s a shortened version of the code that figures out what to put into a tweet:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// The youtube URL is in every possible one of these.</span>
+</span><span class='line'><span class="k">lazy</span> <span class="k">val</span> <span class="n">v0</span> <span class="k">=</span> <span class="nc">Tweet</span><span class="o">(</span><span class="n">songId</span><span class="o">,</span> <span class="n">title</span><span class="o">,</span> <span class="n">remixers</span><span class="o">,</span> <span class="n">composers</span><span class="o">,</span> <span class="n">youtubeUrl</span><span class="o">,</span> <span class="n">writeupUrl</span><span class="o">)</span>
+</span><span class='line'><span class="k">lazy</span> <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="nc">Tweet</span><span class="o">(</span><span class="n">songId</span><span class="o">,</span> <span class="n">title</span><span class="o">,</span> <span class="n">remixers</span><span class="o">,</span> <span class="n">youtubeUrl</span><span class="o">,</span> <span class="n">writeupUrl</span><span class="o">)</span>
+</span><span class='line'><span class="k">lazy</span> <span class="k">val</span> <span class="n">v2</span> <span class="k">=</span> <span class="nc">Tweet</span><span class="o">(</span><span class="n">songId</span><span class="o">,</span> <span class="n">title</span><span class="o">,</span> <span class="n">youtubeUrl</span><span class="o">,</span> <span class="n">writeupUrl</span><span class="o">)</span>
+</span><span class='line'><span class="k">lazy</span> <span class="k">val</span> <span class="n">v3</span> <span class="k">=</span> <span class="nc">Tweet</span><span class="o">(</span><span class="n">songId</span><span class="o">,</span> <span class="n">title</span><span class="o">,</span> <span class="n">youtubeUrl</span><span class="o">)</span>
+</span><span class='line'><span class="k">lazy</span> <span class="k">val</span> <span class="n">v4</span> <span class="k">=</span> <span class="nc">Tweet</span><span class="o">(</span><span class="n">songId</span><span class="o">,</span> <span class="n">youtubeUrl</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Start with the longest possible, then slowly go to the shortest.</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">v0</span><span class="o">.</span><span class="n">isTweetable</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">v0</span>
+</span><span class='line'><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">v1</span><span class="o">.</span><span class="n">isTweetable</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">v1</span>
+</span><span class='line'><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">v2</span><span class="o">.</span><span class="n">isTweetable</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">v2</span>
+</span><span class='line'><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">v3</span><span class="o">.</span><span class="n">isTweetable</span><span class="o">)</span>
+</span><span class='line'>  <span class="n">v3</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="n">v4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Unless Twitter plans on upping the shortened URL length to ~135 characters,
+or the ids start incrementing in several orders of magnitude per new remix,
+the smallest tweet content (<code>songId</code>,<code>youtubeUrl</code>) is good enough.</p>
+
+<p><em>There&rsquo;s a reason songId is included in all of the possibilities as well, more on that later.</em></p>
+
+<h4>Receiving Error Notifications</h4>
+
+<p>In order to make sure I received a notification whenever something breaks, every single
+method that could cause an error returns an <code>Either[_, String]</code>, where
+the <code>Right</code> case stores the successful result, and the <code>Left</code> case stores a string explaining what went wrong. Whenever a method is completed
+with the <code>Left</code> case, a direct message is sent to my own personal Twitter handle,
+with information about the failure.</p>
+
+<p>Here&rsquo;s what error messages look like when they reach my Twitter inbox:</p>
+
+<p><img class="center" src="/images/ocremix/error_messages.png" width="600" height="450" title="All in one place" alt="Error Messages in my Twitter Inbox"></p>
+
+<p>Some examples of methods that might fail that I want to be
+alerted about if they do:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'>  <span class="c1">// Sends a private message to someone on Twitter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">directMessage</span><span class="o">(</span><span class="n">user</span><span class="k">:</span> <span class="kt">TwitterHandle</span><span class="o">,</span> <span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Tweets a new post</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">statusesUpdate</span><span class="o">(</span><span class="n">tweet</span><span class="k">:</span> <span class="kt">Tweetable</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Retrieves the last few Tweets from a user&#39;s timeline</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">userTimeline</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">userId</span><span class="k">:</span>     <span class="kt">String</span><span class="o">,</span>
+</span><span class='line'>    <span class="n">screenName</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span>
+</span><span class='line'>    <span class="n">count</span><span class="k">:</span>      <span class="kt">Int</span>
+</span><span class='line'>  <span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">String</span>,<span class="kt">String</span><span class="o">]]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Retrieves configuration information about Twitter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">helpConfiguration</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">TwitterConfiguration</span><span class="o">]]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(In retrospect, just using Future[String] would have been enough, since it
+stores the exception information in case of failure&hellip; but keep in mind I <em>did</em> write this code as a novice just as I started learning Scala).</p>
+
+<h4>Polling and Parsing the RSS Feed</h4>
+
+<p>There&rsquo;s nothing particularly fancy about this part &mdash; it mostly consists of
+periodically polling <a href="http://ocremix.org/feeds/ten20/">OCRemix&rsquo;s RSS</a> and
+parsing out new songs to post on Twitter.</p>
+
+<p>Here&rsquo;s the code that schedules an RSS polling check every half hour:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">rssPollerSchedule</span> <span class="k">=</span> <span class="nc">MySystem</span><span class="o">().</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">initialDelay</span> <span class="k">=</span> <span class="mi">0</span> <span class="n">seconds</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">frequency</span>    <span class="k">=</span> <span class="mi">30</span> <span class="n">minutes</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">receiver</span>     <span class="k">=</span> <span class="n">rssPoller</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">message</span>      <span class="k">=</span> <span class="s">&quot;doit&quot;</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In order to figure out whether or not a song is new, I send a request to Twitter&rsquo;s API to retrieve the <code>@newOCRemixes</code> Twitter Timeline, check the last Tweet&rsquo;s <code>songId</code>, and make sure any new song I post happens
+to have a songId greater than the one on the timeline.</p>
+
+<h4>Things to Improve</h4>
+
+<p>All of this <em>mostly</em> works. There are a few problems that were more complicated
+to solve than the time I wanted to spend on this.</p>
+
+<p>One of these problems happens to be that the RSS feed
+only stores the 10 latest new songs &mdash; if there&rsquo;s ever more than 10 songs posted
+within a 30 minute interval, any songs prior to the last 10 will not get posted.
+This has only happened once since I&rsquo;ve launched this project, but there&rsquo;s not
+much that can be done about it, short of asking for the OCRemix owners to not post
+so many songs at once, or up the number on their RSS feed.. or polling the website
+itself, and parsing the song URLs from raw HTML.</p>
+
+<p>Another problem (that hasn&rsquo;t actually been much trouble so far) is that the error
+message reporting is dependent on Twitter&rsquo;s API working. If there&rsquo;s a problem with
+the <code>directMessage</code> call to send me a message on errors, I won&rsquo;t be notified. I could have solved this by setting up a secondary notification system such as email, but errors happen so rarely that it wasn&rsquo;t worth the trouble.</p>
+
+<p>The third and last problem that I&rsquo;ve run into is actually not one I can do much about. The Twitter card feature for Youtube videos sometimes won&rsquo;t work &mdash; a few Tweets just won&rsquo;t embed a Youtube video into the post, even if there&rsquo;s a valid Youtube URL in the message.</p>
+
+<p>Having said that, I&rsquo;m pretty happy with the results &mdash; it&rsquo;s been working without a hitch for the last year since it&rsquo;s been deployed.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-05T23:26:00-08:00" data-updated="true" itemprop="datePublished">Feb 5<span>th</span>, 2014</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/project/'>project</a>, <a class='category' href='/blog/categories/scala/'>scala</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2014/02/05/improving-scalariform/" itemprop="url">Improving Scalariform, the Scala Source Formatter</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>Scalariform is a Scala source code formatter, originally written by <a href="http://github.com/mdr">Matt Russell</a> (big thanks to him for writing it).</p>
+
+<p>It&rsquo;s much easier to show you what this does than it is to try and explain it, so that&rsquo;s what I&rsquo;ll do.</p>
+
+<p>This is some poorly formatted code before running Scalariform:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'><span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'><span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'><span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'><span class="mi">0</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After running Scalariform:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty cool, right? Unfortunately, there haven&rsquo;t been very many updates to the official version of this super awesome project lately,
+so I decided to fork the project and start improving upon it myself. Since I use Scala quite often, I&rsquo;ve got some pretty strong motivation to work on improving it.</p>
+
+<p>Here&rsquo;s a quick summary of what I&rsquo;ve added to Scalariform <em>so far</em>:</p>
+
+<figure class='code'><figcaption><span>Previous Scalariform Formatting</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">showInput</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span>
+</span><span class='line'>  <span class="n">parent</span><span class="k">:</span> <span class="kt">Component</span> <span class="o">=</span> <span class="kc">null</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">message</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">title</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="n">uiString</span><span class="o">(</span><span class="s">&quot;OptionPane.inputDialogTitle&quot;</span><span class="o">),</span>
+</span><span class='line'>  <span class="n">messageType</span><span class="k">:</span> <span class="kt">Message.Value</span> <span class="o">=</span> <span class="nc">Message</span><span class="o">.</span><span class="nc">Question</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">icon</span><span class="k">:</span> <span class="kt">Icon</span> <span class="o">=</span> <span class="nc">EmptyIcon</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">entries</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Nil</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">initial</span><span class="k">:</span> <span class="kt">A</span>
+</span><span class='line'><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="k">class</span> <span class="nc">Cake</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">icingFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Vanilla</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">cakeFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Chocolate</span><span class="o">,</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">candles</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">layers</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">iceCream</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">False</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">o</span><span class="o">.</span><span class="n">manyArguments</span><span class="o">(</span><span class="n">abc</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcOne</span> <span class="k">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcTwo</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcThree</span> <span class="k">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFour</span> <span class="k">=</span> <span class="mi">4</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFive</span> <span class="k">=</span> <span class="mi">3</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Scalariform Formatting with My Changes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// Parameter names, types, and defaults are aligned into three separate columns</span>
+</span><span class='line'><span class="k">def</span> <span class="n">showInput</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span>
+</span><span class='line'>  <span class="n">parent</span><span class="k">:</span>      <span class="kt">Component</span>     <span class="o">=</span> <span class="kc">null</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">message</span><span class="k">:</span>     <span class="kt">Any</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">title</span><span class="k">:</span>       <span class="kt">String</span>        <span class="o">=</span> <span class="n">uiString</span><span class="o">(</span><span class="s">&quot;OptionPane.inputDialogTitle&quot;</span><span class="o">),</span>
+</span><span class='line'>  <span class="n">messageType</span><span class="k">:</span> <span class="kt">Message.Value</span> <span class="o">=</span> <span class="nc">Message</span><span class="o">.</span><span class="nc">Question</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">icon</span><span class="k">:</span>        <span class="kt">Icon</span>          <span class="o">=</span> <span class="nc">EmptyIcon</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">entries</span><span class="k">:</span>     <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>        <span class="k">=</span> <span class="nc">Nil</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">initial</span><span class="k">:</span>     <span class="kt">A</span>
+</span><span class='line'><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Two newlines will result in separate alignment groups </span>
+</span><span class='line'><span class="k">case</span> <span class="k">class</span> <span class="nc">Cake</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">icingFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Vanilla</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">cakeFlavor</span><span class="k">:</span>  <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Chocolate</span><span class="o">,</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">candles</span><span class="k">:</span>  <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">layers</span><span class="k">:</span>   <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">iceCream</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">False</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Same feature working with method calls</span>
+</span><span class='line'><span class="n">o</span><span class="o">.</span><span class="n">manyArguments</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">abc</span>    <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcOne</span> <span class="k">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcTwo</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcThree</span> <span class="k">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFour</span>  <span class="k">=</span> <span class="mi">4</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFive</span>  <span class="k">=</span> <span class="mi">3</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And here&rsquo;s how to use my version:</p>
+
+<figure class='code'><figcaption><span>Scalariform Formatting with My Changes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// Add this to .../project/plugins.sbt</span>
+</span><span class='line'><span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Sonatype OSS Snapshots&quot;</span> <span class="n">at</span> <span class="s">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">&quot;com.danieltrinh&quot;</span> <span class="o">%</span> <span class="s">&quot;sbt-scalariform&quot;</span> <span class="o">%</span> <span class="s">&quot;1.3.0-SNAPSHOT&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>See the <a href="https://github.com/daniel-trinh/sbt-scalariform">plugin</a> for how to configure formatting options, and the <a href="https://github.com/daniel-trinh/scalariform">Scalariform readme</a>
+for available formatting options.</p>
+
+<p>Since this is an ongoing project, there will be more updates to come.</p>
+
+<!-- 
+The rest of this article goes into great detail about my motivation to work on Scalariform,
+the importance of auto-formatters in general, and some of the design dilemmas of working on Scalariform.
+
+Before I get into what I've improved, I'll go over some reasons why Scalariform
+is important.
+
+## The Importance of Auto-Formatting
+[Many](https://code.google.com/p/google-styleguide/ "Google's style guides for various languages") [companies](http://twitter.github.io/effectivescala/ "Twitter's style guide for Scala") [have](https://github.com/styleguide/ruby "Github's style guide for Ruby") coding style guidelines for a reason. [I wrote about this](/blog/2014/01/26/maintaining-a-large-code-base-part-3/) in great detail in my article about programming languages and code bases. My general conclusion is that having many ways of visualizing and formatting source code
+is not a good thing -- the more ways to format the code, the more ways a reader of the
+code will have to learn to read the code to understand it. 
+
+The following code example is perfectly valid scala code... but it's not at all readable.
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+The output from running Scalariform for this result is the same as the previous example:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+Having something that will take care of the formatting for me is great &#8211; spending time thinking about formatting, manually formatting code, and spending time
+on code reviews about formatting is not a very productive use of time when there are actual business product related problems to solve, and especially since it&#8217;s a problem that can be solved forever by using an auto-formatter along the lines of Scalariform or gofmt.
+
+#### Formatting Ubiquity
+
+Having an auto formatter to enforce a consistent style in a code base is important, because
+once the maintainers of that code base have become accustomed to that style, they won&#8217;t have to &#8220;readjust&#8221; their eyes to get used to. If the auto formatter for a programming language is nearly ubiquitous amongst those who use it, such as with Golang&#8217;s [gofmt](http://research.swtch.com/gofmt), then even better &#8211; users across the language will be able to read anyone&#8217;s elses code that also uses the formatter.
+
+While auto formatters such as Scalariform can&#8217;t check everything that is in a styleguide
+(it won&#8217;t automatically reformat your imperative, state-mutating code into a functional style automatically), it will take care of the visual aesthetics formatting problem for you.
+
+
+#### Scalariform Dillemas 
+Scalariform has many configuration options, which goes against the design philosophy
+of having one canonical representation so that everyone can quickly get accustomed to the same formatting. It also happens to significantly complicate the actual Scalariform formatting code. With Scalariform, there is one
+global shared state &#8211; the output source code. More configuration options means
+more potentials to clash, and more special cases.
+
+Unfortunately, Scala programmers come from many different backgrounds, and there isn&#8217;t
+a global consensus on what formatting styles programmers prefer. 
+
+When I was gathering feedback for new Scalariform features, I posted an informal poll on Reddit, to gather feedback about 3 different formatting styles:
+
+<figure class='code'><figcaption><span>Style One</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="n">bb</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+<figure class='code'><figcaption><span>Style Two</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">a</span><span class="k">:</span>   <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="n">bb</span><span class="k">:</span>  <span class="kt">String</span>  <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+<figure class='code'><figcaption><span>Style Three</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>   <span class="n">bb</span><span class="k">:</span> <span class="kt">String</span>  <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+I was half-expecting everyone to say they prefered `Style Two`, but of course that wasn&#8217;t the case. `Style One` was the most popular choice. `Style Two` was the second most popular,
+and `Style Three` was by far the least &#8211; not a single person said they preferred this one (although a few said they didn&#8217;t mind any of the options).
+
+I also concluded that a strong contributing factor on which style people prefer is
+strongly related to just what they&#8217;re used to reading &#8211; Golang&#8217;s gofmt happens to format
+code in something similar to `Style Two`, and happens to be used by roughly 70% of all golang projects. If this really is the main factor, then it doesn&#8217;t really make sense
+to  &#8211;>
+
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-26T20:58:00-08:00" data-updated="true" itemprop="datePublished">Jan 26<span>th</span>, 2014</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/golang/'>golang</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/maintainability/'>maintainability</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/scala/'>scala</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2014/01/26/maintaining-a-large-code-base-part-3/" itemprop="url">Maintaining a Large Code Base, Part 3: Programming Languages</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Previous Part: Service Oriented Architecture</em></a></p>
+
+<p>If you are lucky enough to be able to choose the programming language for a new project,
+this section might provide some insight on how it might impact the future of your code base.</p>
+
+<h2>Choose Your Programming Languages Wisely</h2>
+
+<p>This article focuses only on the technical details of programming languages and their
+effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling,
+or library support. While those things are undoubtedly important, those things aren&rsquo;t necessarily intrinsic to a programming language, and they tend to change much more often than the topics I&rsquo;ll
+be discussing here.</p>
+
+<p>When I first started writing this section, it was titled &ldquo;Use a statically typed language.&rdquo;
+I then thought of Java with all of its verbosity, realized it&rsquo;s not quite that simple, and it would
+make more sense to just outline how certain language features impact code maintainability,
+and let you conclude yourself on what kind of language to pursue.</p>
+
+<p>Having said that, personally I prefer languages with static type systems over dynamic ones from a pure maintainability point of view, except perhaps in the case of languages like Java.</p>
+
+<p>Before I get started, let&rsquo;s define a few things.</p>
+
+<blockquote><p>Compiled language &ndash; purely statically typed, type annotations are required,
+or must be able to be inferred at compile time
+(Scala, Java, Haskell, C++)</p>
+
+<p>Dynamic language &ndash; interpreted, no type annotations or they are optional
+(Clojure, Typed Clojure, Ruby, Groovy, Groovy 2.0, Python, JavaScript)</p>
+
+<p>Statically typed language &ndash; same as compiled language</p></blockquote>
+
+<p>Typed Clojure and Groovy 2.0 both have optional type annotations for partial compile time
+type checking and performance improvements, but I am grouping them in the dynamic
+language group because they are optional, and they do not provide the same static
+analysis guarantees as pure statically typed languages, and hence are not as helpful in
+terms of maintainability (more on static analysis later). They are certainly easier
+to pick up than a full blown compiled languages with generics, though (more on this in the language complexity section).</p>
+
+<h3>Conciseness</h3>
+
+<p>By conciseness I mean this: How much code is necessary to express a particular
+piece of business logic? How much of that code is intrinsic to
+describing that logic, and how much of it is necessary because of limitations
+in the language? Conciseness is important for maintainability because it means there&rsquo;s less
+code to read, and less code to refactor when it&rsquo;s necessary to do so.</p>
+
+<p>Here&rsquo;s an example comparing a basic class in Java with the same functionality (both in behavior and runtime performance) implemented in Scala that demonstrates what I mean:</p>
+
+<figure class='code'><figcaption><span>Java class</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">caffeinated</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">sugarCubes</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">Coffee</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">caffeinated</span><span class="o">,</span> <span class="kt">int</span> <span class="n">sugarCubes</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">caffeinated</span> <span class="o">=</span> <span class="n">caffeinated</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">sugarCubes</span> <span class="o">=</span> <span class="n">sugarCubes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">getCaffeinated</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">caffeinated</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getSugarCubes</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">sugarCubes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Scala class</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span><span class="o">(</span><span class="k">val</span> <span class="n">caffeinated</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">,</span> <span class="k">val</span> <span class="n">sugarCubes</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For comparison&rsquo;s sake, here&rsquo;s a Ruby example of something similar to the two examples
+above:</p>
+
+<figure class='code'><figcaption><span>Ruby</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:caffeinated</span><span class="p">,</span> <span class="ss">:sugar_cubes</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">caffeinated</span><span class="p">,</span> <span class="n">sugar_cubes</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@caffeinated</span> <span class="o">=</span> <span class="n">caffeinated</span>
+</span><span class='line'>    <span class="vi">@sugar_cubes</span> <span class="o">=</span> <span class="n">sugar_cubes</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Dynamic languages tend to win in terms of conciseness, since there&rsquo;s no extra
+code necessary for specifying type information, although this isn&rsquo;t always the case.</p>
+
+<h3>Language Complexity</h3>
+
+<p>It doesn&rsquo;t really matter if code takes fewer lines of code if it&rsquo;s impossible to figure out what it does. Unlike conciseness, language complexity isn&rsquo;t quite as clear cut to define. So
+instead of trying to define it in an abstract sense, I&rsquo;ll just give you some examples.</p>
+
+<p>Scala is quite conciseness, but the type system is anything but simple.
+The type system is so involved that it is Turing Complete &mdash; it is so complex that
+it is possible to write algorithms such as <a href="http://apocalisp.wordpress.com/2010/06/08/type-level-programming-in-scala/">infinite loops</a> that only utilize the type system features; no for loops, while loops,
+or function recursion. The type system is so complex to the point that a simpler programming
+language to possibly become the next Scala is <a href="http://www.infoq.com/presentations/data-types-issues">in the works</a> by Scala&rsquo;s original designer.</p>
+
+<p>Here&rsquo;s one of the crazier function signatures in Scala, from the Scalaz library:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">implicit</span> <span class="k">def</span> <span class="nc">CokleisliMAB</span><span class="o">[</span><span class="kt">M</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">](</span><span class="n">k</span><span class="k">:</span> <span class="kt">Cokleisli</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">][</span><span class="k">_</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">])</span><span class="k">:</span> <span class="kt">MAB</span><span class="o">[</span><span class="kt">Cokleisli</span><span class="o">[</span><span class="kt">M</span><span class="o">[</span><span class="k">_</span><span class="o">][</span><span class="k">_</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">][</span><span class="kt">A</span>, <span class="kt">B</span><span class="o">]</span>, <span class="kt">A</span>, <span class="kt">B</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>It probably doesn&rsquo;t seem fair to show that signature for those unfamiliar with Scala, but I assure
+you, that kind of function signature is still daunting for seasoned Scala developers.</p>
+
+<p>Although without those complicated type features, code like this might not be possible in Scala:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// Just Ints</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">5</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">}</span> <span class="n">sum</span>
+</span><span class='line'><span class="c1">// =&gt; Int = 55</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Ints and Doubles</span>
+</span><span class='line'><span class="nc">Array</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span> <span class="o">,</span><span class="mf">3.0</span><span class="o">,</span> <span class="mf">4.5</span><span class="o">,</span> <span class="mf">5.55</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">}</span> <span class="n">sum</span>
+</span><span class='line'><span class="c1">// =&gt; Double = 65.0525 </span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Just Strings</span>
+</span><span class='line'><span class="nc">Vector</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="s">&quot;c&quot;</span><span class="o">,</span> <span class="s">&quot;d&quot;</span><span class="o">,</span> <span class="s">&quot;e&quot;</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">}</span>
+</span><span class='line'><span class="c1">// =&gt;  Vector[String] = Vector(aa, bb, cc, dd, ee)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The implementation of the <code>map</code> function in Scala is far from simple, though. Writing
+this sort of code is not something the average Scala developer can accomplish. In fact,
+I&rsquo;m not sure there&rsquo;s more than a handful of people who could write a collections library
+as powerful as the one in Scala &mdash; it took the creator of the language and a few helpers an entire year to get it to the point it is currently at.</p>
+
+<p>Ruby, on the other hand, has an incredibly simple implementation of the <code>map</code> method.
+It&rsquo;s just a few lines of code, within the <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a> module. To use it, all that is necessary is an implementation of the <code>each</code> function on the inheriting member, and that&rsquo;s it. Because of duck typing, there isn&rsquo;t much else that&rsquo;s needed.</p>
+
+<p>In contrast to both Scala and Ruby, <a href="http://golang.org/">Golang</a> is far from being concise, but it is well reported for being relatively quick to pick up and start coding, likely in large part due to its incredibly minimal type system. It has no form of generics, meaning it is impossible to write type safe collection methods that work with all types using just the language. Golang is packaged with it&rsquo;s own
+basic set of generic data structures (slices, maps, channels), but if you want to write
+your own priority queue that works with all types, you are out of luck. This means
+the language is easier to learn than a language like Scala, but also results in more code and code duplication.</p>
+
+<h3>Syntactic Flexibility</h3>
+
+<p>There&rsquo;s a reason why <a href="https://code.google.com/p/google-styleguide/" title="Google's style guides for various languages">Google</a>,
+<a href="http://twitter.github.io/effectivescala/" title="Twitter's style guide for Scala">Twitter</a>,
+and <a href="https://github.com/styleguide/ruby" title="Github's style guide for Ruby">Github</a> have coding style guidelines.</p>
+
+<p>Can you imagine if each letter of the English alphabet was in a different Unicode character?
+Here&rsquo;s some English that has had each letter of the alphabet mapped to a different character
+in Unicode:</p>
+
+<pre><code>Original text:
+I am Heavy Weapons Guy. And this... [grips Sasha] is my weapon. She weighs 150
+kilograms and fires $200 custom-tooled cartridges at 10,000 rounds per minute. 
+[leans in] It cost $400,000 to fire this weapon...for 12 seconds.
+
+Altered text:
+"ᚋ ᣀᣌ ᚊᣄᣀᨇᨊ ᚙᣄᣀᣏᣎᣍᣒ ᚉᨐᨊ. ᚃᣍᣃ ᣓᣇᣈᣒ... [ᣆᣑᣈᣏᣒ ᚕᣀᣒᣇᣀ] ᣈᣒ ᣌᨊ ᨈᣄᣀᣏᣎᣍ. ᚕᣇᣄ ᨈᣄᣈᣆᣇᣒ 150
+ᣊᣈᣋᣎᣆᣑᣀᣌᣒ ᣀᣍᣃ ᣅᣈᣑᣄᣒ $200 ᣂᨐᣒᣓᣎᣌ-ᣓᣎᣎᣋᣄᣃ ᣂᣀᣑᣓᣑᣈᣃᣆᣄᣒ ᣀᣓ 10,000 ᣑᣎᨐᣍᣃᣒ ᣏᣄᣑ ᣌᣈᣍᨐᣓᣄ. 
+[ᣋᣄᣀᣍᣒ ᣈᣍ] ᚋᣓ ᣂᣎᣒᣓ $400,000 ᣓᣎ ᣅᣈᣑᣄ ᣓᣇᣈᣒ ᨈᣄᣀᣏᣎᣍ...ᣅᣎᣑ 12 ᣒᣄᣂᣎᣍᣃᣒ.
+
+Code for converting: https://gist.github.com/daniel-trinh/2b6d4b9c38e713148db4
+</code></pre>
+
+<p>While that is a bit of a contrived example, it&rsquo;s a taste of what programmers have to deal with
+in programming languages that have flexible syntax. Out of the times I&rsquo;ve talked about the new languages I&rsquo;ve been exploring (Clojure, Go, Scala), syntax is almost always the first thing my coworkers notice
+and talk about &mdash; this is because understanding syntax is the first step to being able to read the language. If it&rsquo;s different from what they&rsquo;re familiar with, it&rsquo;s just another barrier to learning it.</p>
+
+<p>Languages that are designed for building domain-specific languages tend to have more
+syntactic flexibility and lexical complexity. Languages like Ruby and Scala were designed
+in mind of supporting DSLs. Unfortunately, flexible syntax makes it harder for users to read code. For every syntax permutation that people use in a language, everyone who reads the language is going
+to have to be able to read those permutations. In terms of language design, I don&rsquo;t hear this topic talked about as often as some of the other topics in this article, but nevertheless I still see it as worth discussing.</p>
+
+<p>Here are some real examples demonstrating the flexibility of Ruby&rsquo;s and Scala&rsquo;s syntax.</p>
+
+<figure class='code'><figcaption><span>Ruby</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># ( ͡° ͜ʖ ͡°) do..end vs curly braces</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#  Curly Braces</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># do..end</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">].</span><span class="n">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ( ͡° ͜ʖ ͡°) Optional periods</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Method calls without periods</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="p">}</span> <span class="n">reduce</span> <span class="p">(</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Method calls with periods</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="p">}</span><span class="o">.</span><span class="n">reduce</span> <span class="p">(</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ( ͡° ͜ʖ ͡°) Different ways of defining functions</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Method method</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span class='line'> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Lambda method</span>
+</span><span class='line'><span class="n">square</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="o">*</span> <span class="n">n</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Proc method</span>
+</span><span class='line'><span class="n">square</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ( ͡° ͜ʖ ͡°) Flexible method names</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Non Alpha-numeric method names</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">+</span><span class="o">=</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@value</span> <span class="o">=</span> <span class="vi">@value</span> <span class="o">+</span> <span class="n">new_value</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Scala</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="cm">/* ( ͡° ͜ʖ ͡°) Curly braces vs parenthesis */</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Curly Braces</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">,</span><span class="mi">6</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Parenthesis</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">,</span><span class="mi">6</span><span class="o">).</span><span class="n">map</span><span class="o">(</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Unnecessary Curly Braces .. and Parenthesis</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">,</span><span class="mi">6</span><span class="o">).</span><span class="n">map</span><span class="o">(</span>
+</span><span class='line'>  <span class="o">{</span>
+</span><span class='line'>    <span class="o">{</span>
+</span><span class='line'>      <span class="o">(</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">}</span> <span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/* ( ͡° ͜ʖ ͡°) Optional periods */</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Method calls without periods</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">)</span> <span class="n">map</span> <span class="o">(</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">)</span> <span class="n">sum</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Method calls with periods</span>
+</span><span class='line'><span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">).</span><span class="n">map</span><span class="o">(</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">)</span> <span class="n">sum</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/* ( ͡° ͜ʖ ͡°) Different ways of defining &quot;functions&quot; */</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Method</span>
+</span><span class='line'><span class="k">def</span> <span class="n">square</span><span class="o">(</span><span class="n">number</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="n">number</span> <span class="o">*</span> <span class="n">number</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Function</span>
+</span><span class='line'><span class="k">val</span> <span class="n">square</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Int</span> <span class="k">=</span> <span class="o">{</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/* ( ͡° ͜ʖ ͡°) Flexible parameter newline formatting */</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// One line</span>
+</span><span class='line'><span class="k">def</span> <span class="n">manyParams</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Int</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Several lines</span>
+</span><span class='line'><span class="k">def</span> <span class="n">manyParams</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">c</span><span class="k">:</span> <span class="kt">Int</span>
+</span><span class='line'><span class="o">)</span><span class="k">:</span> <span class="kt">Int</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/* ( ͡° ͜ʖ ͡°) Flexible naming */</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Non Alpha-numeric method names</span>
+</span><span class='line'><span class="k">def</span> <span class="o">+=[</span><span class="kt">T</span><span class="o">](</span><span class="n">newValue</span><span class="k">:</span> <span class="kt">T</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">T</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">newValue</span> <span class="o">::</span> <span class="k">this</span><span class="o">.</span><span class="n">list</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Unicode method names </span>
+</span><span class='line'><span class="k">def</span> <span class="n">`(╯°□°）╯︵ ┻━┻`</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And for comparison&rsquo;s sake, here&rsquo;s some Golang:</p>
+
+<figure class='code'><figcaption><span>Golang</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// ( ͡° ͜ʖ ͡°) Curly braces or parenthesis, no mix and matching</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Hello, 世界&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// ( ͡° ͜ʖ ͡°) No optional periods</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">v</span> <span class="o">*</span><span class="nx">Vertex</span><span class="p">)</span> <span class="nx">Abs</span><span class="p">()</span> <span class="kt">float64</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">X</span><span class="o">*</span><span class="nx">v</span><span class="p">.</span><span class="nx">X</span> <span class="o">+</span> <span class="nx">v</span><span class="p">.</span><span class="nx">Y</span><span class="o">*</span><span class="nx">v</span><span class="p">.</span><span class="nx">Y</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// ( ͡° ͜ʖ ͡°) Unicode naming, but no &quot;+=&quot; stuff</span>
+</span><span class='line'><span class="kd">func</span> <span class="err">世界</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Hello, 世界&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Those examples are just the tip of the iceberg, but they should give you a good idea
+of the kinds of syntax quirks I&rsquo;m talking about.</p>
+
+<p>Personally, I&rsquo;m not a fan of the Golang syntax, but there is something to be said about
+it&rsquo;s uniformity &mdash; once I&rsquo;ve learned how to read one person&rsquo;s Golang code, I can read pretty much all Golang code. This isn&rsquo;t necessarily true of Ruby or Scala.</p>
+
+<p>In some cases, newer languages have relied on the syntax of previously famous languages
+to gain popularity &mdash; Java&rsquo;s syntax similarity to C++ was no accident, it was an intentional
+design decision by James Gosling to lure programmers away from their familiar C++ homes. JavaScript
+<a href="http://en.wikipedia.org/wiki/ECMAScript#History">wasn&rsquo;t always named JavaScript</a>, but Brendan Eich
+decided it would help with gaining popularity. The syntax is also reminiscent of Java &mdash; it uses
+curly braces for scopes as well was semicolons for terminating sequences.</p>
+
+<p>The bottom line is that programmers don&rsquo;t want to learn a million different ways of reading
+the same code. If you&rsquo;re using a language with an auto formatter such as <a href="https://www.github.com/mdr/scalariform">Scala</a> or <a href="http://golang.org/cmd/gofmt/">Golang</a>, you&rsquo;re probably in the best boat &mdash; these formatters will format your code for you, enforcing a consistent style without having to spend time and energy trying to manually modify your code to be more readable (no more time wasted on syntax during code reviews). Ruby doesn&rsquo;t have a full fledged auto formatter, but it does have <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for telling you when your code is breaking style conventions.</p>
+
+<h3>Static Analysis</h3>
+
+<p>If there&rsquo;s anything that kills the maintainability of dynamic languages, it&rsquo;s the
+lack of type safety. I&rsquo;ve used Ruby to death, and while I love using it for small applications
+or building prototypes, it&rsquo;s not something I would choose if I had to work on a project
+with more than a few engineers or one that was more than a few thousand lines of code (or one that demanded performance, but that&rsquo;s another story).</p>
+
+<p>While I was working at RightScale, we had a massive 900,000 SLOC repository that contained way more
+business logic than it should have. The code base was a nightmare to maintain, and it had been that way for years. This was partially from the lack of time given to fix the problem, partially from having fifty engineers modifying the same code base, but also partly due to the nature of Ruby itself.</p>
+
+<p>At one point, we really needed to start deprecating old code to get a sense of what was still
+in use and what wasn&rsquo;t. In order to do this, one of our software architects proposed this solution:
+add a snippet (that I&rsquo;ll reference as) <code>dead_code</code> to any file that was thought to
+no longer be in use. The method <code>dead_code</code> was a monkey patch on the <code>Object</code> namespace that
+would log / email / sound the alarms whenever the code was utilized at runtime (since everything
+is an object in Ruby due to its Smalltalk influences, this works &mdash; don&rsquo;t try this in other languages).
+The idea was that if we ever got production error logs from the <code>dead_code</code> snippet, it meant that
+the piece of code we thought we could remove was in fact not removable.</p>
+
+<p>In another case, our infrastructure team was prototyping an idea of a &ldquo;code fence&rdquo;, which
+would log / email / sound the alarms whenever a set of files tagged with a certain method was called at runtime (in production). I&rsquo;ll reference this method as <code>code_fence(some_fence_group)</code>. We needed this in order to extract business logics into separate services for SOA services</p>
+
+<p>And here&rsquo;s what drives me crazy about the two solutions I outlined above &mdash; neither of those slow iterating approaches would have been necessary in a strongly typed static programming language. While they were clever and much easier than adding unit tests to every piece of code we could find after years of neglecting writing unit tests, it wouldn&rsquo;t have been such a problem if we had used a compiled language (we may have never even had enough of a product to get to this point if we used a compiled language, but let&rsquo;s leave that discussion for another time).</p>
+
+<p>Here is how the <code>dead_code</code> situation would have been solved in a strongly typed static programming language:</p>
+
+<pre><code>1. Remove the file or code you want to check from the repo, and compile.
+2. If there are any compile errors, it's being used. Stop using it. If it isn't, you're good.
+
+1a. Alternatively, use your IDE to tell you if its used anywhere.
+2a. If it is, stop using it. If it isn't, remove it.
+</code></pre>
+
+<p>That&rsquo;s all there is to it&hellip; unless your code to remove is API code that is called from a separate service, such as a Rails controller for a RESTful HTTP API. Then some logging is required in the API code layer, but at least in this case it&rsquo;s only the API code that needs logging, and not every possible file in your entire code base that you want to get rid of.</p>
+
+<p>For the <code>code_fence(some_fence_group)</code> situation, solving this is even easier than with the <code>dead_code</code>
+case:</p>
+
+<pre><code>1. Remove the set of code you want refactored into a separate service or library repository.
+2. Compile your newly divided two sets of code. 
+3. If it compiles, you're good. If it doesn't, fix the interfaces and GOTO #2.
+</code></pre>
+
+<p>You might be thinking at this point, &ldquo;dude.. unit tests? WTF!?&rdquo;, but I offer you this counter point: static analysis in a compiled language is tantamount to a proof of correctness in terms of interfaces. Unit tests are not proofs, they do not guarantee your code will work for every possible permutation. You literally get interface checking for free by just using a compiled language &mdash; in a language such as Ruby, to merely get a poor mans version of the same test coverage, you&rsquo;d have to write a unit test for every single new method written to get the level of fine grained error reporting that a compiler would give you.</p>
+
+<p>To drive my point home, that 900,000 SLOC Ruby application I mentioned was a Rails 2.3 application, running on a version of Ruby 1.8.7. Rails 2.3 was released in <em>2009</em>. It&rsquo;s still running on Rails 2.3 and Ruby 1.8.7, and it&rsquo;s <em>2014</em>. Ruby is up to version 2.1, and Rails is up to 4.0.2 as of me writing this. To be fair, some of the reasons for this is not purely related to the language, but it certainly would have helped with upgrading libraries and Ruby versions if the language was a compiled one.</p>
+
+<p>I should note that there are a few exceptions to this rule in the land of static typing, most notably
+pointers in C / C++ and other low level languages, and in Scala there is the <a href="http://www.scala-lang.org/api/current/index.html#scala.Dynamic">dynamic</a> feature. The important thing here is that these are exceptions, and typical code in these languages will find errors more often than not.</p>
+
+<h3>Compile Times and Unit Test Iteration Times</h3>
+
+<p>Slow compile times and slow unit tests slow down code iteration. Dynamic languages
+don&rsquo;t have a compile step, but they are not immune to this issue as they do not
+have a compile time static type checker, lexer, or parser to find these bugs. Unit tests are vital to fill in this gap&hellip; and they can be slow.</p>
+
+<p>That 900,000 line Ruby application I mentioned earlier took <em>five</em> minutes to run a single unit test, mostly due to having to load and initialize way too many gems and libraries. Needless to say, it was impossible to iterate quickly. Small bugs such as interface errors between <a href="http://www.ruby-doc.org/core-2.1.0/Symbol.html">strings and symbols</a> became more troublesome to debug than they should have been &mdash; for every mismatched <code>def .. end</code>, typo, type mismatch, or invalid argument bug I had in my code, it added five minutes to the development time of what I was working on. Unlike with static typing, dynamic languages will typically only find one of these bugs at a time due to their interpreted &ldquo;run one line at a time&rdquo; nature. If it was up to me, fixing the time to run unit tests would have been more important than anything else (except for production bugs that needed fixing).</p>
+
+<p>Conversely, on the other side of the language typing fence, I&rsquo;ve heard of 45 minute C++ build times &mdash; I can&rsquo;t possibly imagine trying to modify a code base that takes that long to compile. Luckily, I don&rsquo;t think it gets worse than C++, and most statically typed languages have much better compilation times than C++.</p>
+
+<p>Languages like Java, Scala or Golang don&rsquo;t quite have the compile time problem to the extent C++ does.
+They all have incremental compilers, which will only recompile code that has been changed
+(and any code that was using the changed code). Golang&rsquo;s compiler is likely one of the
+fastest for a statically typed language, and Scala is bordering on being as slow as C++
+without incremental compilation. One caveat with the JVM &mdash; it takes time to &ldquo;warm up&rdquo;;
+anything that requires restarting the JVM is going to add several seconds to the build process.</p>
+
+<p>If you haven&rsquo;t seen it, <a href="http://vimeo.com/36579366">Bret Victor&rsquo;s talk</a> makes the case for immediate feedback in much greater detail than I can in this article. Let&rsquo;s just say if it took a musician 5 minutes to hear a note once it&rsquo;s been played, there would be much fewer musicians in the world.</p>
+
+<h3>Conclusion and Next Up</h3>
+
+<p>It used to be the case that it was common knowledge that statically typed languages were much more verbose than dynamically typed languages were. This hasn&rsquo;t always been true &mdash; concise compiled languages such as Haskell and ML have been around for a while now &mdash; but concise, strongly and statically typed languages such as Scala are only now starting to gain traction in the industry.</p>
+
+<p>So now our current options now seem to be these:</p>
+
+<blockquote><p>Simple to learn, concise languages, but terrible for long term large scale
+   application maintainability due to the lack of compile time static analysis
+   (Ruby, Python, JavaScript)</p>
+
+<p>Simple to learn, verbose languages with okay long term maintainability, but might
+be a pain to refactor because of code duplication
+   (Go, Java 7 and lower)</p>
+
+<p>Difficult to learn, but concise languages with good long term maintainability&hellip;
+as long as you can figure out what your code is doing.
+   (Scala, Haskell)</p></blockquote>
+
+<p>It remains to be seen if it&rsquo;s possible for a language to have all three qualities &mdash; simple to learn, concise, and good for long term maintainability.</p>
+
+<p>The next article in this series is still related to programming languages, but it&rsquo;s important enough
+to warrant it&rsquo;s own article.</p>
+
+<p><em>Coming Next: Limiting Shared Mutable State, Or Why You Should Learn Functional Programming</em></p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-09T11:07:00-08:00" data-updated="true" itemprop="datePublished">Nov 9<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/maintainability/'>maintainability</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/" itemprop="url">Maintaining a Large Code Base, Part 2: Service Oriented Architecture</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p><a href="/blog/2013/11/05/maintaining-a-large-code-base-part-1/"><em>Previous Part: Backstory and the Basics</em></a></p>
+
+<p>How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &mdash;
+split it up into multiple smaller, separate code bases that communicate with
+each other through well defined interfaces. When done with services
+at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</p>
+
+<h2>Service Oriented Architecture, AKA Don&rsquo;t Repeat Yourself for Servers</h2>
+
+<p>Twitter, Netflix, and Amazon all started out with monolithic, tightly coupled
+architectures in their infant years, and have all adopted the SOA approach as
+they&rsquo;ve grown.</p>
+
+<p>In Twitter&rsquo;s case, they started out with stuffing all functionality into single Ruby
+on Rails application, and later moved to the JVM, using Scala and Java, splitting
+their product into smaller services along the way.</p>
+
+<p>From an <a href="http://blog.redfin.com/devblog/2010/05/how_and_why_twitter_uses_scala.html">interview with Alex Payne, a former Twitter engineer:</a></p>
+
+<blockquote><p>In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
+it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
+you just include more plugins and libraries, shoving them all in to the server.
+The result is a giant ball of mud.</p>
+
+<p>So <em>anything that has to do heavy lifting in our stack is going to be an independent service.</em></p></blockquote>
+
+<p>They split one code base that handled the entirety of Twitter&rsquo;s functionality into several
+services, including a queuing service, a social graph store, a people search service,
+and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their
+services together. Their system has become much more reliable <a href="http://www.whatisfailwhale.info/">ever</a>
+<a href="https://blog.twitter.com/2013/new-tweets-per-second-record-and-how">since</a>.</p>
+
+<p>Netflix <a href="http://techblog.netflix.com/2012/06/netflix-operations-part-i-going.html">started off as a monolithic</a>
+Java application, and split their code base off into smaller services. The change
+also allowed them to split their engineering team into smaller teams on a per
+service basis. Engineers wanting to integrate their service with another service no longer had to search
+through mud to integrate with other features &mdash; they only had to be concerned
+about the interfaces.</p>
+
+<p>Amazon started doing SOA as early back as 2002. According to a
+<a href="https://plus.google.com/+RipRowan/posts/eVeouesvaVX">well known leaked rant by Steve Yegge</a>,
+Jeff Bezos (CEO of Amazon) sent out a mandate to all engineering teams, requiring all
+data and functionality to be exposed through services, with no hooks or backdoors for communicating
+between services. Everything was to be a stand-alone service with a well defined API, and every engineer would have to abide by this new rule, unless they wanted to be fired.</p>
+
+<p>Steve goes on to make a point that Bezos&#8217; reasoning for this was to be able
+to sell Amazon&rsquo;s internal platform for managing servers (hence the no hooks thing),
+now known to us today as Amazon Web Services (AWS), but I&rsquo;m sure he was aware of the code maintainability
+benefits of splitting products up, and how it leads to <a href="http://zurb.com/word/two-pizza-team">smaller self contained teams</a>.</p>
+
+<p>If you are still wondering why this works so well&hellip; Well, it&rsquo;s almost impossible for one engineer to
+understand every detail in a giant monolithic application. If an engineer
+doesn&rsquo;t know how some code works, the chances of them being able to reliably
+modify it are slim. By splitting up responsibilities into services, engineers
+can be assigned to work on specific services, limiting how much they need to know. So it helps in the division of labor in a larger software organization.</p>
+
+<p>As Steve mentions in his rant, it&rsquo;s also a good way of dogfooding services, which happens
+when the team behind one service has to integrate with the interface of another
+team&rsquo;s interface.</p>
+
+<p>The other obvious benefit of splitting things into strict independent services is
+the potential for open sourcing the services, just as <a href="http://twitter.github.io/">Twitter</a> and <a href="http://netflix.github.io/#repo">Netflix</a>
+have done. Open source means more contributors (if it&rsquo;s good enough for others to use) and
+more dogfooding. Or, if it&rsquo;s <em>really</em> good, you could sell the service, like Amazon has done
+with AWS.</p>
+
+<h2>Some Basic Service to Service Examples</h2>
+
+<p>An example of SOA that&rsquo;s perhaps more well known is the movement of
+generating GUIs from the server to the client, and having the server side code serve pure data
+over HTTP, websockets, or some other protocol. This is the idea behind
+the Javascript GUI frameworks such as Backbone.js and Angular.js. By building
+UI on top of an API that servers data, the API gets used and tested in the process
+of building the API. If the API is good enough, it can be opened to the public!
+Now if users don&rsquo;t like your GUI, they can build their own.</p>
+
+<p>That same API could also be <a href="http://spray.io/wjax/#/41">split into a separate</a> service that talks to other services that handle the actual business logic. To directly paraphrase from the link, the API layer would only handle authentication, request routing, serialization and deserialization of objects, and request caching.</p>
+
+<p>So what if you aren&rsquo;t building servers or applications that have to talk over the network? The same principle of splitting things into separate code bases and communicating through a common
+protocol can be applied to smaller scale programs as well.</p>
+
+<h2>The Future of IDEs</h2>
+
+<p>Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you&rsquo;ve ever thought to yourself,
+<em>&ldquo;man, I really like the IDE auto completion, incremental compilation, and refactoring tools,
+but I wish I could be using Emacs / Vim / Sublime Text / Microsoft Word for the text editing instead.&rdquo;</em>, it&rsquo;s technically possible to write an IDE that would let you do this, even if the aforementioned IDEs can&rsquo;t.</p>
+
+<p><a href="https://github.com/nsf/gocode">Gocode</a>,
+<a href="https://github.com/aemoncannon/ensime">Ensime</a>, and
+<a href="http://common-lisp.net/project/slime/">Slime</a> are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate
+over a protocol to any capable text editor &mdash; the daemon receives code from the editor and some commands, executes the commands on the specified code, and returns any necessary text deltas back to the text editor.</p>
+
+<p>Speaking of programming languages&hellip;</p>
+
+<p><a href="/blog/2014/01/26/maintaining-a-large-code-base-part-3/"><em>Next Part: Programming Languages</em></a></p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-05T12:36:00-08:00" data-updated="true" itemprop="datePublished">Nov 5<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/maintainability/'>maintainability</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name"><a href="/blog/2013/11/05/maintaining-a-large-code-base-part-1/" itemprop="url">Maintaining a Large Code Base, Part 1: Backstory and the Basics</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>What&rsquo;s one of the most important quality of good software?</p>
+
+<p><em>It&rsquo;s maintainable.</em></p>
+
+<p>It doesn&rsquo;t matter how well optimized the code is if the code base isn&rsquo;t maintainable.
+If the code can&rsquo;t be refactored and improved, the software project is stuck in time &mdash;
+new features are difficult to add, performance can&rsquo;t be improved, and bugs will be harder to pinpoint.
+Upfront planning and design can greatly reduce the amount of code rewriting that is necessary,
+but its near impossible to get everything right the first time code is written in a significantly
+sized code base. I&rsquo;ve yet to work on a non trivial software project that was finished and
+perfect on the first iteration.</p>
+
+<p>Back when I was in college, the typical coding assignment involved writing a few hundred
+to a few thousand lines of code to solve some mind bending arbitrary assignment that
+the professor thought was more important than the other three programming assignments
+I had from my three other professors, but wouldn&rsquo;t explain what was so important about it.</p>
+
+<p>Anyway, the assignments were mostly automatically graded, and it was quite rare
+for the teaching assistant or professor to take a look at students&#8217; code to
+provide coding style feedback. After the solution to an assignment was submitted,
+the code for it would pretty much never be touched again.</p>
+
+<p>Since the assignments were written to facilitate the learning of specific computer science concepts, the source
+code for the assignment solutions were very rarely useful outside of the context of the class
+that it was presented in. There was pretty much always a better implementation for whatever data structure
+or algorithm that were being implemented in the assignments. The only reason to keep the
+source code was to be able to look back at it in several years and could go, &ldquo;Yep.. I wrote that wonderful piece of turd.&rdquo;</p>
+
+<p>I ended up getting better and better at solving these types of self contained
+assignments, but I never really learned how to write maintainable code from completing
+those assignments.</p>
+
+<p>Fast forward a few years, the largest code base I&rsquo;ve worked on has gone from
+being somewhere around 10,000 source lines of code (SLOC) in Java, a naturally verbose language,
+to the largest code base being a 900,000 SLOC service written in <em>Ruby</em>,
+a <a href="http://stackoverflow.com/a/4205396/1093160">duck-type-able</a> dynamic language that&rsquo;s known for its conciseness.
+That line count doesn&rsquo;t include comments or blank spaces, as you might expect from &ldquo;source lines,
+and that code base also only refers to one code base &mdash; it was one of many.
+It wasn&rsquo;t a code base that I could submit somewhere, forget about and never see again either. This was
+the real deal &mdash; industry programming, where things get reused.</p>
+
+<p>This code base was something that I had to stare at on a daily basis. Needless to say,
+I&rsquo;ve learned many lessons in having to work with a code base of that size, and I&rsquo;m writing
+this to help software engineers, including myself, to think about code maintainability to the same degree they might
+think about code correctness or performance, if not higher.</p>
+
+<h2>The Basics</h2>
+
+<p>Let&rsquo;s get the obvious software practices that happen to help code maintainability
+out of the way first. These should be familiar with anyone who&rsquo;s been coding for a while.</p>
+
+<h4>Don&rsquo;t Repeat Yourself</h4>
+
+<p>What do you do when you&rsquo;ve got a function duplicated 100 times over 100 different
+files, and you want to modify the behavior of that common code? Refactor the common code into one function somewhere,
+and have the code in those 100 files use that common code.</p>
+
+<p>This is important for maintenance so that if the behavior
+of the common code needs to be changed (and the interface is the same),
+it can be done in one single location, instead of once per location it is duplicated.</p>
+
+<p>This might seem too obvious to mention, but the convenience of copy paste seems to
+win quite often, since it&rsquo;s easier do than to refactor code, which might bring bugs.
+Copying and pasting code guarantees your own code won&rsquo;t affect anyone elses, but
+it causes maintenance headaches later on.</p>
+
+<p>Sometimes this isn&rsquo;t always a good thing, especially if the code refactoring involves
+metaprogramming or other language features that tend to make code less readable.</p>
+
+<h4>Eat Your Own Dog Food (Dogfooding)</h4>
+
+<p>If nobody has ever used your application before shipping it to customers, how can
+you be sure it&rsquo;s any good?</p>
+
+<p>Dogfooding is about using your own product whenever possible. If it&rsquo;s bad,
+hopefully the pain from using the product will be motivating enough to improve it.</p>
+
+<p>The term supposedly <a href="http://en.wikipedia.org/wiki/Eating_your_own_dog_food#Origin">originated in Microsoft</a>, and apparently they were trying to get the term changed to
+<a href="http://www.bizjournals.com/seattle/blog/techflash/2009/11/turning_dog_food_into_ice_cream_and_other_tidbits_from_microsofts_cio.html">icecreaming</a>.</p>
+
+<p>I&rsquo;ll be referring to it as dogfooding though, because that&rsquo;s what most people know it by,
+and it doesn&rsquo;t really make sense to dogfood icecream, because icecream is already delicious
+and is not dog food quality food, so it doesn&rsquo;t need to be dogfooded to be improved. Or in English,
+products that are already good (icecream) don&rsquo;t need to be improved.</p>
+
+<p>Dogfooding doesn&rsquo;t have to be limited to using something at the scale of products, though.
+Testing could be considered a form of dogfooding&hellip;</p>
+
+<h4>Write Unit Tests</h4>
+
+<p>How can you refactor and change code reliably if there are no checks in place to
+make sure the application is working as expected after the change?</p>
+
+<p>These are necessary to quickly catch errors in the business logic of your application.
+With dynamic languages, unit tests are also necessary to catch typos, missing method declarations,
+and type errors that would be caught in statically typed languages. By having a
+framework for quickly checking correctness, it&rsquo;ll be that much easier to reorganize your code, add
+features, fix bugs, and possibly splitting it into reusable libraries or services.</p>
+
+<p>Unit tests are really important in dynamic language code bases. Without
+a compiler to perform semantic analysis, the next safety net after unit tests are
+integration tests, and then it&rsquo;s your manual testers, then customers. Each step
+along the way is typically slower than the previous, with
+<a href="http://blogs.msdn.com/cfs-filesystemfile.ashx/__key/communityserver-blogs-components-weblogfiles/00-00-01-32-02-metablogapi/7317.image_5F00_0F65063B.png%20just%20ship%20it">having customers do your testing</a> generally much slower than running a unit test.</p>
+
+<h4>Document Your Code</h4>
+
+<p>Sometimes it&rsquo;s a lot easier to explain in words what your code does than
+it is to try to read the code itself, especially if your programming language is not
+particularly concise (more on this in part 3). A few comments here and there
+can greatly increase the understandability of your code.</p>
+
+<h4>Do Code Reviews and Design Reviews</h4>
+
+<p>So how do you go about figuring out what code needs to be better documented?</p>
+
+<p>Ever write a piece of software, come back to it later some time later,
+and have no idea how it works until you sit down and stare at it until your
+eyes bleed and you want to rewrite your entire code base from scratch? Me neither.
+But for those that this does happen to, it is probably time to dogfood your designs or your code to others.</p>
+
+<p>The writing courses I took in college made a point of having peer reviews for essays.
+Peer reviews exist because sometimes things that sound smart in your head do not
+read smart when written out on paper. Your peers can offer their own views
+on what you are writing that can strengthen your existing ideas. And sometimes,
+peer reviews are useful simply because you were too lazy to proof-read your essay
+on comparing book X about a topic only the professor cares about, to book Y about who knows what,
+mainly because you were busy trying to complete the three programming assignments from your three other professors.</p>
+
+<p>Code reviews were almost never part of the curriculum for any of my computer science
+classes, neither by peers nor the teaching staff. Code reviews by peers weren&rsquo;t allowed because they
+couldn&rsquo;t trust us not to cheat, and they couldn&rsquo;t trust us not to save solutions for future students during the next iteration of the course. Code reviews by teaching assistants or professors
+couldn&rsquo;t be done for everyone because of the numbers problem &mdash; it was too much work
+for a couple of people to review the code of thirty students while also coding
+automated testing systems for homework solutions, doing research,
+and preparing course material, exams, and lectures &mdash; so it was easier to just not
+do it for anyone. At least it was fair.</p>
+
+<p>Anyway, have someone else try to read your code. When you are programming, there
+is a significant amount of context that is in your short term memory that
+might not be obvious or apparent for someone else who didn&rsquo;t write the code.
+The process of coding is like storing info about how your code works in RAM,
+and for someone else reading it, they don&rsquo;t have the contents of your RAM &mdash; they have
+to reconstitute what was in your RAM into their own RAM by <a href="http://en.wikipedia.org/wiki/Lossy_data_conversion">lossily</a>
+interpreting it from your code. Good code results in equivalent RAM in both parties, and bad code is like trying to
+interpret a Picasso painting, where one person thinks it&rsquo;s a man&rsquo;s face looking to
+the side, and another thinks it&rsquo;s a woman&rsquo;s face looking towards the viewer, when it&rsquo;s really a picture of a plane.</p>
+
+<p>Okay, so it&rsquo;s not quite like that, but what I&rsquo;m trying to say is to dog-food the readability of your code, otherwise its going to be very hard for you to modify your code if you don&rsquo;t understand it.</p>
+
+<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Next Part: Service Oriented Architecture</em></a></p>
+
+		
+		
+	</div>
+
+</article>
+
+</div>
+<nav id="pagenavi">
+    
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
+			</div>
+			<footer id="footer" class="inner"><p>
+  Copyright &copy; 2016 - Daniel Trinh -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+</footer>
+			
+
+
+
+
+
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

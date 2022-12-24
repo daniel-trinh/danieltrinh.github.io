@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Maintaining a Large Code Base, Part 2: Service Oriented Architecture // Daniel Trinh</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Daniel Trinh" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.b59b24ca1dd67b152e93f2a69051c7c2d590b7dbbb7ebee89f4e9787d40403ed.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Maintaining a Large Code Base, Part 2: Service Oriented Architecture"/>
+<meta name="twitter:description" content="Previous Part: Backstory and the Basics
+How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &ndash; split it up into multiple smaller, separate code bases that communicate with each other through well defined interfaces. When done with services at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers."/>
+
+    <meta property="og:title" content="Maintaining a Large Code Base, Part 2: Service Oriented Architecture" />
+<meta property="og:description" content="Previous Part: Backstory and the Basics
+How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &ndash; split it up into multiple smaller, separate code bases that communicate with each other through well defined interfaces. When done with services at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://danieltrinh.com/posts/2013-11-09-maintaining-a-large-code-base-part-2/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2013-11-09T00:00:00+00:00" />
+<meta property="article:modified_time" content="2013-11-09T00:00:00+00:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="http://danieltrinh.com"><img class="app-header-avatar" src="/avatar.jpg" alt="Daniel Trinh" /></a>
+      <span class="app-header-title">Daniel Trinh</span>
+      <p>Generalist software engineer with an emphasis on backend.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/daniel-trinh" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="linkedin.com/in/daniel-trinh-31422926" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>My Linkedin</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+          <a href="/downloads/resume.pdf" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-link">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+<article class="post">
+  <header class="post-header">
+    <h3 class="post-title">Maintaining a Large Code Base, Part 2: Service Oriented Architecture</h3>
+    <div class="post-meta">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+        Nov 9, 2013
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+        5 min read
+      </div>
+    </div>
+  </header>
+  <div class="post-content">
+    <p><a href="/blog/2013/11/05/maintaining-a-large-code-base-part-1/"><em>Previous Part: Backstory and the Basics</em></a></p>
+<p>How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &ndash;
+split it up into multiple smaller, separate code bases that communicate with
+each other through well defined interfaces. When done with services
+at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</p>
+<h2 id="service-oriented-architecture-aka-dont-repeat-yourself-for-servers">Service Oriented Architecture, AKA Don&rsquo;t Repeat Yourself for Servers</h2>
+<p>Twitter, Netflix, and Amazon all started out with monolithic, tightly coupled
+architectures in their infant years, and have all adopted the SOA approach as
+they&rsquo;ve grown.</p>
+<p>In Twitter&rsquo;s case, they started out with stuffing all functionality into single Ruby
+on Rails application, and later moved to the JVM, using Scala and Java, splitting
+their product into smaller services along the way.</p>
+<p>From an <a href="http://blog.redfin.com/devblog/2010/05/how_and_why_twitter_uses_scala.html">interview with Alex Payne, a former Twitter engineer:</a></p>
+<blockquote>
+<p>In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
+it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
+you just include more plugins and libraries, shoving them all in to the server.
+The result is a giant ball of mud.</p>
+<p>So <em>anything that has to do heavy lifting in our stack is going to be an independent service.</em></p>
+</blockquote>
+<p>They split one code base that handled the entirety of Twitter&rsquo;s functionality into several
+services, including a queuing service, a social graph store, a people search service,
+and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their
+services together. Their system has become much more reliable <a href="http://www.whatisfailwhale.info/">ever</a>
+<a href="https://blog.twitter.com/2013/new-tweets-per-second-record-and-how">since</a>.</p>
+<p>Netflix <a href="http://techblog.netflix.com/2012/06/netflix-operations-part-i-going.html">started off as a monolithic</a>
+Java application, and split their code base off into smaller services. The change
+also allowed them to split their engineering team into smaller teams on a per
+service basis. Engineers wanting to integrate their service with another service no longer had to search
+through mud to integrate with other features &ndash; they only had to be concerned
+about the interfaces.</p>
+<p>Amazon started doing SOA as early back as 2002. According to a
+<a href="https://plus.google.com/+RipRowan/posts/eVeouesvaVX">well known leaked rant by Steve Yegge</a>,
+Jeff Bezos (CEO of Amazon) sent out a mandate to all engineering teams, requiring all
+data and functionality to be exposed through services, with no hooks or backdoors for communicating
+between services. Everything was to be a stand-alone service with a well defined API, and every engineer would have to abide by this new rule, unless they wanted to be fired.</p>
+<p>Steve goes on to make a point that Bezos&rsquo; reasoning for this was to be able
+to sell Amazon&rsquo;s internal platform for managing servers (hence the no hooks thing),
+now known to us today as Amazon Web Services (AWS), but I&rsquo;m sure he was aware of the code maintainability
+benefits of splitting products up, and how it leads to <a href="http://zurb.com/word/two-pizza-team">smaller self contained teams</a>.</p>
+<p>If you are still wondering why this works so well&hellip; Well, it&rsquo;s almost impossible for one engineer to
+understand every detail in a giant monolithic application. If an engineer
+doesn&rsquo;t know how some code works, the chances of them being able to reliably
+modify it are slim. By splitting up responsibilities into services, engineers
+can be assigned to work on specific services, limiting how much they need to know. So it helps in the division of labor in a larger software organization.</p>
+<p>As Steve mentions in his rant, it&rsquo;s also a good way of dogfooding services, which happens
+when the team behind one service has to integrate with the interface of another
+team&rsquo;s interface.</p>
+<p>The other obvious benefit of splitting things into strict independent services is
+the potential for open sourcing the services, just as <a href="http://twitter.github.io/">Twitter</a> and <a href="http://netflix.github.io/#repo">Netflix</a>
+have done. Open source means more contributors (if it&rsquo;s good enough for others to use) and
+more dogfooding. Or, if it&rsquo;s <em>really</em> good, you could sell the service, like Amazon has done
+with AWS.</p>
+<h2 id="some-basic-service-to-service-examples">Some Basic Service to Service Examples</h2>
+<p>An example of SOA that&rsquo;s perhaps more well known is the movement of
+generating GUIs from the server to the client, and having the server side code serve pure data
+over HTTP, websockets, or some other protocol. This is the idea behind
+the Javascript GUI frameworks such as Backbone.js and Angular.js. By building
+UI on top of an API that servers data, the API gets used and tested in the process
+of building the API. If the API is good enough, it can be opened to the public!
+Now if users don&rsquo;t like your GUI, they can build their own.</p>
+<p>That same API could also be <a href="http://spray.io/wjax/#/41">split into a separate</a> service that talks to other services that handle the actual business logic. To directly paraphrase from the link, the API layer would only handle authentication, request routing, serialization and deserialization of objects, and request caching.</p>
+<p>So what if you aren&rsquo;t building servers or applications that have to talk over the network? The same principle of splitting things into separate code bases and communicating through a common
+protocol can be applied to smaller scale programs as well.</p>
+<h2 id="the-future-of-ides">The Future of IDEs</h2>
+<p>Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you&rsquo;ve ever thought to yourself,
+<em>&ldquo;man, I really like the IDE auto completion, incremental compilation, and refactoring tools,
+but I wish I could be using Emacs / Vim / Sublime Text / Microsoft Word for the text editing instead.&rdquo;</em>, it&rsquo;s technically possible to write an IDE that would let you do this, even if the aforementioned IDEs can&rsquo;t.</p>
+<p><a href="https://github.com/nsf/gocode">Gocode</a>,
+<a href="https://github.com/aemoncannon/ensime">Ensime</a>, and
+<a href="http://common-lisp.net/project/slime/">Slime</a> are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate
+over a protocol to any capable text editor &ndash; the daemon receives code from the editor and some commands, executes the commands on the specified code, and returns any necessary text deltas back to the text editor.</p>
+<p>Speaking of programming languages&hellip;</p>
+<p><a href="/blog/2014/01/26/maintaining-a-large-code-base-part-3/"><em>Next Part: Programming Languages</em></a></p>
+
+  </div>
+  <div class="post-footer">
+    
+  </div>
+</article>
+
+    </main>
+  </body>
+</html>

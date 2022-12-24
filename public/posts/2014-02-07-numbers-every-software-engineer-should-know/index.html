@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Numbers Every Software Engineer Should Know // Daniel Trinh</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Daniel Trinh" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.b59b24ca1dd67b152e93f2a69051c7c2d590b7dbbb7ebee89f4e9787d40403ed.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Numbers Every Software Engineer Should Know"/>
+<meta name="twitter:description" content="This article is a collection of runtime and memory usage numbers that might be useful to keep in mind when building performance critical software.
+Big-O Absolute Numbers This chart shows how well or poorly certain algorithm complexities scale when n grows.
+Function | n=8 (2^3) | n=64 (2^6) | n=1024 (2^10) | n=2^32 (~ 4 billion) -----------|-----------|-------------|---------------|--------------------- log(n) | 3 | 6 | 10 | 32 n | 8 | 64 | 1024 | 4294967296 n*log(n) | 24 | 384 | 10240 | 1."/>
+
+    <meta property="og:title" content="Numbers Every Software Engineer Should Know" />
+<meta property="og:description" content="This article is a collection of runtime and memory usage numbers that might be useful to keep in mind when building performance critical software.
+Big-O Absolute Numbers This chart shows how well or poorly certain algorithm complexities scale when n grows.
+Function | n=8 (2^3) | n=64 (2^6) | n=1024 (2^10) | n=2^32 (~ 4 billion) -----------|-----------|-------------|---------------|--------------------- log(n) | 3 | 6 | 10 | 32 n | 8 | 64 | 1024 | 4294967296 n*log(n) | 24 | 384 | 10240 | 1." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://danieltrinh.com/posts/2014-02-07-numbers-every-software-engineer-should-know/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2014-02-07T00:00:00+00:00" />
+<meta property="article:modified_time" content="2014-02-07T00:00:00+00:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="http://danieltrinh.com"><img class="app-header-avatar" src="/avatar.jpg" alt="Daniel Trinh" /></a>
+      <span class="app-header-title">Daniel Trinh</span>
+      <p>Generalist software engineer with an emphasis on backend.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/daniel-trinh" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="linkedin.com/in/daniel-trinh-31422926" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>My Linkedin</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+          <a href="/downloads/resume.pdf" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-link">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+<article class="post">
+  <header class="post-header">
+    <h3 class="post-title">Numbers Every Software Engineer Should Know</h3>
+    <div class="post-meta">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+        Feb 7, 2014
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+        4 min read
+      </div>
+    </div>
+  </header>
+  <div class="post-content">
+    <p>This article is a collection of runtime and memory usage numbers that
+might be useful to keep in mind when building performance critical software.</p>
+<h2 id="big-o-absolute-numbers">Big-O Absolute Numbers</h2>
+<p>This chart shows how well or poorly certain algorithm complexities scale
+when <code>n</code> grows.</p>
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)  | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|-------------|---------------|---------------------
+log(n)     | 3         | 6           | 10            | 32
+n          | 8         | 64          | 1024          | 4294967296
+n*log(n)   | 24        | 384         | 10240         | 1.374...E11
+n^2        | 64        | 4096        | 1048576       | 1.844...E19
+n^2*log(n) | 192       | 24576       | 1.048...E7    | -
+n^3        | 512       | 262144      | -             | -
+2^n        | 256       | 1.844...E19 | -             | -
+n!         | 40320     | 1.268...E89 | -             | -
+</code></pre>
+<h2 id="runtime-performance-numbers">Runtime Performance Numbers</h2>
+<h4 id="big-o-runtime-performance-numbers">Big-O Runtime Performance Numbers</h4>
+<p>This chart shows how well or poorly certain algorithm complexities scale when <code>n</code> grows,
+in the context of CPU runtime. Exponentials and factorial algorithms clearly
+do not scale to values of <code>n</code> of any significant size.</p>
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)       | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|------------------|---------------|---------------------
+log(n)     | 3   ns    | 6   ns           | 10 ns         | 32  ns
+n          | 8   ns    | 64  ns           | 1  µs         | 4.2 seconds
+n*log(n)   | 24  ns    | 384 ns           | 10 µs         | 137 seconds
+n^2        | 64  ns    | 4   µs           | 1  ms         | 584 years
+n^2*log(n) | 192 ns    | 24  µs           | 10 ms         | forever
+n^3        | 512 ns    | 262 µs           | 1  second     | forever
+2^n        | 256 ns    | 584 years        | forever       | forever
+n!         | 40  µs    | forever          | forever       | forever
+
+ns      = Nanoseconds, about the time it takes for a CPU instruction cycle to run
+µs      = 1,000 ns
+ms      = 1,000 µs
+forever = way way longer than the lifetime of the universe of 13.798 billion years
+</code></pre>
+<h4 id="latency-numbers">Latency Numbers</h4>
+<p>This chart shows the round trip latency for certain computing actions.</p>
+<pre><code> Action                             | Time     | Comparisons
+------------------------------------|----------|-----------------------------
+ L1 cache reference                 | 0.5   ns |
+ Branch mispredict                  | 5     ns |
+ L2 cache reference                 | 7     ns | 14x L1 cache
+ Mutex lock/unlock                  | 25    ns |
+ Main memory reference              | 100   ns | 20x L2 cache, 200x L1 cache
+ Compress 1K bytes with Zippy       | 3,000 ns |
+ Send 1K bytes over 1 Gbps network  | 10    µs |
+ Read 4K randomly from SSD*         | 150   µs |
+ Read 1 MB sequentially from memory | 250   µs |
+ Round trip within same datacenter  | 500   µs |
+ Read 1 MB sequentially from SSD*   | 1     ms | 4X memory
+ Disk seek                          | 10    ms | 20x datacenter roundtrip
+ Read 1 MB sequentially from disk   | 20    ms | 80x memory, 20X SSD
+ Send packet CA-&gt;Netherlands-&gt;CA    | 150   ms |
+
++ By Jeff Dean: http://research.google.com/people/jeff/
++ Originally by Peter Norvig: http://norvig.com/21-days.html#answers
++ Retrieved from Jonas Bonér: https://gist.github.com/jboner/2841832
+</code></pre>
+<h2 id="memory-and-storage-numbers">Memory and Storage Numbers</h2>
+<h4 id="big-o-storage-size">Big-O Storage size</h4>
+<p>This chart shows how well or poorly certain algorithm complexities scale when <code>n</code> grows,
+in the context of memory and storage.</p>
+<pre><code>Function   | n=8 (2^3) | n=64 (2^6)    | n=1024 (2^10) | n=2^32 (~ 4 billion)
+-----------|-----------|---------------|---------------|---------------------
+log(n)     | 3   B     | 6   B         | 10 B          | 32 B
+n          | 8   B     | 64  B         | 1  KB         | 4 GB
+n*log(n)   | 24  B     | 384 B         | 10 KB         | 128 GB
+n^2        | 64  B     | 40  KB        | 1  MB         | 16 exabytes
+n^2*log(n) | 192 B     | 24  KB        | 10 MB         | ...
+n^3        | 512 B     | 256 KB        | 1  GB         | ...
+2^n        | 256 B     | 16  exaBytes  | ...           | ...
+n!         | 40  KB    | ...           | ...           | ...
+
+B       = 1 Byte, or 8 Bits
+KB      = kilobyte (1024 B)
+MB      = megabyte (1024 KB)
+GB      = gigabyte (1024 MB)
+TB      = terabyte (1024 GB)
+TB      = petabyte (1024 TB)
+exabyte = 1024 petabytes, or 1 million computers with 1 terabyte HDs
+...     = there isn't enough room on earth to store the required computers.
+</code></pre>
+<h4 id="powers-of-two-table">Powers of Two Table</h4>
+<p>This chart shows how much memory is required to store bits in powers of two. For example, it takes
+4GB of memory to store 2^32 bits in memory, and would require 16GB of memory to store
+an array of 32-bit integers. This is useful for knowing when a hash table is appropriate for a problem.</p>
+<pre><code>Power of 2 | Exact Value       | Storage size
+-----------|-------------------|-------------
+7          | 128               | 128 B
+8          | 256               | 256 B
+10         | 1024              | 1   KB
+16         | 65,536            | 64  KB
+20         | 1,048,576         | 1   MB
+30         | 1,073,741,824     | 1   GB
+32         | 4,294,967,296     | 4   GB
+40         | 1,099,511,627,776 | 1   TB
+64         | 1.844...E19       | 16  exabytes
+
++ Modified from _Cracking the Coding Interview_ By Gayle L. McDowell (p. 47)</code></pre>
+
+  </div>
+  <div class="post-footer">
+    
+  </div>
+</article>
+
+    </main>
+  </body>
+</html>

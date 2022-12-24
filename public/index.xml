@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Daniel Trinh</title>
+    <link>http://danieltrinh.com/</link>
+    <description>Recent content on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 12 Jul 2016 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Filtering Duplicate Messages in Twitch Chat</title>
+      <link>http://danieltrinh.com/posts/2016-07-12-filtering-duplicate-messages-in-twitch-chat/</link>
+      <pubDate>Tue, 12 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2016-07-12-filtering-duplicate-messages-in-twitch-chat/</guid>
+      <description>I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.
+The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on Twitch.tv. It shows the filtering in action, in the middle of a burst of the WutFace spam, which you can see in the lower left of the above video.</description>
+    </item>
+    
+    <item>
+      <title>Numbers Every Software Engineer Should Know</title>
+      <link>http://danieltrinh.com/posts/2014-02-07-numbers-every-software-engineer-should-know/</link>
+      <pubDate>Fri, 07 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-07-numbers-every-software-engineer-should-know/</guid>
+      <description>This article is a collection of runtime and memory usage numbers that might be useful to keep in mind when building performance critical software.
+Big-O Absolute Numbers This chart shows how well or poorly certain algorithm complexities scale when n grows.
+Function | n=8 (2^3) | n=64 (2^6) | n=1024 (2^10) | n=2^32 (~ 4 billion) -----------|-----------|-------------|---------------|--------------------- log(n) | 3 | 6 | 10 | 32 n | 8 | 64 | 1024 | 4294967296 n*log(n) | 24 | 384 | 10240 | 1.</description>
+    </item>
+    
+    <item>
+      <title>Converting the OverClocked Remix RSS to a Twitter Feed</title>
+      <link>http://danieltrinh.com/posts/2014-02-06-converting-ocremixs-rss-to-a-twitter-feed/</link>
+      <pubDate>Thu, 06 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-06-converting-ocremixs-rss-to-a-twitter-feed/</guid>
+      <description>OverClocked Remix (OCRemix) is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.
+This post is about a server daemon project I wrote a year ago &amp;ndash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at @newOCRemixes on Twitter.</description>
+    </item>
+    
+    <item>
+      <title>Improving Scalariform, The Scala Source Formatter</title>
+      <link>http://danieltrinh.com/posts/2014-02-05-improving-scalariform/</link>
+      <pubDate>Wed, 05 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-05-improving-scalariform/</guid>
+      <description>Scalariform is a Scala source code formatter, originally written by Matt Russell (big thanks to him for writing it).
+It&amp;rsquo;s much easier to show you what this does than it is to try and explain it, so that&amp;rsquo;s what I&amp;rsquo;ll do.
+This is some poorly formatted code before running Scalariform:
+class Coffee { val sugarCubes = 20 val isCaffeinated = false def energyBoost = { if (caffeinated) 100 * sugarCubes else 0 } } After running Scalariform:</description>
+    </item>
+    
+    <item>
+      <title>Maintaining a Large Code Base, Part 3: Programming Languages</title>
+      <link>http://danieltrinh.com/posts/2014-01-26-maintaining-a-large-code-base-part-3/</link>
+      <pubDate>Sun, 26 Jan 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-01-26-maintaining-a-large-code-base-part-3/</guid>
+      <description>Previous Part: Service Oriented Architecture
+If you are lucky enough to be able to choose the programming language for a new project, this section might provide some insight on how it might impact the future of your code base.
+Choose Your Programming Languages Wisely This article focuses only on the technical details of programming languages and their effects on maintainability. It won&amp;rsquo;t be covering topics such as a language&amp;rsquo;s popularity, tooling, or library support.</description>
+    </item>
+    
+    <item>
+      <title>Maintaining a Large Code Base, Part 2: Service Oriented Architecture</title>
+      <link>http://danieltrinh.com/posts/2013-11-09-maintaining-a-large-code-base-part-2/</link>
+      <pubDate>Sat, 09 Nov 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2013-11-09-maintaining-a-large-code-base-part-2/</guid>
+      <description>Previous Part: Backstory and the Basics
+How do you deal with a code base that&amp;rsquo;s too large to handle? Try making it smaller &amp;ndash; split it up into multiple smaller, separate code bases that communicate with each other through well defined interfaces. When done with services at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</description>
+    </item>
+    
+    <item>
+      <title>Maintaining a Large Code Base, Part 1: Backstory and the Basics</title>
+      <link>http://danieltrinh.com/posts/2013-11-05-maintaining-a-large-code-base-part-1/</link>
+      <pubDate>Tue, 05 Nov 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2013-11-05-maintaining-a-large-code-base-part-1/</guid>
+      <description>What&amp;rsquo;s one of the most important quality of good software?
+It&amp;rsquo;s maintainable.
+It doesn&amp;rsquo;t matter how well optimized the code is if the code base isn&amp;rsquo;t maintainable. If the code can&amp;rsquo;t be refactored and improved, the software project is stuck in time &amp;ndash; new features are difficult to add, performance can&amp;rsquo;t be improved, and bugs will be harder to pinpoint. Upfront planning and design can greatly reduce the amount of code rewriting that is necessary, but its near impossible to get everything right the first time code is written in a significantly sized code base.</description>
+    </item>
+    
+  </channel>
+</rss>

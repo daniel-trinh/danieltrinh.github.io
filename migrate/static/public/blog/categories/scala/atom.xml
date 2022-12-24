@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: scala | Daniel Trinh]]></title>
+  <link href="http://danieltrinh.com/blog/categories/scala/atom.xml" rel="self"/>
+  <link href="http://danieltrinh.com/"/>
+  <updated>2016-07-19T12:50:47-07:00</updated>
+  <id>http://danieltrinh.com/</id>
+  <author>
+    <name><![CDATA[Daniel Trinh]]></name>
+    <email><![CDATA[daniel.s.trinh@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Converting the OverClocked Remix RSS to a Twitter Feed]]></title>
+    <link href="http://danieltrinh.com/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/"/>
+    <updated>2014-02-06T00:00:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed</id>
+    <content type="html"><![CDATA[<p><a href="http://ocremix.org">OverClocked Remix (OCRemix)</a> is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.</p>
+
+<p>This post is about a server daemon project I wrote a year ago &mdash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at <a href="https://twitter.com/newOCRemixes">@newOCRemixes</a> on Twitter. It&rsquo;s been running on Heroku 24/7 for the past year without any problems. Source code is <a href="http://github.com/daniel-trinh/ocremix">here</a>.</p>
+
+<p>The rest of this post goes into the design and development of this project, so if that doesn&rsquo;t sound interesting to you, now is a good time to hop off this train.</p>
+
+<h2>Motivation and design</h2>
+
+<p>I&rsquo;ve been listening to music off of OCRemix ever since 2002. The way I used
+to find new songs was to repeatedly visit their website, look for new songs,
+and then click through three or four links for every new song that was posted.</p>
+
+<p>I got tired of checking the website, only to end up finding out there were no new songs,
+or finding out there are ten new songs, and having to click 30 times to hear all of them.</p>
+
+<p>So I set out to figure out how to make it much, much easier to hear new songs and download
+them if I liked them.</p>
+
+<h4>Existing OCRemix Feeds</h4>
+
+<p>OCRemix has it&rsquo;s <a href="https://twitter.com/ocremix">own Twitter feed</a>, which they will use
+to post new remixes, but it&rsquo;s not exclusive to providing just new songs:</p>
+
+<p><img class="center" src="/images/ocremix/official_unrelated.png" width="500" height="450" title="&lsquo;Official OCRemix Twitter Feed&rsquo; &lsquo;Official OCRemix Twitter Feed picture&rsquo;" ></p>
+
+<p>Twitter happens to have this nice feature that they call <a href="https://dev.twitter.com/docs/cards">cards</a>. Cards are essentially a feature that detect certain types of URLs, and display information within the tweet that would only be accessible from visiting the URL. One of the
+supported card types are Youtube links, which will embed a Youtube video into a Tweet
+whenever a Youtube link is detected.</p>
+
+<p>Sometimes the links to new songs include a Youtube link to the remix for easy listening&hellip;</p>
+
+<p><img class="center" src="/images/ocremix/official_link.png" width="400" height="450" title="&lsquo;Official OCRemix Twitter Feed &mdash; Embedded Youtube&rsquo; &lsquo;Official OCRemix Twitter Feed picture, embedded Youtube&rsquo;" ></p>
+
+<p>and sometimes they don&rsquo;t:</p>
+
+<p><img class="center" src="/images/ocremix/official_no_link.png" width="400" height="450" title="&lsquo;Official OCRemix Twitter Feed &mdash; no Embedded Youtube&rsquo; &lsquo;Official OCRemix Twitter Feed picture, no Youtube&rsquo;" ></p>
+
+<p>They also have their own <a href="https://www.youtube.com/channel/UC8Wh7qpPGJm3K1eZ6DHjpKA">Youtube channel</a>
+where new songs are posted, but similarly to their Twitter feed, it is not exclusive to new songs.</p>
+
+<h4>My OCRemix Feed</h4>
+
+<p>Since I was already using Twitter as a news feed, I chose that as my target platform for
+receiving new song notifications. The following is a list of some of the things I wanted
+out of my Twitter feed system.</p>
+
+<blockquote><ul>
+<li><p>Only new songs should be posted &mdash; no reposts.</p></li>
+<li><p>Only songs should be posted &mdash; nothing else but new OCRemix songs.</p></li>
+<li><p>Every single song must contain a link to the Youtube song link.</p></li>
+<li><p>Show the video game, remixer, and composer the song is remixed from,
+ if it fits in 140 characters along with the Youtube link.</p></li>
+<li><p>This system should not require any input from me (automated).</p></li>
+<li><p>If something is broken, I should be notified of the breakage.</p></li>
+</ul>
+</blockquote>
+
+<p>Initially, I wanted to implement direct download links within each Tweet in order to simplify the process of downloading the mp3 for new songs. However, because ocremix.org is non-profit and receives advertising money from the main website to pay for bandwidth, I chose to just link to their site to download out of politeness.</p>
+
+<p>This is what the final version of my implementation looks like:</p>
+
+<p><img class="center" src="/images/ocremix/my_version.png" width="500" height="550" title="&lsquo;My Unofficial Twitter Feed&rsquo; &lsquo;My Unofficial Twitter Feed picture&rsquo;" ></p>
+
+<p>Assuming this information fits into the 140 character limit, each one of these song tweets is composed of the following:</p>
+
+<pre><code>songId     - Integer, official remix number (currently at 2827 at the time of writing). 
+title      - Song title, given to the song by the remixers.
+remixers   - The remix artists that created the remix.
+composers  - The original artists that created the original song.
+youtubeUrl - Link to the remix on Youtube.
+writeupUrl - Official OCRemix link with remix information and a download link.
+</code></pre>
+
+<h2>Programming Details</h2>
+
+<p>The actual project was implemented using Scala. The main libraries used were
+Dispatch for OAuth and talking with Twitter&rsquo;s API, and <a href="akka.io">Akka</a> for the periodic
+polling of the RSS feed.</p>
+
+<h4>Fitting Info into a Tweet</h4>
+
+<p>Trying to detect whether or not a Tweet will fit in 140 characters is tricky, especially
+if there are URLs in the Tweet. Twitter will automatically shorten URLs for you &mdash; the caveat
+is that the length of the shortened URL is what counts to the 140 character limit,
+and not the size of the original URL.</p>
+
+<p>So how do you figure out what the shortened URL size will be?
+Twitter happens to have a <a href="https://dev.twitter.com/docs/api/1.1/get/help/configuration">configuration API</a> that will tell you the current length
+of URLs (https links are one character longer than http). Since this number can
+change, it can&rsquo;t be hardcoded into the system. It&rsquo;s also not a number that is likely
+to change often.</p>
+
+<p>To take this varying URL length into consideration, the previously known shortened URL length is cached in memory for quick usage. I poll the configuration API
+every 24 hours to check for and update the URL length cache if necessary.</p>
+
+<p>This polling is done using Akka&rsquo;s scheduler:</p>
+
+<p><code>scala
+val twitterConfigUpdaterSchedule = MySystem().scheduler.schedule(
+  initialDelay = 0 seconds,
+  frequency    = 1 day,
+  receiver     = configUpdater,
+  // If I was writing this again, I probably wouldn't use a "doit" message
+  // for initiating an update.
+  message      = "doit"
+)
+</code></p>
+
+<p>Sometimes there&rsquo;s just too much information to include in 140 characters. Going back
+to my design goal of making it easy to hear new songs, the Youtube link is the
+most important thing to include in the Tweet.</p>
+
+<p>Here&rsquo;s a shortened version of the code that figures out what to put into a tweet:</p>
+
+<p>```scala
+// The youtube URL is in every possible one of these.
+lazy val v0 = Tweet(songId, title, remixers, composers, youtubeUrl, writeupUrl)
+lazy val v1 = Tweet(songId, title, remixers, youtubeUrl, writeupUrl)
+lazy val v2 = Tweet(songId, title, youtubeUrl, writeupUrl)
+lazy val v3 = Tweet(songId, title, youtubeUrl)
+lazy val v4 = Tweet(songId, youtubeUrl)</p>
+
+<p>// Start with the longest possible, then slowly go to the shortest.
+if (v0.isTweetable)
+  v0
+else if (v1.isTweetable)
+  v1
+else if (v2.isTweetable)
+  v2
+else if (v3.isTweetable)
+  v3
+else
+  v4
+```</p>
+
+<p>Unless Twitter plans on upping the shortened URL length to ~135 characters,
+or the ids start incrementing in several orders of magnitude per new remix,
+the smallest tweet content (<code>songId</code>,<code>youtubeUrl</code>) is good enough.</p>
+
+<p><em>There&rsquo;s a reason songId is included in all of the possibilities as well, more on that later.</em></p>
+
+<h4>Receiving Error Notifications</h4>
+
+<p>In order to make sure I received a notification whenever something breaks, every single
+method that could cause an error returns an <code>Either[_, String]</code>, where
+the <code>Right</code> case stores the successful result, and the <code>Left</code> case stores a string explaining what went wrong. Whenever a method is completed
+with the <code>Left</code> case, a direct message is sent to my own personal Twitter handle,
+with information about the failure.</p>
+
+<p>Here&rsquo;s what error messages look like when they reach my Twitter inbox:</p>
+
+<p><img class="center" src="/images/ocremix/error_messages.png" width="600" height="450" title="&lsquo;All in one place&rsquo; &lsquo;Error Messages in my Twitter Inbox&rsquo;" ></p>
+
+<p>Some examples of methods that might fail that I want to be
+alerted about if they do:</p>
+
+<p>```scala
+  // Sends a private message to someone on Twitter
+  def directMessage(user: TwitterHandle, message: String): Future[Either[String,String]]</p>
+
+<p>  // Tweets a new post
+  def statusesUpdate(tweet: Tweetable): Future[Either[String,String]]</p>
+
+<p>  // Retrieves the last few Tweets from a user&rsquo;s timeline
+  def userTimeline(</p>
+
+<pre><code>userId:     String,
+screenName: String,
+count:      Int
+</code></pre>
+
+<p>  ): Future[Either[String,String]]</p>
+
+<p>  // Retrieves configuration information about Twitter
+  def helpConfiguration: Future[Either[String, TwitterConfiguration]]
+```</p>
+
+<p>(In retrospect, just using Future[String] would have been enough, since it
+stores the exception information in case of failure&hellip; but keep in mind I <em>did</em> write this code as a novice just as I started learning Scala).</p>
+
+<h4>Polling and Parsing the RSS Feed</h4>
+
+<p>There&rsquo;s nothing particularly fancy about this part &mdash; it mostly consists of
+periodically polling <a href="http://ocremix.org/feeds/ten20/">OCRemix&rsquo;s RSS</a> and
+parsing out new songs to post on Twitter.</p>
+
+<p>Here&rsquo;s the code that schedules an RSS polling check every half hour:</p>
+
+<p><code>scala
+val rssPollerSchedule = MySystem().scheduler.schedule(
+  initialDelay = 0 seconds,
+  frequency    = 30 minutes,
+  receiver     = rssPoller,
+  message      = "doit"
+)
+</code></p>
+
+<p>In order to figure out whether or not a song is new, I send a request to Twitter&rsquo;s API to retrieve the <code>@newOCRemixes</code> Twitter Timeline, check the last Tweet&rsquo;s <code>songId</code>, and make sure any new song I post happens
+to have a songId greater than the one on the timeline.</p>
+
+<h4>Things to Improve</h4>
+
+<p>All of this <em>mostly</em> works. There are a few problems that were more complicated
+to solve than the time I wanted to spend on this.</p>
+
+<p>One of these problems happens to be that the RSS feed
+only stores the 10 latest new songs &mdash; if there&rsquo;s ever more than 10 songs posted
+within a 30 minute interval, any songs prior to the last 10 will not get posted.
+This has only happened once since I&rsquo;ve launched this project, but there&rsquo;s not
+much that can be done about it, short of asking for the OCRemix owners to not post
+so many songs at once, or up the number on their RSS feed.. or polling the website
+itself, and parsing the song URLs from raw HTML.</p>
+
+<p>Another problem (that hasn&rsquo;t actually been much trouble so far) is that the error
+message reporting is dependent on Twitter&rsquo;s API working. If there&rsquo;s a problem with
+the <code>directMessage</code> call to send me a message on errors, I won&rsquo;t be notified. I could have solved this by setting up a secondary notification system such as email, but errors happen so rarely that it wasn&rsquo;t worth the trouble.</p>
+
+<p>The third and last problem that I&rsquo;ve run into is actually not one I can do much about. The Twitter card feature for Youtube videos sometimes won&rsquo;t work &mdash; a few Tweets just won&rsquo;t embed a Youtube video into the post, even if there&rsquo;s a valid Youtube URL in the message.</p>
+
+<p>Having said that, I&rsquo;m pretty happy with the results &mdash; it&rsquo;s been working without a hitch for the last year since it&rsquo;s been deployed.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Improving Scalariform, The Scala Source Formatter]]></title>
+    <link href="http://danieltrinh.com/blog/2014/02/05/improving-scalariform/"/>
+    <updated>2014-02-05T23:26:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/02/05/improving-scalariform</id>
+    <content type="html"><![CDATA[<p>Scalariform is a Scala source code formatter, originally written by <a href="http://github.com/mdr">Matt Russell</a> (big thanks to him for writing it).</p>
+
+<p>It&rsquo;s much easier to show you what this does than it is to try and explain it, so that&rsquo;s what I&rsquo;ll do.</p>
+
+<p>This is some poorly formatted code before running Scalariform:</p>
+
+<p>```scala
+class Coffee {
+val sugarCubes = 20
+val isCaffeinated = false</p>
+
+<p>def energyBoost = {
+if (caffeinated)
+100 * sugarCubes
+else
+0
+}
+}
+```</p>
+
+<p>After running Scalariform:
+```scala
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false</p>
+
+<p>  def energyBoost = {</p>
+
+<pre><code>if (caffeinated) 
+  100 * sugarCubes
+else
+  0
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>Pretty cool, right? Unfortunately, there haven&rsquo;t been very many updates to the official version of this super awesome project lately,
+so I decided to fork the project and start improving upon it myself. Since I use Scala quite often, I&rsquo;ve got some pretty strong motivation to work on improving it.</p>
+
+<p>Here&rsquo;s a quick summary of what I&rsquo;ve added to Scalariform <em>so far</em>:</p>
+
+<p>```scala Previous Scalariform Formatting
+def showInput<a href="parent:%20Component%20=%20null,%0A%20%20message:%20Any,%0A%20%20title:%20String%20=%20uiString(" title="OptionPane.inputDialogTitle">A</a>,
+  messageType: Message.Value = Message.Question,
+  icon: Icon = EmptyIcon,
+  entries: Seq[A] = Nil,
+  initial: A
+): Option[A]</p>
+
+<p>case class Cake(
+  icingFlavor: Flavor = Vanilla,
+  cakeFlavor: Flavor = Chocolate,</p>
+
+<p>  candles: Int = 1,
+  layers: Int = 3,
+  iceCream: Boolean = False
+)</p>
+
+<p>o.manyArguments(abc = 0,
+  abcOne = 1,
+  abcTwo,
+  abcThree = 3,
+  abcFour = 4,
+  abcFive = 3
+)
+```</p>
+
+<p>```scala Scalariform Formatting with My Changes</p>
+
+<p>// Parameter names, types, and defaults are aligned into three separate columns
+def showInput<a href="parent:%20%20%20%20%20%20Component%20%20%20%20%20=%20null,%0A%20%20message:%20%20%20%20%20Any,%0A%20%20title:%20%20%20%20%20%20%20String%20%20%20%20%20%20%20%20=%20uiString(" title="OptionPane.inputDialogTitle">A</a>,
+  messageType: Message.Value = Message.Question,
+  icon:        Icon          = EmptyIcon,
+  entries:     Seq[A]        = Nil,
+  initial:     A
+): Option[A]</p>
+
+<p>// Two newlines will result in separate alignment groups
+case class Cake(
+  icingFlavor: Flavor = Vanilla,
+  cakeFlavor:  Flavor = Chocolate,</p>
+
+<p>  candles:  Int     = 1,
+  layers:   Int     = 3,
+  iceCream: Boolean = False
+)</p>
+
+<p>// Same feature working with method calls
+o.manyArguments(
+  abc    = 0,
+  abcOne = 1,
+  abcTwo,
+  abcThree = 3,
+  abcFour  = 4,
+  abcFive  = 3
+)
+```</p>
+
+<p>And here&rsquo;s how to use my version:</p>
+
+<p>```
+// Add this to &hellip;/project/plugins.sbt
+resolvers += &ldquo;Sonatype OSS Snapshots&rdquo; at &ldquo;<a href="https://oss.sonatype.org/content/repositories/snapshots">https://oss.sonatype.org/content/repositories/snapshots</a>&rdquo;</p>
+
+<p>addSbtPlugin(&ldquo;com.danieltrinh&rdquo; % &ldquo;sbt-scalariform&rdquo; % &ldquo;1.3.0-SNAPSHOT&rdquo;)
+```</p>
+
+<p>See the <a href="https://github.com/daniel-trinh/sbt-scalariform">plugin</a> for how to configure formatting options, and the <a href="https://github.com/daniel-trinh/scalariform">Scalariform readme</a>
+for available formatting options.</p>
+
+<p>Since this is an ongoing project, there will be more updates to come.</p>
+
+<!-- 
+The rest of this article goes into great detail about my motivation to work on Scalariform,
+the importance of auto-formatters in general, and some of the design dilemmas of working on Scalariform.
+
+Before I get into what I've improved, I'll go over some reasons why Scalariform
+is important.
+
+## The Importance of Auto-Formatting
+[Many](https://code.google.com/p/google-styleguide/ "Google's style guides for various languages") [companies](http://twitter.github.io/effectivescala/ "Twitter's style guide for Scala") [have](https://github.com/styleguide/ruby "Github's style guide for Ruby") coding style guidelines for a reason. [I wrote about this](/blog/2014/01/26/maintaining-a-large-code-base-part-3/) in great detail in my article about programming languages and code bases. My general conclusion is that having many ways of visualizing and formatting source code
+is not a good thing -- the more ways to format the code, the more ways a reader of the
+code will have to learn to read the code to understand it. 
+
+The following code example is perfectly valid scala code... but it's not at all readable.
+
+```scala
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false
+
+  def energyBoost = {
+    if (caffeinated) 
+      100 * sugarCubes
+    else
+      0
+  }
+}
+```
+
+The output from running Scalariform for this result is the same as the previous example:
+```
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false
+
+  def energyBoost = {
+    if (caffeinated) 
+      100 * sugarCubes
+    else
+      0
+  }
+}
+```
+
+Having something that will take care of the formatting for me is great -- spending time thinking about formatting, manually formatting code, and spending time
+on code reviews about formatting is not a very productive use of time when there are actual business product related problems to solve, and especially since it's a problem that can be solved forever by using an auto-formatter along the lines of Scalariform or gofmt.
+
+#### Formatting Ubiquity
+
+Having an auto formatter to enforce a consistent style in a code base is important, because
+once the maintainers of that code base have become accustomed to that style, they won't have to "readjust" their eyes to get used to. If the auto formatter for a programming language is nearly ubiquitous amongst those who use it, such as with Golang's [gofmt](http://research.swtch.com/gofmt), then even better -- users across the language will be able to read anyone's elses code that also uses the formatter.
+
+While auto formatters such as Scalariform can't check everything that is in a styleguide
+(it won't automatically reformat your imperative, state-mutating code into a functional style automatically), it will take care of the visual aesthetics formatting problem for you.
+
+
+#### Scalariform Dillemas 
+Scalariform has many configuration options, which goes against the design philosophy
+of having one canonical representation so that everyone can quickly get accustomed to the same formatting. It also happens to significantly complicate the actual Scalariform formatting code. With Scalariform, there is one
+global shared state -- the output source code. More configuration options means
+more potentials to clash, and more special cases.
+
+Unfortunately, Scala programmers come from many different backgrounds, and there isn't
+a global consensus on what formatting styles programmers prefer. 
+
+When I was gathering feedback for new Scalariform features, I posted an informal poll on Reddit, to gather feedback about 3 different formatting styles:
+
+```scala Style One
+class definition(
+  a: Int = 1
+  bb: String = ""
+  ccc: Boolean = true
+)
+```
+
+```scala Style Two
+class definition(
+  a:   Int     = 1
+  bb:  String  = ""
+  ccc: Boolean = true
+)
+```
+
+```scala Style Three
+class definition(
+    a: Int     = 1
+   bb: String  = ""
+  ccc: Boolean = true
+)
+```
+
+I was half-expecting everyone to say they prefered `Style Two`, but of course that wasn't the case. `Style One` was the most popular choice. `Style Two` was the second most popular,
+and `Style Three` was by far the least -- not a single person said they preferred this one (although a few said they didn't mind any of the options).
+
+I also concluded that a strong contributing factor on which style people prefer is
+strongly related to just what they're used to reading -- Golang's gofmt happens to format
+code in something similar to `Style Two`, and happens to be used by roughly 70% of all golang projects. If this really is the main factor, then it doesn't really make sense
+to  -->
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Maintaining a Large Code Base, Part 3: Programming Languages]]></title>
+    <link href="http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3/"/>
+    <updated>2014-01-26T20:58:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3</id>
+    <content type="html"><![CDATA[<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Previous Part: Service Oriented Architecture</em></a></p>
+
+<p>If you are lucky enough to be able to choose the programming language for a new project,
+this section might provide some insight on how it might impact the future of your code base.</p>
+
+<h2>Choose Your Programming Languages Wisely</h2>
+
+<p>This article focuses only on the technical details of programming languages and their
+effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling,
+or library support. While those things are undoubtedly important, those things aren&rsquo;t necessarily intrinsic to a programming language, and they tend to change much more often than the topics I&rsquo;ll
+be discussing here.</p>
+
+<p>When I first started writing this section, it was titled &ldquo;Use a statically typed language.&rdquo;
+I then thought of Java with all of its verbosity, realized it&rsquo;s not quite that simple, and it would
+make more sense to just outline how certain language features impact code maintainability,
+and let you conclude yourself on what kind of language to pursue.</p>
+
+<p>Having said that, personally I prefer languages with static type systems over dynamic ones from a pure maintainability point of view, except perhaps in the case of languages like Java.</p>
+
+<p>Before I get started, let&rsquo;s define a few things.</p>
+
+<blockquote><p>Compiled language &ndash; purely statically typed, type annotations are required,
+or must be able to be inferred at compile time
+(Scala, Java, Haskell, C++)</p>
+
+<p>Dynamic language &ndash; interpreted, no type annotations or they are optional
+(Clojure, Typed Clojure, Ruby, Groovy, Groovy 2.0, Python, JavaScript)</p>
+
+<p>Statically typed language &ndash; same as compiled language</p></blockquote>
+
+<p>Typed Clojure and Groovy 2.0 both have optional type annotations for partial compile time
+type checking and performance improvements, but I am grouping them in the dynamic
+language group because they are optional, and they do not provide the same static
+analysis guarantees as pure statically typed languages, and hence are not as helpful in
+terms of maintainability (more on static analysis later). They are certainly easier
+to pick up than a full blown compiled languages with generics, though (more on this in the language complexity section).</p>
+
+<h3>Conciseness</h3>
+
+<p>By conciseness I mean this: How much code is necessary to express a particular
+piece of business logic? How much of that code is intrinsic to
+describing that logic, and how much of it is necessary because of limitations
+in the language? Conciseness is important for maintainability because it means there&rsquo;s less
+code to read, and less code to refactor when it&rsquo;s necessary to do so.</p>
+
+<p>Here&rsquo;s an example comparing a basic class in Java with the same functionality (both in behavior and runtime performance) implemented in Scala that demonstrates what I mean:</p>
+
+<p>```java Java class
+public class Coffee {</p>
+
+<pre><code>private final boolean caffeinated;
+private final int sugarCubes;
+
+public Coffee(boolean caffeinated, int sugarCubes) {
+    this.caffeinated = caffeinated;
+    this.sugarCubes = sugarCubes;
+}
+public boolean getCaffeinated() {
+    return caffeinated;
+}
+public int getSugarCubes() {
+    return sugarCubes;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>scala Scala class
+class Coffee(val caffeinated: Boolean, val sugarCubes: Int)
+</code></p>
+
+<p>For comparison&rsquo;s sake, here&rsquo;s a Ruby example of something similar to the two examples
+above:</p>
+
+<p>```ruby Ruby
+class Coffee
+  attr_reader :caffeinated, :sugar_cubes</p>
+
+<p>  def initialize(caffeinated, sugar_cubes)</p>
+
+<pre><code>@caffeinated = caffeinated
+@sugar_cubes = sugar_cubes
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Dynamic languages tend to win in terms of conciseness, since there&rsquo;s no extra
+code necessary for specifying type information, although this isn&rsquo;t always the case.</p>
+
+<h3>Language Complexity</h3>
+
+<p>It doesn&rsquo;t really matter if code takes fewer lines of code if it&rsquo;s impossible to figure out what it does. Unlike conciseness, language complexity isn&rsquo;t quite as clear cut to define. So
+instead of trying to define it in an abstract sense, I&rsquo;ll just give you some examples.</p>
+
+<p>Scala is quite conciseness, but the type system is anything but simple.
+The type system is so involved that it is Turing Complete &mdash; it is so complex that
+it is possible to write algorithms such as <a href="http://apocalisp.wordpress.com/2010/06/08/type-level-programming-in-scala/">infinite loops</a> that only utilize the type system features; no for loops, while loops,
+or function recursion. The type system is so complex to the point that a simpler programming
+language to possibly become the next Scala is <a href="http://www.infoq.com/presentations/data-types-issues">in the works</a> by Scala&rsquo;s original designer.</p>
+
+<p>Here&rsquo;s one of the crazier function signatures in Scala, from the Scalaz library:</p>
+
+<p><code>scala
+implicit def CokleisliMAB[M, A, B](k: Cokleisli[M[_][_], A, B]): MAB[Cokleisli[M[_][_], A, B][A, B], A, B]
+</code></p>
+
+<p>It probably doesn&rsquo;t seem fair to show that signature for those unfamiliar with Scala, but I assure
+you, that kind of function signature is still daunting for seasoned Scala developers.</p>
+
+<p>Although without those complicated type features, code like this might not be possible in Scala:</p>
+
+<p>```scala
+// Just Ints
+List(1, 2, 3, 4, 5) map { x => x * x } sum
+// => Int = 55</p>
+
+<p>// Ints and Doubles
+Array(1, 2 ,3.0, 4.5, 5.55) map { x => x * x } sum
+// => Double = 65.0525</p>
+
+<p>// Just Strings
+Vector(&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;e&rdquo;) map { x => x * 2 }
+// =>  Vector[String] = Vector(aa, bb, cc, dd, ee)
+```</p>
+
+<p>The implementation of the <code>map</code> function in Scala is far from simple, though. Writing
+this sort of code is not something the average Scala developer can accomplish. In fact,
+I&rsquo;m not sure there&rsquo;s more than a handful of people who could write a collections library
+as powerful as the one in Scala &mdash; it took the creator of the language and a few helpers an entire year to get it to the point it is currently at.</p>
+
+<p>Ruby, on the other hand, has an incredibly simple implementation of the <code>map</code> method.
+It&rsquo;s just a few lines of code, within the <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a> module. To use it, all that is necessary is an implementation of the <code>each</code> function on the inheriting member, and that&rsquo;s it. Because of duck typing, there isn&rsquo;t much else that&rsquo;s needed.</p>
+
+<p>In contrast to both Scala and Ruby, <a href="http://golang.org/">Golang</a> is far from being concise, but it is well reported for being relatively quick to pick up and start coding, likely in large part due to its incredibly minimal type system. It has no form of generics, meaning it is impossible to write type safe collection methods that work with all types using just the language. Golang is packaged with it&rsquo;s own
+basic set of generic data structures (slices, maps, channels), but if you want to write
+your own priority queue that works with all types, you are out of luck. This means
+the language is easier to learn than a language like Scala, but also results in more code and code duplication.</p>
+
+<h3>Syntactic Flexibility</h3>
+
+<p>There&rsquo;s a reason why <a href="https://code.google.com/p/google-styleguide/" title="Google's style guides for various languages">Google</a>,
+<a href="http://twitter.github.io/effectivescala/" title="Twitter's style guide for Scala">Twitter</a>,
+and <a href="https://github.com/styleguide/ruby" title="Github's style guide for Ruby">Github</a> have coding style guidelines.</p>
+
+<p>Can you imagine if each letter of the English alphabet was in a different Unicode character?
+Here&rsquo;s some English that has had each letter of the alphabet mapped to a different character
+in Unicode:</p>
+
+<pre><code>Original text:
+I am Heavy Weapons Guy. And this... [grips Sasha] is my weapon. She weighs 150
+kilograms and fires $200 custom-tooled cartridges at 10,000 rounds per minute. 
+[leans in] It cost $400,000 to fire this weapon...for 12 seconds.
+
+Altered text:
+"ᚋ ᣀᣌ ᚊᣄᣀᨇᨊ ᚙᣄᣀᣏᣎᣍᣒ ᚉᨐᨊ. ᚃᣍᣃ ᣓᣇᣈᣒ... [ᣆᣑᣈᣏᣒ ᚕᣀᣒᣇᣀ] ᣈᣒ ᣌᨊ ᨈᣄᣀᣏᣎᣍ. ᚕᣇᣄ ᨈᣄᣈᣆᣇᣒ 150
+ᣊᣈᣋᣎᣆᣑᣀᣌᣒ ᣀᣍᣃ ᣅᣈᣑᣄᣒ $200 ᣂᨐᣒᣓᣎᣌ-ᣓᣎᣎᣋᣄᣃ ᣂᣀᣑᣓᣑᣈᣃᣆᣄᣒ ᣀᣓ 10,000 ᣑᣎᨐᣍᣃᣒ ᣏᣄᣑ ᣌᣈᣍᨐᣓᣄ. 
+[ᣋᣄᣀᣍᣒ ᣈᣍ] ᚋᣓ ᣂᣎᣒᣓ $400,000 ᣓᣎ ᣅᣈᣑᣄ ᣓᣇᣈᣒ ᨈᣄᣀᣏᣎᣍ...ᣅᣎᣑ 12 ᣒᣄᣂᣎᣍᣃᣒ.
+
+Code for converting: https://gist.github.com/daniel-trinh/2b6d4b9c38e713148db4
+</code></pre>
+
+<p>While that is a bit of a contrived example, it&rsquo;s a taste of what programmers have to deal with
+in programming languages that have flexible syntax. Out of the times I&rsquo;ve talked about the new languages I&rsquo;ve been exploring (Clojure, Go, Scala), syntax is almost always the first thing my coworkers notice
+and talk about &mdash; this is because understanding syntax is the first step to being able to read the language. If it&rsquo;s different from what they&rsquo;re familiar with, it&rsquo;s just another barrier to learning it.</p>
+
+<p>Languages that are designed for building domain-specific languages tend to have more
+syntactic flexibility and lexical complexity. Languages like Ruby and Scala were designed
+in mind of supporting DSLs. Unfortunately, flexible syntax makes it harder for users to read code. For every syntax permutation that people use in a language, everyone who reads the language is going
+to have to be able to read those permutations. In terms of language design, I don&rsquo;t hear this topic talked about as often as some of the other topics in this article, but nevertheless I still see it as worth discussing.</p>
+
+<p>Here are some real examples demonstrating the flexibility of Ruby&rsquo;s and Scala&rsquo;s syntax.</p>
+
+<p>```ruby Ruby</p>
+
+<h1>( ͡° ͜ʖ ͡°) do..end vs curly braces</h1>
+
+<h1>Curly Braces</h1>
+
+<p>[1,2,3,4,5].map { |x| x * x }</p>
+
+<h1>do..end</h1>
+
+<p>[1,2,3,4,5].map do |x|
+  x * x
+end</p>
+
+<h1>( ͡° ͜ʖ ͡°) Optional periods</h1>
+
+<h1>Method calls without periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x } reduce (:+)</p>
+
+<h1>Method calls with periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x }.reduce (:+)</p>
+
+<h1>( ͡° ͜ʖ ͡°) Different ways of defining functions</h1>
+
+<h1>Method method</h1>
+
+<p>def square(x)
+ x * x
+end</p>
+
+<h1>Lambda method</h1>
+
+<p>square = lambda { |n| n * n }</p>
+
+<h1>Proc method</h1>
+
+<p>square = Proc.new { |x| x * x }</p>
+
+<h1>( ͡° ͜ʖ ͡°) Flexible method names</h1>
+
+<h1>Non Alpha-numeric method names</h1>
+
+<p>def +=(new_value)
+  @value = @value + new_value
+end
+```</p>
+
+<p>```scala Scala</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Curly braces vs parenthesis </em>/</p>
+
+<p>// Curly Braces
+List(1,2,3,4,5,6).map { x => x * x }</p>
+
+<p>// Parenthesis
+List(1,2,3,4,5,6).map( x => x * x )</p>
+
+<p>// Unnecessary Curly Braces .. and Parenthesis
+List(1,2,3,4,5,6).map(
+  {</p>
+
+<pre><code>{
+  ( { x =&gt; x * x } )
+}
+</code></pre>
+
+<p>  }
+)</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Optional periods </em>/</p>
+
+<p>// Method calls without periods
+List(1,2,3,4,5) map ( x => x * x ) sum</p>
+
+<p>// Method calls with periods
+List(1,2,3,4,5).map( x => x * x ) sum</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Different ways of defining &ldquo;functions&rdquo; </em>/</p>
+
+<p>// Method
+def square(number: Int): Int = number * number</p>
+
+<p>// Function
+val square: Int => Int = { x => x * x }</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible parameter newline formatting </em>/</p>
+
+<p>// One line
+def manyParams(a: Int, b: Int, c: Int): Int</p>
+
+<p>// Several lines
+def manyParams(
+  a: Int,
+  b: Int,
+  c: Int
+): Int</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible naming </em>/</p>
+
+<p>// Non Alpha-numeric method names
+def +=<a href="newValue:%20T">T</a>: List[T] = {
+  newValue :: this.list
+}</p>
+
+<p>// Unicode method names
+def <code>(╯°□°）╯︵ ┻━┻</code>: Unit = {
+  sys.exit(1)
+}
+```</p>
+
+<p>And for comparison&rsquo;s sake, here&rsquo;s some Golang:</p>
+
+<p>```go Golang
+// ( ͡° ͜ʖ ͡°) Curly braces or parenthesis, no mix and matching
+func main() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) No optional periods
+func (v *Vertex) Abs() float64 {</p>
+
+<pre><code>return math.Sqrt(v.X*v.X + v.Y*v.Y)
+</code></pre>
+
+<p>}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) Unicode naming, but no &ldquo;+=&rdquo; stuff
+func 世界() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}
+```</p>
+
+<p>Those examples are just the tip of the iceberg, but they should give you a good idea
+of the kinds of syntax quirks I&rsquo;m talking about.</p>
+
+<p>Personally, I&rsquo;m not a fan of the Golang syntax, but there is something to be said about
+it&rsquo;s uniformity &mdash; once I&rsquo;ve learned how to read one person&rsquo;s Golang code, I can read pretty much all Golang code. This isn&rsquo;t necessarily true of Ruby or Scala.</p>
+
+<p>In some cases, newer languages have relied on the syntax of previously famous languages
+to gain popularity &mdash; Java&rsquo;s syntax similarity to C++ was no accident, it was an intentional
+design decision by James Gosling to lure programmers away from their familiar C++ homes. JavaScript
+<a href="http://en.wikipedia.org/wiki/ECMAScript#History">wasn&rsquo;t always named JavaScript</a>, but Brendan Eich
+decided it would help with gaining popularity. The syntax is also reminiscent of Java &mdash; it uses
+curly braces for scopes as well was semicolons for terminating sequences.</p>
+
+<p>The bottom line is that programmers don&rsquo;t want to learn a million different ways of reading
+the same code. If you&rsquo;re using a language with an auto formatter such as <a href="https://www.github.com/mdr/scalariform">Scala</a> or <a href="http://golang.org/cmd/gofmt/">Golang</a>, you&rsquo;re probably in the best boat &mdash; these formatters will format your code for you, enforcing a consistent style without having to spend time and energy trying to manually modify your code to be more readable (no more time wasted on syntax during code reviews). Ruby doesn&rsquo;t have a full fledged auto formatter, but it does have <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for telling you when your code is breaking style conventions.</p>
+
+<h3>Static Analysis</h3>
+
+<p>If there&rsquo;s anything that kills the maintainability of dynamic languages, it&rsquo;s the
+lack of type safety. I&rsquo;ve used Ruby to death, and while I love using it for small applications
+or building prototypes, it&rsquo;s not something I would choose if I had to work on a project
+with more than a few engineers or one that was more than a few thousand lines of code (or one that demanded performance, but that&rsquo;s another story).</p>
+
+<p>While I was working at RightScale, we had a massive 900,000 SLOC repository that contained way more
+business logic than it should have. The code base was a nightmare to maintain, and it had been that way for years. This was partially from the lack of time given to fix the problem, partially from having fifty engineers modifying the same code base, but also partly due to the nature of Ruby itself.</p>
+
+<p>At one point, we really needed to start deprecating old code to get a sense of what was still
+in use and what wasn&rsquo;t. In order to do this, one of our software architects proposed this solution:
+add a snippet (that I&rsquo;ll reference as) <code>dead_code</code> to any file that was thought to
+no longer be in use. The method <code>dead_code</code> was a monkey patch on the <code>Object</code> namespace that
+would log / email / sound the alarms whenever the code was utilized at runtime (since everything
+is an object in Ruby due to its Smalltalk influences, this works &mdash; don&rsquo;t try this in other languages).
+The idea was that if we ever got production error logs from the <code>dead_code</code> snippet, it meant that
+the piece of code we thought we could remove was in fact not removable.</p>
+
+<p>In another case, our infrastructure team was prototyping an idea of a &ldquo;code fence&rdquo;, which
+would log / email / sound the alarms whenever a set of files tagged with a certain method was called at runtime (in production). I&rsquo;ll reference this method as <code>code_fence(some_fence_group)</code>. We needed this in order to extract business logics into separate services for SOA services</p>
+
+<p>And here&rsquo;s what drives me crazy about the two solutions I outlined above &mdash; neither of those slow iterating approaches would have been necessary in a strongly typed static programming language. While they were clever and much easier than adding unit tests to every piece of code we could find after years of neglecting writing unit tests, it wouldn&rsquo;t have been such a problem if we had used a compiled language (we may have never even had enough of a product to get to this point if we used a compiled language, but let&rsquo;s leave that discussion for another time).</p>
+
+<p>Here is how the <code>dead_code</code> situation would have been solved in a strongly typed static programming language:</p>
+
+<pre><code>1. Remove the file or code you want to check from the repo, and compile.
+2. If there are any compile errors, it's being used. Stop using it. If it isn't, you're good.
+
+1a. Alternatively, use your IDE to tell you if its used anywhere.
+2a. If it is, stop using it. If it isn't, remove it.
+</code></pre>
+
+<p>That&rsquo;s all there is to it&hellip; unless your code to remove is API code that is called from a separate service, such as a Rails controller for a RESTful HTTP API. Then some logging is required in the API code layer, but at least in this case it&rsquo;s only the API code that needs logging, and not every possible file in your entire code base that you want to get rid of.</p>
+
+<p>For the <code>code_fence(some_fence_group)</code> situation, solving this is even easier than with the <code>dead_code</code>
+case:</p>
+
+<pre><code>1. Remove the set of code you want refactored into a separate service or library repository.
+2. Compile your newly divided two sets of code. 
+3. If it compiles, you're good. If it doesn't, fix the interfaces and GOTO #2.
+</code></pre>
+
+<p>You might be thinking at this point, &ldquo;dude.. unit tests? WTF!?&rdquo;, but I offer you this counter point: static analysis in a compiled language is tantamount to a proof of correctness in terms of interfaces. Unit tests are not proofs, they do not guarantee your code will work for every possible permutation. You literally get interface checking for free by just using a compiled language &mdash; in a language such as Ruby, to merely get a poor mans version of the same test coverage, you&rsquo;d have to write a unit test for every single new method written to get the level of fine grained error reporting that a compiler would give you.</p>
+
+<p>To drive my point home, that 900,000 SLOC Ruby application I mentioned was a Rails 2.3 application, running on a version of Ruby 1.8.7. Rails 2.3 was released in <em>2009</em>. It&rsquo;s still running on Rails 2.3 and Ruby 1.8.7, and it&rsquo;s <em>2014</em>. Ruby is up to version 2.1, and Rails is up to 4.0.2 as of me writing this. To be fair, some of the reasons for this is not purely related to the language, but it certainly would have helped with upgrading libraries and Ruby versions if the language was a compiled one.</p>
+
+<p>I should note that there are a few exceptions to this rule in the land of static typing, most notably
+pointers in C / C++ and other low level languages, and in Scala there is the <a href="http://www.scala-lang.org/api/current/index.html#scala.Dynamic">dynamic</a> feature. The important thing here is that these are exceptions, and typical code in these languages will find errors more often than not.</p>
+
+<h3>Compile Times and Unit Test Iteration Times</h3>
+
+<p>Slow compile times and slow unit tests slow down code iteration. Dynamic languages
+don&rsquo;t have a compile step, but they are not immune to this issue as they do not
+have a compile time static type checker, lexer, or parser to find these bugs. Unit tests are vital to fill in this gap&hellip; and they can be slow.</p>
+
+<p>That 900,000 line Ruby application I mentioned earlier took <em>five</em> minutes to run a single unit test, mostly due to having to load and initialize way too many gems and libraries. Needless to say, it was impossible to iterate quickly. Small bugs such as interface errors between <a href="http://www.ruby-doc.org/core-2.1.0/Symbol.html">strings and symbols</a> became more troublesome to debug than they should have been &mdash; for every mismatched <code>def .. end</code>, typo, type mismatch, or invalid argument bug I had in my code, it added five minutes to the development time of what I was working on. Unlike with static typing, dynamic languages will typically only find one of these bugs at a time due to their interpreted &ldquo;run one line at a time&rdquo; nature. If it was up to me, fixing the time to run unit tests would have been more important than anything else (except for production bugs that needed fixing).</p>
+
+<p>Conversely, on the other side of the language typing fence, I&rsquo;ve heard of 45 minute C++ build times &mdash; I can&rsquo;t possibly imagine trying to modify a code base that takes that long to compile. Luckily, I don&rsquo;t think it gets worse than C++, and most statically typed languages have much better compilation times than C++.</p>
+
+<p>Languages like Java, Scala or Golang don&rsquo;t quite have the compile time problem to the extent C++ does.
+They all have incremental compilers, which will only recompile code that has been changed
+(and any code that was using the changed code). Golang&rsquo;s compiler is likely one of the
+fastest for a statically typed language, and Scala is bordering on being as slow as C++
+without incremental compilation. One caveat with the JVM &mdash; it takes time to &ldquo;warm up&rdquo;;
+anything that requires restarting the JVM is going to add several seconds to the build process.</p>
+
+<p>If you haven&rsquo;t seen it, <a href="http://vimeo.com/36579366">Bret Victor&rsquo;s talk</a> makes the case for immediate feedback in much greater detail than I can in this article. Let&rsquo;s just say if it took a musician 5 minutes to hear a note once it&rsquo;s been played, there would be much fewer musicians in the world.</p>
+
+<h3>Conclusion and Next Up</h3>
+
+<p>It used to be the case that it was common knowledge that statically typed languages were much more verbose than dynamically typed languages were. This hasn&rsquo;t always been true &mdash; concise compiled languages such as Haskell and ML have been around for a while now &mdash; but concise, strongly and statically typed languages such as Scala are only now starting to gain traction in the industry.</p>
+
+<p>So now our current options now seem to be these:</p>
+
+<blockquote><p>Simple to learn, concise languages, but terrible for long term large scale
+   application maintainability due to the lack of compile time static analysis
+   (Ruby, Python, JavaScript)</p>
+
+<p>Simple to learn, verbose languages with okay long term maintainability, but might
+be a pain to refactor because of code duplication
+   (Go, Java 7 and lower)</p>
+
+<p>Difficult to learn, but concise languages with good long term maintainability&hellip;
+as long as you can figure out what your code is doing.
+   (Scala, Haskell)</p></blockquote>
+
+<p>It remains to be seen if it&rsquo;s possible for a language to have all three qualities &mdash; simple to learn, concise, and good for long term maintainability.</p>
+
+<p>The next article in this series is still related to programming languages, but it&rsquo;s important enough
+to warrant it&rsquo;s own article.</p>
+
+<p><em>Coming Next: Limiting Shared Mutable State, Or Why You Should Learn Functional Programming</em></p>
+]]></content>
+  </entry>
+  
+</feed>

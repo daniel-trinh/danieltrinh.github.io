@@ -1,0 +1,331 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Maintaining a Large Code Base, Part 1: Backstory and the Basics - Daniel Trinh</title>
+	<meta name="author" content="Daniel Trinh">
+
+	
+	<meta name="description" content="Nov 5th, 2013 maintainability Maintaining a Large Code Base, Part 1: Backstory and the Basics What&rsquo;s one of the most important quality of good &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Daniel Trinh" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://danieltrinh.com/blog/2013/11/05/maintaining-a-large-code-base-part-1/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-45587019-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<img src="http://www.gravatar.com/avatar/685bb9c0f2d690d3e4a910995a13f811?s=160" alt="Profile Picture" style="width: 160px;" />
+	
+</div>
+<hgroup>
+  <h1><a href="/">Daniel Trinh</a></h1>
+  
+</hgroup>
+<nav id="main-nav"><hgroup>
+  <h2>Articles</h2>
+  
+</hgroup>
+<ul class="main-navigation">
+  <li><a href="/blog/categories">Categories</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+<hgroup>
+  <h2 class="main-navigation">
+    <a href="/blog/categories/project/">Open Source Projects</a>
+  </h2>
+</hgroup>
+<ul>
+  <li>
+    <a href="/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/">Filtering Twitch Chat</a>
+  </li>
+  <li>
+    <a href="/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/">OCRemix RSS to Twitter</a></li>
+  <li>
+    <a href="/blog/2014/02/05/improving-scalariform/">Scalariform</a>
+  </li>
+</ul>
+
+<section class="aboutme">
+  <p>
+    Generalist Backend Software Engineer. This is my blog on tech related things.
+
+  </p>
+</section>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+			<a class="email" href="mailto:daniel.s.trinh@gmail.com" title="Email">Email</a>
+		
+		
+		
+		
+			<a class="github" href="https://github.com/daniel-trinh" title="GitHub">GitHub</a>
+		
+		
+		
+		
+			<a class="linkedin" href="http://www.linkedin.com/pub/daniel-trinh/26/229/314" title="LinkedIn">LinkedIn</a>
+		
+		
+		
+		
+		
+		
+		
+			<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-05T12:36:00-08:00" data-updated="true" itemprop="datePublished">Nov 5<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/maintainability/'>maintainability</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name">Maintaining a Large Code Base, Part 1: Backstory and the Basics</h1>
+	<div class="entry-content" itemprop="articleBody"><p>What&rsquo;s one of the most important quality of good software?</p>
+
+<p><em>It&rsquo;s maintainable.</em></p>
+
+<p>It doesn&rsquo;t matter how well optimized the code is if the code base isn&rsquo;t maintainable.
+If the code can&rsquo;t be refactored and improved, the software project is stuck in time &mdash;
+new features are difficult to add, performance can&rsquo;t be improved, and bugs will be harder to pinpoint.
+Upfront planning and design can greatly reduce the amount of code rewriting that is necessary,
+but its near impossible to get everything right the first time code is written in a significantly
+sized code base. I&rsquo;ve yet to work on a non trivial software project that was finished and
+perfect on the first iteration.</p>
+
+<p>Back when I was in college, the typical coding assignment involved writing a few hundred
+to a few thousand lines of code to solve some mind bending arbitrary assignment that
+the professor thought was more important than the other three programming assignments
+I had from my three other professors, but wouldn&rsquo;t explain what was so important about it.</p>
+
+<p>Anyway, the assignments were mostly automatically graded, and it was quite rare
+for the teaching assistant or professor to take a look at students&#8217; code to
+provide coding style feedback. After the solution to an assignment was submitted,
+the code for it would pretty much never be touched again.</p>
+
+<p>Since the assignments were written to facilitate the learning of specific computer science concepts, the source
+code for the assignment solutions were very rarely useful outside of the context of the class
+that it was presented in. There was pretty much always a better implementation for whatever data structure
+or algorithm that were being implemented in the assignments. The only reason to keep the
+source code was to be able to look back at it in several years and could go, &ldquo;Yep.. I wrote that wonderful piece of turd.&rdquo;</p>
+
+<p>I ended up getting better and better at solving these types of self contained
+assignments, but I never really learned how to write maintainable code from completing
+those assignments.</p>
+
+<p>Fast forward a few years, the largest code base I&rsquo;ve worked on has gone from
+being somewhere around 10,000 source lines of code (SLOC) in Java, a naturally verbose language,
+to the largest code base being a 900,000 SLOC service written in <em>Ruby</em>,
+a <a href="http://stackoverflow.com/a/4205396/1093160">duck-type-able</a> dynamic language that&rsquo;s known for its conciseness.
+That line count doesn&rsquo;t include comments or blank spaces, as you might expect from &ldquo;source lines,
+and that code base also only refers to one code base &mdash; it was one of many.
+It wasn&rsquo;t a code base that I could submit somewhere, forget about and never see again either. This was
+the real deal &mdash; industry programming, where things get reused.</p>
+
+<p>This code base was something that I had to stare at on a daily basis. Needless to say,
+I&rsquo;ve learned many lessons in having to work with a code base of that size, and I&rsquo;m writing
+this to help software engineers, including myself, to think about code maintainability to the same degree they might
+think about code correctness or performance, if not higher.</p>
+
+<h2>The Basics</h2>
+
+<p>Let&rsquo;s get the obvious software practices that happen to help code maintainability
+out of the way first. These should be familiar with anyone who&rsquo;s been coding for a while.</p>
+
+<h4>Don&rsquo;t Repeat Yourself</h4>
+
+<p>What do you do when you&rsquo;ve got a function duplicated 100 times over 100 different
+files, and you want to modify the behavior of that common code? Refactor the common code into one function somewhere,
+and have the code in those 100 files use that common code.</p>
+
+<p>This is important for maintenance so that if the behavior
+of the common code needs to be changed (and the interface is the same),
+it can be done in one single location, instead of once per location it is duplicated.</p>
+
+<p>This might seem too obvious to mention, but the convenience of copy paste seems to
+win quite often, since it&rsquo;s easier do than to refactor code, which might bring bugs.
+Copying and pasting code guarantees your own code won&rsquo;t affect anyone elses, but
+it causes maintenance headaches later on.</p>
+
+<p>Sometimes this isn&rsquo;t always a good thing, especially if the code refactoring involves
+metaprogramming or other language features that tend to make code less readable.</p>
+
+<h4>Eat Your Own Dog Food (Dogfooding)</h4>
+
+<p>If nobody has ever used your application before shipping it to customers, how can
+you be sure it&rsquo;s any good?</p>
+
+<p>Dogfooding is about using your own product whenever possible. If it&rsquo;s bad,
+hopefully the pain from using the product will be motivating enough to improve it.</p>
+
+<p>The term supposedly <a href="http://en.wikipedia.org/wiki/Eating_your_own_dog_food#Origin">originated in Microsoft</a>, and apparently they were trying to get the term changed to
+<a href="http://www.bizjournals.com/seattle/blog/techflash/2009/11/turning_dog_food_into_ice_cream_and_other_tidbits_from_microsofts_cio.html">icecreaming</a>.</p>
+
+<p>I&rsquo;ll be referring to it as dogfooding though, because that&rsquo;s what most people know it by,
+and it doesn&rsquo;t really make sense to dogfood icecream, because icecream is already delicious
+and is not dog food quality food, so it doesn&rsquo;t need to be dogfooded to be improved. Or in English,
+products that are already good (icecream) don&rsquo;t need to be improved.</p>
+
+<p>Dogfooding doesn&rsquo;t have to be limited to using something at the scale of products, though.
+Testing could be considered a form of dogfooding&hellip;</p>
+
+<h4>Write Unit Tests</h4>
+
+<p>How can you refactor and change code reliably if there are no checks in place to
+make sure the application is working as expected after the change?</p>
+
+<p>These are necessary to quickly catch errors in the business logic of your application.
+With dynamic languages, unit tests are also necessary to catch typos, missing method declarations,
+and type errors that would be caught in statically typed languages. By having a
+framework for quickly checking correctness, it&rsquo;ll be that much easier to reorganize your code, add
+features, fix bugs, and possibly splitting it into reusable libraries or services.</p>
+
+<p>Unit tests are really important in dynamic language code bases. Without
+a compiler to perform semantic analysis, the next safety net after unit tests are
+integration tests, and then it&rsquo;s your manual testers, then customers. Each step
+along the way is typically slower than the previous, with
+<a href="http://blogs.msdn.com/cfs-filesystemfile.ashx/__key/communityserver-blogs-components-weblogfiles/00-00-01-32-02-metablogapi/7317.image_5F00_0F65063B.png%20just%20ship%20it">having customers do your testing</a> generally much slower than running a unit test.</p>
+
+<h4>Document Your Code</h4>
+
+<p>Sometimes it&rsquo;s a lot easier to explain in words what your code does than
+it is to try to read the code itself, especially if your programming language is not
+particularly concise (more on this in part 3). A few comments here and there
+can greatly increase the understandability of your code.</p>
+
+<h4>Do Code Reviews and Design Reviews</h4>
+
+<p>So how do you go about figuring out what code needs to be better documented?</p>
+
+<p>Ever write a piece of software, come back to it later some time later,
+and have no idea how it works until you sit down and stare at it until your
+eyes bleed and you want to rewrite your entire code base from scratch? Me neither.
+But for those that this does happen to, it is probably time to dogfood your designs or your code to others.</p>
+
+<p>The writing courses I took in college made a point of having peer reviews for essays.
+Peer reviews exist because sometimes things that sound smart in your head do not
+read smart when written out on paper. Your peers can offer their own views
+on what you are writing that can strengthen your existing ideas. And sometimes,
+peer reviews are useful simply because you were too lazy to proof-read your essay
+on comparing book X about a topic only the professor cares about, to book Y about who knows what,
+mainly because you were busy trying to complete the three programming assignments from your three other professors.</p>
+
+<p>Code reviews were almost never part of the curriculum for any of my computer science
+classes, neither by peers nor the teaching staff. Code reviews by peers weren&rsquo;t allowed because they
+couldn&rsquo;t trust us not to cheat, and they couldn&rsquo;t trust us not to save solutions for future students during the next iteration of the course. Code reviews by teaching assistants or professors
+couldn&rsquo;t be done for everyone because of the numbers problem &mdash; it was too much work
+for a couple of people to review the code of thirty students while also coding
+automated testing systems for homework solutions, doing research,
+and preparing course material, exams, and lectures &mdash; so it was easier to just not
+do it for anyone. At least it was fair.</p>
+
+<p>Anyway, have someone else try to read your code. When you are programming, there
+is a significant amount of context that is in your short term memory that
+might not be obvious or apparent for someone else who didn&rsquo;t write the code.
+The process of coding is like storing info about how your code works in RAM,
+and for someone else reading it, they don&rsquo;t have the contents of your RAM &mdash; they have
+to reconstitute what was in your RAM into their own RAM by <a href="http://en.wikipedia.org/wiki/Lossy_data_conversion">lossily</a>
+interpreting it from your code. Good code results in equivalent RAM in both parties, and bad code is like trying to
+interpret a Picasso painting, where one person thinks it&rsquo;s a man&rsquo;s face looking to
+the side, and another thinks it&rsquo;s a woman&rsquo;s face looking towards the viewer, when it&rsquo;s really a picture of a plane.</p>
+
+<p>Okay, so it&rsquo;s not quite like that, but what I&rsquo;m trying to say is to dog-food the readability of your code, otherwise its going to be very hard for you to modify your code if you don&rsquo;t understand it.</p>
+
+<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Next Part: Service Oriented Architecture</em></a></p>
+</div>
+
+</article>
+
+	
+
+</div>
+			</div>
+			<footer id="footer" class="inner"><p>
+  Copyright &copy; 2016 - Daniel Trinh -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+</footer>
+			
+
+
+
+
+
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

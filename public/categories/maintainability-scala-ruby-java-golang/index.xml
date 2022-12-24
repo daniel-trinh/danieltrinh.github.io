@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>maintainability scala ruby java golang on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/maintainability-scala-ruby-java-golang/</link>
+    <description>Recent content in maintainability scala ruby java golang on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 26 Jan 2014 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/maintainability-scala-ruby-java-golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Maintaining a Large Code Base, Part 3: Programming Languages</title>
+      <link>http://danieltrinh.com/posts/2014-01-26-maintaining-a-large-code-base-part-3/</link>
+      <pubDate>Sun, 26 Jan 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-01-26-maintaining-a-large-code-base-part-3/</guid>
+      <description>Previous Part: Service Oriented Architecture
+If you are lucky enough to be able to choose the programming language for a new project, this section might provide some insight on how it might impact the future of your code base.
+Choose Your Programming Languages Wisely This article focuses only on the technical details of programming languages and their effects on maintainability. It won&amp;rsquo;t be covering topics such as a language&amp;rsquo;s popularity, tooling, or library support.</description>
+    </item>
+    
+  </channel>
+</rss>

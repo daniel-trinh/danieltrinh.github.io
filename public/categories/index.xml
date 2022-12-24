@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/</link>
+    <description>Recent content in Categories on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 12 Jul 2016 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>golang project</title>
+      <link>http://danieltrinh.com/categories/golang-project/</link>
+      <pubDate>Tue, 12 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/categories/golang-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>performance snippet</title>
+      <link>http://danieltrinh.com/categories/performance-snippet/</link>
+      <pubDate>Fri, 07 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/categories/performance-snippet/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>scala project</title>
+      <link>http://danieltrinh.com/categories/scala-project/</link>
+      <pubDate>Thu, 06 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/categories/scala-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>maintainability scala ruby java golang</title>
+      <link>http://danieltrinh.com/categories/maintainability-scala-ruby-java-golang/</link>
+      <pubDate>Sun, 26 Jan 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/categories/maintainability-scala-ruby-java-golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>maintainability</title>
+      <link>http://danieltrinh.com/categories/maintainability/</link>
+      <pubDate>Sat, 09 Nov 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/categories/maintainability/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

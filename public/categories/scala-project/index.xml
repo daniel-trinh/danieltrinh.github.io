@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>scala project on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/scala-project/</link>
+    <description>Recent content in scala project on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 06 Feb 2014 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/scala-project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Converting the OverClocked Remix RSS to a Twitter Feed</title>
+      <link>http://danieltrinh.com/posts/2014-02-06-converting-ocremixs-rss-to-a-twitter-feed/</link>
+      <pubDate>Thu, 06 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-06-converting-ocremixs-rss-to-a-twitter-feed/</guid>
+      <description>OverClocked Remix (OCRemix) is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.
+This post is about a server daemon project I wrote a year ago &amp;ndash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at @newOCRemixes on Twitter.</description>
+    </item>
+    
+    <item>
+      <title>Improving Scalariform, The Scala Source Formatter</title>
+      <link>http://danieltrinh.com/posts/2014-02-05-improving-scalariform/</link>
+      <pubDate>Wed, 05 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-05-improving-scalariform/</guid>
+      <description>Scalariform is a Scala source code formatter, originally written by Matt Russell (big thanks to him for writing it).
+It&amp;rsquo;s much easier to show you what this does than it is to try and explain it, so that&amp;rsquo;s what I&amp;rsquo;ll do.
+This is some poorly formatted code before running Scalariform:
+class Coffee { val sugarCubes = 20 val isCaffeinated = false def energyBoost = { if (caffeinated) 100 * sugarCubes else 0 } } After running Scalariform:</description>
+    </item>
+    
+  </channel>
+</rss>

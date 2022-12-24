@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: project | Daniel Trinh]]></title>
+  <link href="http://danieltrinh.com/blog/categories/project/atom.xml" rel="self"/>
+  <link href="http://danieltrinh.com/"/>
+  <updated>2016-07-19T12:50:47-07:00</updated>
+  <id>http://danieltrinh.com/</id>
+  <author>
+    <name><![CDATA[Daniel Trinh]]></name>
+    <email><![CDATA[daniel.s.trinh@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Filtering Duplicate Messages in Twitch Chat]]></title>
+    <link href="http://danieltrinh.com/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/"/>
+    <updated>2016-07-12T12:14:00-07:00</updated>
+    <id>http://danieltrinh.com/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat</id>
+    <content type="html"><![CDATA[<p>I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.</p>
+
+<p><a href="https://www.youtube.com/watch?v=i8sRO7_qvOY" title="Twitch Chat Filterer"><img src="http://i.imgur.com/m50Kii1.gif" alt="Twitch Chat Filterer" /></a></p>
+
+<p>The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on <a href="https://www.twitch.tv/">Twitch.tv</a>. It shows the filtering in action, in the middle of a burst of the <code>WutFace</code> spam, which you can see in the lower left of the above video.</p>
+
+<h2>Twitch.tv Overview</h2>
+
+<p>For the uninitiated, <a href="https://www.twitch.tv/">Twitch.tv</a> is a streaming video website that allows anyone to share live video with viewers over the internet, with twitch. The most popular use case by a wide margin for streaming players playing video games, although it is also sometimes used for sharing live music, where the video streamer might be playing an instrument (or instruments, if it&rsquo;s a band.</p>
+
+<p>Several thousand people can be watching the same video stream at the same time &mdash; it&rsquo;s not uncommon to see streams that have 100,000 simultaneous viewers. Since viewers who watch the same video stream are also put into the same chat room (there&rsquo;s no chat room splitting that happens automatically), the chat room messages can become incredibly difficult to parse.</p>
+
+<p>To (sort of) solve this problem, I wrote a simple CLI Twitch/IRC chat client that supports the ability to filter out duplicate messages within a sliding time window in realtime.</p>
+
+<h2>Implementation Details</h2>
+
+<p>Although this was built specifically for Twitch, it works with any chat that supports IRC as a protocol.</p>
+
+<p>The fully functional IRC client was written in Golang. The choice of Golang was purely out of my desire to learn the language. If I was to build something beyond for toy usage, I&rsquo;d probably write it as a Chrome extension, since native Twitch chat is in the browser, and it&rsquo;s where users are accustomed to chatting.</p>
+
+<p>I used <a href="https://github.com/gizak/termui">termui</a> for the UI. The usecase for termui is pretty niche &mdash; I&rsquo;d say it&rsquo;s useful for interfaces when a browser is out of the question, such as while SSHed onto a remote server. Unless performance is a problem or golang is absolutely necessary, <a href="https://github.com/yaronn/blessed-contrib">blessed-contrib</a> using JavaScript looks to be a better option for building CLI UIs. I&rsquo;d avoid building CLI UIs over browser based ones in general though &mdash; these frameworks for building CLI UIs is not like working with the DOM in the browser, and the kinds of UIs you can build using <code>termui</code> or <code>blessed-contrib</code> are limited in scope.</p>
+
+<p>There are the following widgets in this client:</p>
+
+<p>  1) Message Rate Monitor (Rate of messages over sliding window)</p>
+
+<p>  2) Message Stats Monitor (Min, Max, Avg messages over sliding window)</p>
+
+<p>  3) Duplicate Message Aggregator (List of messages sorted by number of occurrences over sliding window)</p>
+
+<p>The trickiest implementation detail was the duplicate message aggregator. It involved maintaining a sorted list of <code>(message, count)</code> pairs in realtime as messages arrived, and then decrementing / removing the message from the sorted list of (message, count) pairs, while also preventing concurrent updates from malforming the sorted list counts.</p>
+
+<p>Despite the complexity, Golang made this process quite easy. Concurrent updates were handled by serializing all updates through a queueing channel, and goroutines with <code>time.Sleep(duration)</code> were used to decrement counts.</p>
+
+<h2>Further Thoughts on Golang</h2>
+
+<p>Golang was a bit of a pain at times &mdash; the lack of generics in the language shows. I had to duplicate methods like <code>math.Max</code> for <code>int</code> types, since the builtin <code>math.Max</code> only works with <code>float64</code>. Also, the extra overhead of thinking about when to pass a pointer to a struct vs just the struct got in the way of thinking about the higher level functionality of the application.</p>
+
+<p>On the flip side, I spent almost no time learning Golang and was able to build something functional almost immediately. This hasn&rsquo;t been the case with other languages I&rsquo;ve learned, such as <code>TypeScript</code> or <code>Scala</code>. The expediency experienced with Golang comes from two things &mdash; firstly, the amazing tooling that has gone into the language ecosystem, and secondly, the sheer simplicity of the language and lack of language features.</p>
+
+<p>I wouldn&rsquo;t use Golang as my first language choice for prototyping a product, but for system level programming, network intensive applications, or performance critical backends, Golang seems like the perfect choice for development. I&rsquo;ll stick to Python, Scala, or TypeScript for prototyping products quickly, and use Golang when the extra performance is necessary.</p>
+
+<h2>Using the Client</h2>
+
+<p>The source code and instructions for usage of the project described earlier can be found at my github page <a href="https://github.com/daniel-trinh/twitch_chat_filter">here</a>. All that is needed is a golang installation and a Twitch account.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Converting the OverClocked Remix RSS to a Twitter Feed]]></title>
+    <link href="http://danieltrinh.com/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/"/>
+    <updated>2014-02-06T00:00:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed</id>
+    <content type="html"><![CDATA[<p><a href="http://ocremix.org">OverClocked Remix (OCRemix)</a> is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.</p>
+
+<p>This post is about a server daemon project I wrote a year ago &mdash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at <a href="https://twitter.com/newOCRemixes">@newOCRemixes</a> on Twitter. It&rsquo;s been running on Heroku 24/7 for the past year without any problems. Source code is <a href="http://github.com/daniel-trinh/ocremix">here</a>.</p>
+
+<p>The rest of this post goes into the design and development of this project, so if that doesn&rsquo;t sound interesting to you, now is a good time to hop off this train.</p>
+
+<h2>Motivation and design</h2>
+
+<p>I&rsquo;ve been listening to music off of OCRemix ever since 2002. The way I used
+to find new songs was to repeatedly visit their website, look for new songs,
+and then click through three or four links for every new song that was posted.</p>
+
+<p>I got tired of checking the website, only to end up finding out there were no new songs,
+or finding out there are ten new songs, and having to click 30 times to hear all of them.</p>
+
+<p>So I set out to figure out how to make it much, much easier to hear new songs and download
+them if I liked them.</p>
+
+<h4>Existing OCRemix Feeds</h4>
+
+<p>OCRemix has it&rsquo;s <a href="https://twitter.com/ocremix">own Twitter feed</a>, which they will use
+to post new remixes, but it&rsquo;s not exclusive to providing just new songs:</p>
+
+<p><img class="center" src="/images/ocremix/official_unrelated.png" width="500" height="450" title="&lsquo;Official OCRemix Twitter Feed&rsquo; &lsquo;Official OCRemix Twitter Feed picture&rsquo;" ></p>
+
+<p>Twitter happens to have this nice feature that they call <a href="https://dev.twitter.com/docs/cards">cards</a>. Cards are essentially a feature that detect certain types of URLs, and display information within the tweet that would only be accessible from visiting the URL. One of the
+supported card types are Youtube links, which will embed a Youtube video into a Tweet
+whenever a Youtube link is detected.</p>
+
+<p>Sometimes the links to new songs include a Youtube link to the remix for easy listening&hellip;</p>
+
+<p><img class="center" src="/images/ocremix/official_link.png" width="400" height="450" title="&lsquo;Official OCRemix Twitter Feed &mdash; Embedded Youtube&rsquo; &lsquo;Official OCRemix Twitter Feed picture, embedded Youtube&rsquo;" ></p>
+
+<p>and sometimes they don&rsquo;t:</p>
+
+<p><img class="center" src="/images/ocremix/official_no_link.png" width="400" height="450" title="&lsquo;Official OCRemix Twitter Feed &mdash; no Embedded Youtube&rsquo; &lsquo;Official OCRemix Twitter Feed picture, no Youtube&rsquo;" ></p>
+
+<p>They also have their own <a href="https://www.youtube.com/channel/UC8Wh7qpPGJm3K1eZ6DHjpKA">Youtube channel</a>
+where new songs are posted, but similarly to their Twitter feed, it is not exclusive to new songs.</p>
+
+<h4>My OCRemix Feed</h4>
+
+<p>Since I was already using Twitter as a news feed, I chose that as my target platform for
+receiving new song notifications. The following is a list of some of the things I wanted
+out of my Twitter feed system.</p>
+
+<blockquote><ul>
+<li><p>Only new songs should be posted &mdash; no reposts.</p></li>
+<li><p>Only songs should be posted &mdash; nothing else but new OCRemix songs.</p></li>
+<li><p>Every single song must contain a link to the Youtube song link.</p></li>
+<li><p>Show the video game, remixer, and composer the song is remixed from,
+ if it fits in 140 characters along with the Youtube link.</p></li>
+<li><p>This system should not require any input from me (automated).</p></li>
+<li><p>If something is broken, I should be notified of the breakage.</p></li>
+</ul>
+</blockquote>
+
+<p>Initially, I wanted to implement direct download links within each Tweet in order to simplify the process of downloading the mp3 for new songs. However, because ocremix.org is non-profit and receives advertising money from the main website to pay for bandwidth, I chose to just link to their site to download out of politeness.</p>
+
+<p>This is what the final version of my implementation looks like:</p>
+
+<p><img class="center" src="/images/ocremix/my_version.png" width="500" height="550" title="&lsquo;My Unofficial Twitter Feed&rsquo; &lsquo;My Unofficial Twitter Feed picture&rsquo;" ></p>
+
+<p>Assuming this information fits into the 140 character limit, each one of these song tweets is composed of the following:</p>
+
+<pre><code>songId     - Integer, official remix number (currently at 2827 at the time of writing). 
+title      - Song title, given to the song by the remixers.
+remixers   - The remix artists that created the remix.
+composers  - The original artists that created the original song.
+youtubeUrl - Link to the remix on Youtube.
+writeupUrl - Official OCRemix link with remix information and a download link.
+</code></pre>
+
+<h2>Programming Details</h2>
+
+<p>The actual project was implemented using Scala. The main libraries used were
+Dispatch for OAuth and talking with Twitter&rsquo;s API, and <a href="akka.io">Akka</a> for the periodic
+polling of the RSS feed.</p>
+
+<h4>Fitting Info into a Tweet</h4>
+
+<p>Trying to detect whether or not a Tweet will fit in 140 characters is tricky, especially
+if there are URLs in the Tweet. Twitter will automatically shorten URLs for you &mdash; the caveat
+is that the length of the shortened URL is what counts to the 140 character limit,
+and not the size of the original URL.</p>
+
+<p>So how do you figure out what the shortened URL size will be?
+Twitter happens to have a <a href="https://dev.twitter.com/docs/api/1.1/get/help/configuration">configuration API</a> that will tell you the current length
+of URLs (https links are one character longer than http). Since this number can
+change, it can&rsquo;t be hardcoded into the system. It&rsquo;s also not a number that is likely
+to change often.</p>
+
+<p>To take this varying URL length into consideration, the previously known shortened URL length is cached in memory for quick usage. I poll the configuration API
+every 24 hours to check for and update the URL length cache if necessary.</p>
+
+<p>This polling is done using Akka&rsquo;s scheduler:</p>
+
+<p><code>scala
+val twitterConfigUpdaterSchedule = MySystem().scheduler.schedule(
+  initialDelay = 0 seconds,
+  frequency    = 1 day,
+  receiver     = configUpdater,
+  // If I was writing this again, I probably wouldn't use a "doit" message
+  // for initiating an update.
+  message      = "doit"
+)
+</code></p>
+
+<p>Sometimes there&rsquo;s just too much information to include in 140 characters. Going back
+to my design goal of making it easy to hear new songs, the Youtube link is the
+most important thing to include in the Tweet.</p>
+
+<p>Here&rsquo;s a shortened version of the code that figures out what to put into a tweet:</p>
+
+<p>```scala
+// The youtube URL is in every possible one of these.
+lazy val v0 = Tweet(songId, title, remixers, composers, youtubeUrl, writeupUrl)
+lazy val v1 = Tweet(songId, title, remixers, youtubeUrl, writeupUrl)
+lazy val v2 = Tweet(songId, title, youtubeUrl, writeupUrl)
+lazy val v3 = Tweet(songId, title, youtubeUrl)
+lazy val v4 = Tweet(songId, youtubeUrl)</p>
+
+<p>// Start with the longest possible, then slowly go to the shortest.
+if (v0.isTweetable)
+  v0
+else if (v1.isTweetable)
+  v1
+else if (v2.isTweetable)
+  v2
+else if (v3.isTweetable)
+  v3
+else
+  v4
+```</p>
+
+<p>Unless Twitter plans on upping the shortened URL length to ~135 characters,
+or the ids start incrementing in several orders of magnitude per new remix,
+the smallest tweet content (<code>songId</code>,<code>youtubeUrl</code>) is good enough.</p>
+
+<p><em>There&rsquo;s a reason songId is included in all of the possibilities as well, more on that later.</em></p>
+
+<h4>Receiving Error Notifications</h4>
+
+<p>In order to make sure I received a notification whenever something breaks, every single
+method that could cause an error returns an <code>Either[_, String]</code>, where
+the <code>Right</code> case stores the successful result, and the <code>Left</code> case stores a string explaining what went wrong. Whenever a method is completed
+with the <code>Left</code> case, a direct message is sent to my own personal Twitter handle,
+with information about the failure.</p>
+
+<p>Here&rsquo;s what error messages look like when they reach my Twitter inbox:</p>
+
+<p><img class="center" src="/images/ocremix/error_messages.png" width="600" height="450" title="&lsquo;All in one place&rsquo; &lsquo;Error Messages in my Twitter Inbox&rsquo;" ></p>
+
+<p>Some examples of methods that might fail that I want to be
+alerted about if they do:</p>
+
+<p>```scala
+  // Sends a private message to someone on Twitter
+  def directMessage(user: TwitterHandle, message: String): Future[Either[String,String]]</p>
+
+<p>  // Tweets a new post
+  def statusesUpdate(tweet: Tweetable): Future[Either[String,String]]</p>
+
+<p>  // Retrieves the last few Tweets from a user&rsquo;s timeline
+  def userTimeline(</p>
+
+<pre><code>userId:     String,
+screenName: String,
+count:      Int
+</code></pre>
+
+<p>  ): Future[Either[String,String]]</p>
+
+<p>  // Retrieves configuration information about Twitter
+  def helpConfiguration: Future[Either[String, TwitterConfiguration]]
+```</p>
+
+<p>(In retrospect, just using Future[String] would have been enough, since it
+stores the exception information in case of failure&hellip; but keep in mind I <em>did</em> write this code as a novice just as I started learning Scala).</p>
+
+<h4>Polling and Parsing the RSS Feed</h4>
+
+<p>There&rsquo;s nothing particularly fancy about this part &mdash; it mostly consists of
+periodically polling <a href="http://ocremix.org/feeds/ten20/">OCRemix&rsquo;s RSS</a> and
+parsing out new songs to post on Twitter.</p>
+
+<p>Here&rsquo;s the code that schedules an RSS polling check every half hour:</p>
+
+<p><code>scala
+val rssPollerSchedule = MySystem().scheduler.schedule(
+  initialDelay = 0 seconds,
+  frequency    = 30 minutes,
+  receiver     = rssPoller,
+  message      = "doit"
+)
+</code></p>
+
+<p>In order to figure out whether or not a song is new, I send a request to Twitter&rsquo;s API to retrieve the <code>@newOCRemixes</code> Twitter Timeline, check the last Tweet&rsquo;s <code>songId</code>, and make sure any new song I post happens
+to have a songId greater than the one on the timeline.</p>
+
+<h4>Things to Improve</h4>
+
+<p>All of this <em>mostly</em> works. There are a few problems that were more complicated
+to solve than the time I wanted to spend on this.</p>
+
+<p>One of these problems happens to be that the RSS feed
+only stores the 10 latest new songs &mdash; if there&rsquo;s ever more than 10 songs posted
+within a 30 minute interval, any songs prior to the last 10 will not get posted.
+This has only happened once since I&rsquo;ve launched this project, but there&rsquo;s not
+much that can be done about it, short of asking for the OCRemix owners to not post
+so many songs at once, or up the number on their RSS feed.. or polling the website
+itself, and parsing the song URLs from raw HTML.</p>
+
+<p>Another problem (that hasn&rsquo;t actually been much trouble so far) is that the error
+message reporting is dependent on Twitter&rsquo;s API working. If there&rsquo;s a problem with
+the <code>directMessage</code> call to send me a message on errors, I won&rsquo;t be notified. I could have solved this by setting up a secondary notification system such as email, but errors happen so rarely that it wasn&rsquo;t worth the trouble.</p>
+
+<p>The third and last problem that I&rsquo;ve run into is actually not one I can do much about. The Twitter card feature for Youtube videos sometimes won&rsquo;t work &mdash; a few Tweets just won&rsquo;t embed a Youtube video into the post, even if there&rsquo;s a valid Youtube URL in the message.</p>
+
+<p>Having said that, I&rsquo;m pretty happy with the results &mdash; it&rsquo;s been working without a hitch for the last year since it&rsquo;s been deployed.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Improving Scalariform, The Scala Source Formatter]]></title>
+    <link href="http://danieltrinh.com/blog/2014/02/05/improving-scalariform/"/>
+    <updated>2014-02-05T23:26:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/02/05/improving-scalariform</id>
+    <content type="html"><![CDATA[<p>Scalariform is a Scala source code formatter, originally written by <a href="http://github.com/mdr">Matt Russell</a> (big thanks to him for writing it).</p>
+
+<p>It&rsquo;s much easier to show you what this does than it is to try and explain it, so that&rsquo;s what I&rsquo;ll do.</p>
+
+<p>This is some poorly formatted code before running Scalariform:</p>
+
+<p>```scala
+class Coffee {
+val sugarCubes = 20
+val isCaffeinated = false</p>
+
+<p>def energyBoost = {
+if (caffeinated)
+100 * sugarCubes
+else
+0
+}
+}
+```</p>
+
+<p>After running Scalariform:
+```scala
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false</p>
+
+<p>  def energyBoost = {</p>
+
+<pre><code>if (caffeinated) 
+  100 * sugarCubes
+else
+  0
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>Pretty cool, right? Unfortunately, there haven&rsquo;t been very many updates to the official version of this super awesome project lately,
+so I decided to fork the project and start improving upon it myself. Since I use Scala quite often, I&rsquo;ve got some pretty strong motivation to work on improving it.</p>
+
+<p>Here&rsquo;s a quick summary of what I&rsquo;ve added to Scalariform <em>so far</em>:</p>
+
+<p>```scala Previous Scalariform Formatting
+def showInput<a href="parent:%20Component%20=%20null,%0A%20%20message:%20Any,%0A%20%20title:%20String%20=%20uiString(" title="OptionPane.inputDialogTitle">A</a>,
+  messageType: Message.Value = Message.Question,
+  icon: Icon = EmptyIcon,
+  entries: Seq[A] = Nil,
+  initial: A
+): Option[A]</p>
+
+<p>case class Cake(
+  icingFlavor: Flavor = Vanilla,
+  cakeFlavor: Flavor = Chocolate,</p>
+
+<p>  candles: Int = 1,
+  layers: Int = 3,
+  iceCream: Boolean = False
+)</p>
+
+<p>o.manyArguments(abc = 0,
+  abcOne = 1,
+  abcTwo,
+  abcThree = 3,
+  abcFour = 4,
+  abcFive = 3
+)
+```</p>
+
+<p>```scala Scalariform Formatting with My Changes</p>
+
+<p>// Parameter names, types, and defaults are aligned into three separate columns
+def showInput<a href="parent:%20%20%20%20%20%20Component%20%20%20%20%20=%20null,%0A%20%20message:%20%20%20%20%20Any,%0A%20%20title:%20%20%20%20%20%20%20String%20%20%20%20%20%20%20%20=%20uiString(" title="OptionPane.inputDialogTitle">A</a>,
+  messageType: Message.Value = Message.Question,
+  icon:        Icon          = EmptyIcon,
+  entries:     Seq[A]        = Nil,
+  initial:     A
+): Option[A]</p>
+
+<p>// Two newlines will result in separate alignment groups
+case class Cake(
+  icingFlavor: Flavor = Vanilla,
+  cakeFlavor:  Flavor = Chocolate,</p>
+
+<p>  candles:  Int     = 1,
+  layers:   Int     = 3,
+  iceCream: Boolean = False
+)</p>
+
+<p>// Same feature working with method calls
+o.manyArguments(
+  abc    = 0,
+  abcOne = 1,
+  abcTwo,
+  abcThree = 3,
+  abcFour  = 4,
+  abcFive  = 3
+)
+```</p>
+
+<p>And here&rsquo;s how to use my version:</p>
+
+<p>```
+// Add this to &hellip;/project/plugins.sbt
+resolvers += &ldquo;Sonatype OSS Snapshots&rdquo; at &ldquo;<a href="https://oss.sonatype.org/content/repositories/snapshots">https://oss.sonatype.org/content/repositories/snapshots</a>&rdquo;</p>
+
+<p>addSbtPlugin(&ldquo;com.danieltrinh&rdquo; % &ldquo;sbt-scalariform&rdquo; % &ldquo;1.3.0-SNAPSHOT&rdquo;)
+```</p>
+
+<p>See the <a href="https://github.com/daniel-trinh/sbt-scalariform">plugin</a> for how to configure formatting options, and the <a href="https://github.com/daniel-trinh/scalariform">Scalariform readme</a>
+for available formatting options.</p>
+
+<p>Since this is an ongoing project, there will be more updates to come.</p>
+
+<!-- 
+The rest of this article goes into great detail about my motivation to work on Scalariform,
+the importance of auto-formatters in general, and some of the design dilemmas of working on Scalariform.
+
+Before I get into what I've improved, I'll go over some reasons why Scalariform
+is important.
+
+## The Importance of Auto-Formatting
+[Many](https://code.google.com/p/google-styleguide/ "Google's style guides for various languages") [companies](http://twitter.github.io/effectivescala/ "Twitter's style guide for Scala") [have](https://github.com/styleguide/ruby "Github's style guide for Ruby") coding style guidelines for a reason. [I wrote about this](/blog/2014/01/26/maintaining-a-large-code-base-part-3/) in great detail in my article about programming languages and code bases. My general conclusion is that having many ways of visualizing and formatting source code
+is not a good thing -- the more ways to format the code, the more ways a reader of the
+code will have to learn to read the code to understand it. 
+
+The following code example is perfectly valid scala code... but it's not at all readable.
+
+```scala
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false
+
+  def energyBoost = {
+    if (caffeinated) 
+      100 * sugarCubes
+    else
+      0
+  }
+}
+```
+
+The output from running Scalariform for this result is the same as the previous example:
+```
+class Coffee {
+  val sugarCubes = 20
+  val isCaffeinated = false
+
+  def energyBoost = {
+    if (caffeinated) 
+      100 * sugarCubes
+    else
+      0
+  }
+}
+```
+
+Having something that will take care of the formatting for me is great -- spending time thinking about formatting, manually formatting code, and spending time
+on code reviews about formatting is not a very productive use of time when there are actual business product related problems to solve, and especially since it's a problem that can be solved forever by using an auto-formatter along the lines of Scalariform or gofmt.
+
+#### Formatting Ubiquity
+
+Having an auto formatter to enforce a consistent style in a code base is important, because
+once the maintainers of that code base have become accustomed to that style, they won't have to "readjust" their eyes to get used to. If the auto formatter for a programming language is nearly ubiquitous amongst those who use it, such as with Golang's [gofmt](http://research.swtch.com/gofmt), then even better -- users across the language will be able to read anyone's elses code that also uses the formatter.
+
+While auto formatters such as Scalariform can't check everything that is in a styleguide
+(it won't automatically reformat your imperative, state-mutating code into a functional style automatically), it will take care of the visual aesthetics formatting problem for you.
+
+
+#### Scalariform Dillemas 
+Scalariform has many configuration options, which goes against the design philosophy
+of having one canonical representation so that everyone can quickly get accustomed to the same formatting. It also happens to significantly complicate the actual Scalariform formatting code. With Scalariform, there is one
+global shared state -- the output source code. More configuration options means
+more potentials to clash, and more special cases.
+
+Unfortunately, Scala programmers come from many different backgrounds, and there isn't
+a global consensus on what formatting styles programmers prefer. 
+
+When I was gathering feedback for new Scalariform features, I posted an informal poll on Reddit, to gather feedback about 3 different formatting styles:
+
+```scala Style One
+class definition(
+  a: Int = 1
+  bb: String = ""
+  ccc: Boolean = true
+)
+```
+
+```scala Style Two
+class definition(
+  a:   Int     = 1
+  bb:  String  = ""
+  ccc: Boolean = true
+)
+```
+
+```scala Style Three
+class definition(
+    a: Int     = 1
+   bb: String  = ""
+  ccc: Boolean = true
+)
+```
+
+I was half-expecting everyone to say they prefered `Style Two`, but of course that wasn't the case. `Style One` was the most popular choice. `Style Two` was the second most popular,
+and `Style Three` was by far the least -- not a single person said they preferred this one (although a few said they didn't mind any of the options).
+
+I also concluded that a strong contributing factor on which style people prefer is
+strongly related to just what they're used to reading -- Golang's gofmt happens to format
+code in something similar to `Style Two`, and happens to be used by roughly 70% of all golang projects. If this really is the main factor, then it doesn't really make sense
+to  -->
+
+]]></content>
+  </entry>
+  
+</feed>

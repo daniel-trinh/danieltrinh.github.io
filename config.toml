@@ -1,0 +1,30 @@
+baseURL = 'http://danieltrinh.com'
+languageCode = 'en-us'
+title = 'Daniel Trinh'
+theme = 'm10c'
+
+[params]
+  author = "Daniel Trinh"
+  description = "Generalist software engineer with an emphasis on backend."
+  menu_item_separator = " - "
+    [[params.social]]
+    icon = "github"
+    name = "My Github"
+    url = "https://github.com/daniel-trinh"
+
+    [[params.social]]
+    icon = "linkedin"
+    name = "My Linkedin"
+    url = "linkedin.com/in/daniel-trinh-31422926"
+
+    [[params.social]]
+    icon = "resume"
+    name = "My Resume"
+    url = "/downloads/resume.pdf"
+
+    [params.style]
+    darkestColor = "#315659"
+    darkColor = "#212121"
+    lightColor = "#d6d6d6"
+    lightestColor = "#d3d3d3"
+    primaryColor = "#ffffff"

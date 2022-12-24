@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>maintainability on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/maintainability/</link>
+    <description>Recent content in maintainability on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 09 Nov 2013 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/maintainability/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Maintaining a Large Code Base, Part 2: Service Oriented Architecture</title>
+      <link>http://danieltrinh.com/posts/2013-11-09-maintaining-a-large-code-base-part-2/</link>
+      <pubDate>Sat, 09 Nov 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2013-11-09-maintaining-a-large-code-base-part-2/</guid>
+      <description>Previous Part: Backstory and the Basics
+How do you deal with a code base that&amp;rsquo;s too large to handle? Try making it smaller &amp;ndash; split it up into multiple smaller, separate code bases that communicate with each other through well defined interfaces. When done with services at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</description>
+    </item>
+    
+    <item>
+      <title>Maintaining a Large Code Base, Part 1: Backstory and the Basics</title>
+      <link>http://danieltrinh.com/posts/2013-11-05-maintaining-a-large-code-base-part-1/</link>
+      <pubDate>Tue, 05 Nov 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2013-11-05-maintaining-a-large-code-base-part-1/</guid>
+      <description>What&amp;rsquo;s one of the most important quality of good software?
+It&amp;rsquo;s maintainable.
+It doesn&amp;rsquo;t matter how well optimized the code is if the code base isn&amp;rsquo;t maintainable. If the code can&amp;rsquo;t be refactored and improved, the software project is stuck in time &amp;ndash; new features are difficult to add, performance can&amp;rsquo;t be improved, and bugs will be harder to pinpoint. Upfront planning and design can greatly reduce the amount of code rewriting that is necessary, but its near impossible to get everything right the first time code is written in a significantly sized code base.</description>
+    </item>
+    
+  </channel>
+</rss>

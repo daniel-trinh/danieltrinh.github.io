@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: maintainability | Daniel Trinh]]></title>
+  <link href="http://danieltrinh.com/blog/categories/maintainability/atom.xml" rel="self"/>
+  <link href="http://danieltrinh.com/"/>
+  <updated>2016-07-19T12:50:47-07:00</updated>
+  <id>http://danieltrinh.com/</id>
+  <author>
+    <name><![CDATA[Daniel Trinh]]></name>
+    <email><![CDATA[daniel.s.trinh@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Maintaining a Large Code Base, Part 3: Programming Languages]]></title>
+    <link href="http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3/"/>
+    <updated>2014-01-26T20:58:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3</id>
+    <content type="html"><![CDATA[<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Previous Part: Service Oriented Architecture</em></a></p>
+
+<p>If you are lucky enough to be able to choose the programming language for a new project,
+this section might provide some insight on how it might impact the future of your code base.</p>
+
+<h2>Choose Your Programming Languages Wisely</h2>
+
+<p>This article focuses only on the technical details of programming languages and their
+effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling,
+or library support. While those things are undoubtedly important, those things aren&rsquo;t necessarily intrinsic to a programming language, and they tend to change much more often than the topics I&rsquo;ll
+be discussing here.</p>
+
+<p>When I first started writing this section, it was titled &ldquo;Use a statically typed language.&rdquo;
+I then thought of Java with all of its verbosity, realized it&rsquo;s not quite that simple, and it would
+make more sense to just outline how certain language features impact code maintainability,
+and let you conclude yourself on what kind of language to pursue.</p>
+
+<p>Having said that, personally I prefer languages with static type systems over dynamic ones from a pure maintainability point of view, except perhaps in the case of languages like Java.</p>
+
+<p>Before I get started, let&rsquo;s define a few things.</p>
+
+<blockquote><p>Compiled language &ndash; purely statically typed, type annotations are required,
+or must be able to be inferred at compile time
+(Scala, Java, Haskell, C++)</p>
+
+<p>Dynamic language &ndash; interpreted, no type annotations or they are optional
+(Clojure, Typed Clojure, Ruby, Groovy, Groovy 2.0, Python, JavaScript)</p>
+
+<p>Statically typed language &ndash; same as compiled language</p></blockquote>
+
+<p>Typed Clojure and Groovy 2.0 both have optional type annotations for partial compile time
+type checking and performance improvements, but I am grouping them in the dynamic
+language group because they are optional, and they do not provide the same static
+analysis guarantees as pure statically typed languages, and hence are not as helpful in
+terms of maintainability (more on static analysis later). They are certainly easier
+to pick up than a full blown compiled languages with generics, though (more on this in the language complexity section).</p>
+
+<h3>Conciseness</h3>
+
+<p>By conciseness I mean this: How much code is necessary to express a particular
+piece of business logic? How much of that code is intrinsic to
+describing that logic, and how much of it is necessary because of limitations
+in the language? Conciseness is important for maintainability because it means there&rsquo;s less
+code to read, and less code to refactor when it&rsquo;s necessary to do so.</p>
+
+<p>Here&rsquo;s an example comparing a basic class in Java with the same functionality (both in behavior and runtime performance) implemented in Scala that demonstrates what I mean:</p>
+
+<p>```java Java class
+public class Coffee {</p>
+
+<pre><code>private final boolean caffeinated;
+private final int sugarCubes;
+
+public Coffee(boolean caffeinated, int sugarCubes) {
+    this.caffeinated = caffeinated;
+    this.sugarCubes = sugarCubes;
+}
+public boolean getCaffeinated() {
+    return caffeinated;
+}
+public int getSugarCubes() {
+    return sugarCubes;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>scala Scala class
+class Coffee(val caffeinated: Boolean, val sugarCubes: Int)
+</code></p>
+
+<p>For comparison&rsquo;s sake, here&rsquo;s a Ruby example of something similar to the two examples
+above:</p>
+
+<p>```ruby Ruby
+class Coffee
+  attr_reader :caffeinated, :sugar_cubes</p>
+
+<p>  def initialize(caffeinated, sugar_cubes)</p>
+
+<pre><code>@caffeinated = caffeinated
+@sugar_cubes = sugar_cubes
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Dynamic languages tend to win in terms of conciseness, since there&rsquo;s no extra
+code necessary for specifying type information, although this isn&rsquo;t always the case.</p>
+
+<h3>Language Complexity</h3>
+
+<p>It doesn&rsquo;t really matter if code takes fewer lines of code if it&rsquo;s impossible to figure out what it does. Unlike conciseness, language complexity isn&rsquo;t quite as clear cut to define. So
+instead of trying to define it in an abstract sense, I&rsquo;ll just give you some examples.</p>
+
+<p>Scala is quite conciseness, but the type system is anything but simple.
+The type system is so involved that it is Turing Complete &mdash; it is so complex that
+it is possible to write algorithms such as <a href="http://apocalisp.wordpress.com/2010/06/08/type-level-programming-in-scala/">infinite loops</a> that only utilize the type system features; no for loops, while loops,
+or function recursion. The type system is so complex to the point that a simpler programming
+language to possibly become the next Scala is <a href="http://www.infoq.com/presentations/data-types-issues">in the works</a> by Scala&rsquo;s original designer.</p>
+
+<p>Here&rsquo;s one of the crazier function signatures in Scala, from the Scalaz library:</p>
+
+<p><code>scala
+implicit def CokleisliMAB[M, A, B](k: Cokleisli[M[_][_], A, B]): MAB[Cokleisli[M[_][_], A, B][A, B], A, B]
+</code></p>
+
+<p>It probably doesn&rsquo;t seem fair to show that signature for those unfamiliar with Scala, but I assure
+you, that kind of function signature is still daunting for seasoned Scala developers.</p>
+
+<p>Although without those complicated type features, code like this might not be possible in Scala:</p>
+
+<p>```scala
+// Just Ints
+List(1, 2, 3, 4, 5) map { x => x * x } sum
+// => Int = 55</p>
+
+<p>// Ints and Doubles
+Array(1, 2 ,3.0, 4.5, 5.55) map { x => x * x } sum
+// => Double = 65.0525</p>
+
+<p>// Just Strings
+Vector(&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;e&rdquo;) map { x => x * 2 }
+// =>  Vector[String] = Vector(aa, bb, cc, dd, ee)
+```</p>
+
+<p>The implementation of the <code>map</code> function in Scala is far from simple, though. Writing
+this sort of code is not something the average Scala developer can accomplish. In fact,
+I&rsquo;m not sure there&rsquo;s more than a handful of people who could write a collections library
+as powerful as the one in Scala &mdash; it took the creator of the language and a few helpers an entire year to get it to the point it is currently at.</p>
+
+<p>Ruby, on the other hand, has an incredibly simple implementation of the <code>map</code> method.
+It&rsquo;s just a few lines of code, within the <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a> module. To use it, all that is necessary is an implementation of the <code>each</code> function on the inheriting member, and that&rsquo;s it. Because of duck typing, there isn&rsquo;t much else that&rsquo;s needed.</p>
+
+<p>In contrast to both Scala and Ruby, <a href="http://golang.org/">Golang</a> is far from being concise, but it is well reported for being relatively quick to pick up and start coding, likely in large part due to its incredibly minimal type system. It has no form of generics, meaning it is impossible to write type safe collection methods that work with all types using just the language. Golang is packaged with it&rsquo;s own
+basic set of generic data structures (slices, maps, channels), but if you want to write
+your own priority queue that works with all types, you are out of luck. This means
+the language is easier to learn than a language like Scala, but also results in more code and code duplication.</p>
+
+<h3>Syntactic Flexibility</h3>
+
+<p>There&rsquo;s a reason why <a href="https://code.google.com/p/google-styleguide/" title="Google's style guides for various languages">Google</a>,
+<a href="http://twitter.github.io/effectivescala/" title="Twitter's style guide for Scala">Twitter</a>,
+and <a href="https://github.com/styleguide/ruby" title="Github's style guide for Ruby">Github</a> have coding style guidelines.</p>
+
+<p>Can you imagine if each letter of the English alphabet was in a different Unicode character?
+Here&rsquo;s some English that has had each letter of the alphabet mapped to a different character
+in Unicode:</p>
+
+<pre><code>Original text:
+I am Heavy Weapons Guy. And this... [grips Sasha] is my weapon. She weighs 150
+kilograms and fires $200 custom-tooled cartridges at 10,000 rounds per minute. 
+[leans in] It cost $400,000 to fire this weapon...for 12 seconds.
+
+Altered text:
+"ᚋ ᣀᣌ ᚊᣄᣀᨇᨊ ᚙᣄᣀᣏᣎᣍᣒ ᚉᨐᨊ. ᚃᣍᣃ ᣓᣇᣈᣒ... [ᣆᣑᣈᣏᣒ ᚕᣀᣒᣇᣀ] ᣈᣒ ᣌᨊ ᨈᣄᣀᣏᣎᣍ. ᚕᣇᣄ ᨈᣄᣈᣆᣇᣒ 150
+ᣊᣈᣋᣎᣆᣑᣀᣌᣒ ᣀᣍᣃ ᣅᣈᣑᣄᣒ $200 ᣂᨐᣒᣓᣎᣌ-ᣓᣎᣎᣋᣄᣃ ᣂᣀᣑᣓᣑᣈᣃᣆᣄᣒ ᣀᣓ 10,000 ᣑᣎᨐᣍᣃᣒ ᣏᣄᣑ ᣌᣈᣍᨐᣓᣄ. 
+[ᣋᣄᣀᣍᣒ ᣈᣍ] ᚋᣓ ᣂᣎᣒᣓ $400,000 ᣓᣎ ᣅᣈᣑᣄ ᣓᣇᣈᣒ ᨈᣄᣀᣏᣎᣍ...ᣅᣎᣑ 12 ᣒᣄᣂᣎᣍᣃᣒ.
+
+Code for converting: https://gist.github.com/daniel-trinh/2b6d4b9c38e713148db4
+</code></pre>
+
+<p>While that is a bit of a contrived example, it&rsquo;s a taste of what programmers have to deal with
+in programming languages that have flexible syntax. Out of the times I&rsquo;ve talked about the new languages I&rsquo;ve been exploring (Clojure, Go, Scala), syntax is almost always the first thing my coworkers notice
+and talk about &mdash; this is because understanding syntax is the first step to being able to read the language. If it&rsquo;s different from what they&rsquo;re familiar with, it&rsquo;s just another barrier to learning it.</p>
+
+<p>Languages that are designed for building domain-specific languages tend to have more
+syntactic flexibility and lexical complexity. Languages like Ruby and Scala were designed
+in mind of supporting DSLs. Unfortunately, flexible syntax makes it harder for users to read code. For every syntax permutation that people use in a language, everyone who reads the language is going
+to have to be able to read those permutations. In terms of language design, I don&rsquo;t hear this topic talked about as often as some of the other topics in this article, but nevertheless I still see it as worth discussing.</p>
+
+<p>Here are some real examples demonstrating the flexibility of Ruby&rsquo;s and Scala&rsquo;s syntax.</p>
+
+<p>```ruby Ruby</p>
+
+<h1>( ͡° ͜ʖ ͡°) do..end vs curly braces</h1>
+
+<h1>Curly Braces</h1>
+
+<p>[1,2,3,4,5].map { |x| x * x }</p>
+
+<h1>do..end</h1>
+
+<p>[1,2,3,4,5].map do |x|
+  x * x
+end</p>
+
+<h1>( ͡° ͜ʖ ͡°) Optional periods</h1>
+
+<h1>Method calls without periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x } reduce (:+)</p>
+
+<h1>Method calls with periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x }.reduce (:+)</p>
+
+<h1>( ͡° ͜ʖ ͡°) Different ways of defining functions</h1>
+
+<h1>Method method</h1>
+
+<p>def square(x)
+ x * x
+end</p>
+
+<h1>Lambda method</h1>
+
+<p>square = lambda { |n| n * n }</p>
+
+<h1>Proc method</h1>
+
+<p>square = Proc.new { |x| x * x }</p>
+
+<h1>( ͡° ͜ʖ ͡°) Flexible method names</h1>
+
+<h1>Non Alpha-numeric method names</h1>
+
+<p>def +=(new_value)
+  @value = @value + new_value
+end
+```</p>
+
+<p>```scala Scala</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Curly braces vs parenthesis </em>/</p>
+
+<p>// Curly Braces
+List(1,2,3,4,5,6).map { x => x * x }</p>
+
+<p>// Parenthesis
+List(1,2,3,4,5,6).map( x => x * x )</p>
+
+<p>// Unnecessary Curly Braces .. and Parenthesis
+List(1,2,3,4,5,6).map(
+  {</p>
+
+<pre><code>{
+  ( { x =&gt; x * x } )
+}
+</code></pre>
+
+<p>  }
+)</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Optional periods </em>/</p>
+
+<p>// Method calls without periods
+List(1,2,3,4,5) map ( x => x * x ) sum</p>
+
+<p>// Method calls with periods
+List(1,2,3,4,5).map( x => x * x ) sum</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Different ways of defining &ldquo;functions&rdquo; </em>/</p>
+
+<p>// Method
+def square(number: Int): Int = number * number</p>
+
+<p>// Function
+val square: Int => Int = { x => x * x }</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible parameter newline formatting </em>/</p>
+
+<p>// One line
+def manyParams(a: Int, b: Int, c: Int): Int</p>
+
+<p>// Several lines
+def manyParams(
+  a: Int,
+  b: Int,
+  c: Int
+): Int</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible naming </em>/</p>
+
+<p>// Non Alpha-numeric method names
+def +=<a href="newValue:%20T">T</a>: List[T] = {
+  newValue :: this.list
+}</p>
+
+<p>// Unicode method names
+def <code>(╯°□°）╯︵ ┻━┻</code>: Unit = {
+  sys.exit(1)
+}
+```</p>
+
+<p>And for comparison&rsquo;s sake, here&rsquo;s some Golang:</p>
+
+<p>```go Golang
+// ( ͡° ͜ʖ ͡°) Curly braces or parenthesis, no mix and matching
+func main() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) No optional periods
+func (v *Vertex) Abs() float64 {</p>
+
+<pre><code>return math.Sqrt(v.X*v.X + v.Y*v.Y)
+</code></pre>
+
+<p>}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) Unicode naming, but no &ldquo;+=&rdquo; stuff
+func 世界() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}
+```</p>
+
+<p>Those examples are just the tip of the iceberg, but they should give you a good idea
+of the kinds of syntax quirks I&rsquo;m talking about.</p>
+
+<p>Personally, I&rsquo;m not a fan of the Golang syntax, but there is something to be said about
+it&rsquo;s uniformity &mdash; once I&rsquo;ve learned how to read one person&rsquo;s Golang code, I can read pretty much all Golang code. This isn&rsquo;t necessarily true of Ruby or Scala.</p>
+
+<p>In some cases, newer languages have relied on the syntax of previously famous languages
+to gain popularity &mdash; Java&rsquo;s syntax similarity to C++ was no accident, it was an intentional
+design decision by James Gosling to lure programmers away from their familiar C++ homes. JavaScript
+<a href="http://en.wikipedia.org/wiki/ECMAScript#History">wasn&rsquo;t always named JavaScript</a>, but Brendan Eich
+decided it would help with gaining popularity. The syntax is also reminiscent of Java &mdash; it uses
+curly braces for scopes as well was semicolons for terminating sequences.</p>
+
+<p>The bottom line is that programmers don&rsquo;t want to learn a million different ways of reading
+the same code. If you&rsquo;re using a language with an auto formatter such as <a href="https://www.github.com/mdr/scalariform">Scala</a> or <a href="http://golang.org/cmd/gofmt/">Golang</a>, you&rsquo;re probably in the best boat &mdash; these formatters will format your code for you, enforcing a consistent style without having to spend time and energy trying to manually modify your code to be more readable (no more time wasted on syntax during code reviews). Ruby doesn&rsquo;t have a full fledged auto formatter, but it does have <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for telling you when your code is breaking style conventions.</p>
+
+<h3>Static Analysis</h3>
+
+<p>If there&rsquo;s anything that kills the maintainability of dynamic languages, it&rsquo;s the
+lack of type safety. I&rsquo;ve used Ruby to death, and while I love using it for small applications
+or building prototypes, it&rsquo;s not something I would choose if I had to work on a project
+with more than a few engineers or one that was more than a few thousand lines of code (or one that demanded performance, but that&rsquo;s another story).</p>
+
+<p>While I was working at RightScale, we had a massive 900,000 SLOC repository that contained way more
+business logic than it should have. The code base was a nightmare to maintain, and it had been that way for years. This was partially from the lack of time given to fix the problem, partially from having fifty engineers modifying the same code base, but also partly due to the nature of Ruby itself.</p>
+
+<p>At one point, we really needed to start deprecating old code to get a sense of what was still
+in use and what wasn&rsquo;t. In order to do this, one of our software architects proposed this solution:
+add a snippet (that I&rsquo;ll reference as) <code>dead_code</code> to any file that was thought to
+no longer be in use. The method <code>dead_code</code> was a monkey patch on the <code>Object</code> namespace that
+would log / email / sound the alarms whenever the code was utilized at runtime (since everything
+is an object in Ruby due to its Smalltalk influences, this works &mdash; don&rsquo;t try this in other languages).
+The idea was that if we ever got production error logs from the <code>dead_code</code> snippet, it meant that
+the piece of code we thought we could remove was in fact not removable.</p>
+
+<p>In another case, our infrastructure team was prototyping an idea of a &ldquo;code fence&rdquo;, which
+would log / email / sound the alarms whenever a set of files tagged with a certain method was called at runtime (in production). I&rsquo;ll reference this method as <code>code_fence(some_fence_group)</code>. We needed this in order to extract business logics into separate services for SOA services</p>
+
+<p>And here&rsquo;s what drives me crazy about the two solutions I outlined above &mdash; neither of those slow iterating approaches would have been necessary in a strongly typed static programming language. While they were clever and much easier than adding unit tests to every piece of code we could find after years of neglecting writing unit tests, it wouldn&rsquo;t have been such a problem if we had used a compiled language (we may have never even had enough of a product to get to this point if we used a compiled language, but let&rsquo;s leave that discussion for another time).</p>
+
+<p>Here is how the <code>dead_code</code> situation would have been solved in a strongly typed static programming language:</p>
+
+<pre><code>1. Remove the file or code you want to check from the repo, and compile.
+2. If there are any compile errors, it's being used. Stop using it. If it isn't, you're good.
+
+1a. Alternatively, use your IDE to tell you if its used anywhere.
+2a. If it is, stop using it. If it isn't, remove it.
+</code></pre>
+
+<p>That&rsquo;s all there is to it&hellip; unless your code to remove is API code that is called from a separate service, such as a Rails controller for a RESTful HTTP API. Then some logging is required in the API code layer, but at least in this case it&rsquo;s only the API code that needs logging, and not every possible file in your entire code base that you want to get rid of.</p>
+
+<p>For the <code>code_fence(some_fence_group)</code> situation, solving this is even easier than with the <code>dead_code</code>
+case:</p>
+
+<pre><code>1. Remove the set of code you want refactored into a separate service or library repository.
+2. Compile your newly divided two sets of code. 
+3. If it compiles, you're good. If it doesn't, fix the interfaces and GOTO #2.
+</code></pre>
+
+<p>You might be thinking at this point, &ldquo;dude.. unit tests? WTF!?&rdquo;, but I offer you this counter point: static analysis in a compiled language is tantamount to a proof of correctness in terms of interfaces. Unit tests are not proofs, they do not guarantee your code will work for every possible permutation. You literally get interface checking for free by just using a compiled language &mdash; in a language such as Ruby, to merely get a poor mans version of the same test coverage, you&rsquo;d have to write a unit test for every single new method written to get the level of fine grained error reporting that a compiler would give you.</p>
+
+<p>To drive my point home, that 900,000 SLOC Ruby application I mentioned was a Rails 2.3 application, running on a version of Ruby 1.8.7. Rails 2.3 was released in <em>2009</em>. It&rsquo;s still running on Rails 2.3 and Ruby 1.8.7, and it&rsquo;s <em>2014</em>. Ruby is up to version 2.1, and Rails is up to 4.0.2 as of me writing this. To be fair, some of the reasons for this is not purely related to the language, but it certainly would have helped with upgrading libraries and Ruby versions if the language was a compiled one.</p>
+
+<p>I should note that there are a few exceptions to this rule in the land of static typing, most notably
+pointers in C / C++ and other low level languages, and in Scala there is the <a href="http://www.scala-lang.org/api/current/index.html#scala.Dynamic">dynamic</a> feature. The important thing here is that these are exceptions, and typical code in these languages will find errors more often than not.</p>
+
+<h3>Compile Times and Unit Test Iteration Times</h3>
+
+<p>Slow compile times and slow unit tests slow down code iteration. Dynamic languages
+don&rsquo;t have a compile step, but they are not immune to this issue as they do not
+have a compile time static type checker, lexer, or parser to find these bugs. Unit tests are vital to fill in this gap&hellip; and they can be slow.</p>
+
+<p>That 900,000 line Ruby application I mentioned earlier took <em>five</em> minutes to run a single unit test, mostly due to having to load and initialize way too many gems and libraries. Needless to say, it was impossible to iterate quickly. Small bugs such as interface errors between <a href="http://www.ruby-doc.org/core-2.1.0/Symbol.html">strings and symbols</a> became more troublesome to debug than they should have been &mdash; for every mismatched <code>def .. end</code>, typo, type mismatch, or invalid argument bug I had in my code, it added five minutes to the development time of what I was working on. Unlike with static typing, dynamic languages will typically only find one of these bugs at a time due to their interpreted &ldquo;run one line at a time&rdquo; nature. If it was up to me, fixing the time to run unit tests would have been more important than anything else (except for production bugs that needed fixing).</p>
+
+<p>Conversely, on the other side of the language typing fence, I&rsquo;ve heard of 45 minute C++ build times &mdash; I can&rsquo;t possibly imagine trying to modify a code base that takes that long to compile. Luckily, I don&rsquo;t think it gets worse than C++, and most statically typed languages have much better compilation times than C++.</p>
+
+<p>Languages like Java, Scala or Golang don&rsquo;t quite have the compile time problem to the extent C++ does.
+They all have incremental compilers, which will only recompile code that has been changed
+(and any code that was using the changed code). Golang&rsquo;s compiler is likely one of the
+fastest for a statically typed language, and Scala is bordering on being as slow as C++
+without incremental compilation. One caveat with the JVM &mdash; it takes time to &ldquo;warm up&rdquo;;
+anything that requires restarting the JVM is going to add several seconds to the build process.</p>
+
+<p>If you haven&rsquo;t seen it, <a href="http://vimeo.com/36579366">Bret Victor&rsquo;s talk</a> makes the case for immediate feedback in much greater detail than I can in this article. Let&rsquo;s just say if it took a musician 5 minutes to hear a note once it&rsquo;s been played, there would be much fewer musicians in the world.</p>
+
+<h3>Conclusion and Next Up</h3>
+
+<p>It used to be the case that it was common knowledge that statically typed languages were much more verbose than dynamically typed languages were. This hasn&rsquo;t always been true &mdash; concise compiled languages such as Haskell and ML have been around for a while now &mdash; but concise, strongly and statically typed languages such as Scala are only now starting to gain traction in the industry.</p>
+
+<p>So now our current options now seem to be these:</p>
+
+<blockquote><p>Simple to learn, concise languages, but terrible for long term large scale
+   application maintainability due to the lack of compile time static analysis
+   (Ruby, Python, JavaScript)</p>
+
+<p>Simple to learn, verbose languages with okay long term maintainability, but might
+be a pain to refactor because of code duplication
+   (Go, Java 7 and lower)</p>
+
+<p>Difficult to learn, but concise languages with good long term maintainability&hellip;
+as long as you can figure out what your code is doing.
+   (Scala, Haskell)</p></blockquote>
+
+<p>It remains to be seen if it&rsquo;s possible for a language to have all three qualities &mdash; simple to learn, concise, and good for long term maintainability.</p>
+
+<p>The next article in this series is still related to programming languages, but it&rsquo;s important enough
+to warrant it&rsquo;s own article.</p>
+
+<p><em>Coming Next: Limiting Shared Mutable State, Or Why You Should Learn Functional Programming</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Maintaining a Large Code Base, Part 2: Service Oriented Architecture]]></title>
+    <link href="http://danieltrinh.com/blog/2013/11/09/maintaining-a-large-code-base-part-2/"/>
+    <updated>2013-11-09T11:07:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2013/11/09/maintaining-a-large-code-base-part-2</id>
+    <content type="html"><![CDATA[<p><a href="/blog/2013/11/05/maintaining-a-large-code-base-part-1/"><em>Previous Part: Backstory and the Basics</em></a></p>
+
+<p>How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &mdash;
+split it up into multiple smaller, separate code bases that communicate with
+each other through well defined interfaces. When done with services
+at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</p>
+
+<h2>Service Oriented Architecture, AKA Don&rsquo;t Repeat Yourself for Servers</h2>
+
+<p>Twitter, Netflix, and Amazon all started out with monolithic, tightly coupled
+architectures in their infant years, and have all adopted the SOA approach as
+they&rsquo;ve grown.</p>
+
+<p>In Twitter&rsquo;s case, they started out with stuffing all functionality into single Ruby
+on Rails application, and later moved to the JVM, using Scala and Java, splitting
+their product into smaller services along the way.</p>
+
+<p>From an <a href="http://blog.redfin.com/devblog/2010/05/how_and_why_twitter_uses_scala.html">interview with Alex Payne, a former Twitter engineer:</a></p>
+
+<blockquote><p>In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
+it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
+you just include more plugins and libraries, shoving them all in to the server.
+The result is a giant ball of mud.</p>
+
+<p>So <em>anything that has to do heavy lifting in our stack is going to be an independent service.</em></p></blockquote>
+
+<p>They split one code base that handled the entirety of Twitter&rsquo;s functionality into several
+services, including a queuing service, a social graph store, a people search service,
+and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their
+services together. Their system has become much more reliable <a href="http://www.whatisfailwhale.info/">ever</a>
+<a href="https://blog.twitter.com/2013/new-tweets-per-second-record-and-how">since</a>.</p>
+
+<p>Netflix <a href="http://techblog.netflix.com/2012/06/netflix-operations-part-i-going.html">started off as a monolithic</a>
+Java application, and split their code base off into smaller services. The change
+also allowed them to split their engineering team into smaller teams on a per
+service basis. Engineers wanting to integrate their service with another service no longer had to search
+through mud to integrate with other features &mdash; they only had to be concerned
+about the interfaces.</p>
+
+<p>Amazon started doing SOA as early back as 2002. According to a
+<a href="https://plus.google.com/+RipRowan/posts/eVeouesvaVX">well known leaked rant by Steve Yegge</a>,
+Jeff Bezos (CEO of Amazon) sent out a mandate to all engineering teams, requiring all
+data and functionality to be exposed through services, with no hooks or backdoors for communicating
+between services. Everything was to be a stand-alone service with a well defined API, and every engineer would have to abide by this new rule, unless they wanted to be fired.</p>
+
+<p>Steve goes on to make a point that Bezos' reasoning for this was to be able
+to sell Amazon&rsquo;s internal platform for managing servers (hence the no hooks thing),
+now known to us today as Amazon Web Services (AWS), but I&rsquo;m sure he was aware of the code maintainability
+benefits of splitting products up, and how it leads to <a href="http://zurb.com/word/two-pizza-team">smaller self contained teams</a>.</p>
+
+<p>If you are still wondering why this works so well&hellip; Well, it&rsquo;s almost impossible for one engineer to
+understand every detail in a giant monolithic application. If an engineer
+doesn&rsquo;t know how some code works, the chances of them being able to reliably
+modify it are slim. By splitting up responsibilities into services, engineers
+can be assigned to work on specific services, limiting how much they need to know. So it helps in the division of labor in a larger software organization.</p>
+
+<p>As Steve mentions in his rant, it&rsquo;s also a good way of dogfooding services, which happens
+when the team behind one service has to integrate with the interface of another
+team&rsquo;s interface.</p>
+
+<p>The other obvious benefit of splitting things into strict independent services is
+the potential for open sourcing the services, just as <a href="http://twitter.github.io/">Twitter</a> and <a href="http://netflix.github.io/#repo">Netflix</a>
+have done. Open source means more contributors (if it&rsquo;s good enough for others to use) and
+more dogfooding. Or, if it&rsquo;s <em>really</em> good, you could sell the service, like Amazon has done
+with AWS.</p>
+
+<h2>Some Basic Service to Service Examples</h2>
+
+<p>An example of SOA that&rsquo;s perhaps more well known is the movement of
+generating GUIs from the server to the client, and having the server side code serve pure data
+over HTTP, websockets, or some other protocol. This is the idea behind
+the Javascript GUI frameworks such as Backbone.js and Angular.js. By building
+UI on top of an API that servers data, the API gets used and tested in the process
+of building the API. If the API is good enough, it can be opened to the public!
+Now if users don&rsquo;t like your GUI, they can build their own.</p>
+
+<p>That same API could also be <a href="http://spray.io/wjax/#/41">split into a separate</a> service that talks to other services that handle the actual business logic. To directly paraphrase from the link, the API layer would only handle authentication, request routing, serialization and deserialization of objects, and request caching.</p>
+
+<p>So what if you aren&rsquo;t building servers or applications that have to talk over the network? The same principle of splitting things into separate code bases and communicating through a common
+protocol can be applied to smaller scale programs as well.</p>
+
+<h2>The Future of IDEs</h2>
+
+<p>Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you&rsquo;ve ever thought to yourself,
+<em>&ldquo;man, I really like the IDE auto completion, incremental compilation, and refactoring tools,
+but I wish I could be using Emacs / Vim / Sublime Text / Microsoft Word for the text editing instead.&rdquo;</em>, it&rsquo;s technically possible to write an IDE that would let you do this, even if the aforementioned IDEs can&rsquo;t.</p>
+
+<p><a href="https://github.com/nsf/gocode">Gocode</a>,
+<a href="https://github.com/aemoncannon/ensime">Ensime</a>, and
+<a href="http://common-lisp.net/project/slime/">Slime</a> are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate
+over a protocol to any capable text editor &mdash; the daemon receives code from the editor and some commands, executes the commands on the specified code, and returns any necessary text deltas back to the text editor.</p>
+
+<p>Speaking of programming languages&hellip;</p>
+
+<p><a href="/blog/2014/01/26/maintaining-a-large-code-base-part-3/"><em>Next Part: Programming Languages</em></a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Maintaining a Large Code Base, Part 1: Backstory and the Basics]]></title>
+    <link href="http://danieltrinh.com/blog/2013/11/05/maintaining-a-large-code-base-part-1/"/>
+    <updated>2013-11-05T12:36:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2013/11/05/maintaining-a-large-code-base-part-1</id>
+    <content type="html"><![CDATA[<p>What&rsquo;s one of the most important quality of good software?</p>
+
+<p><em>It&rsquo;s maintainable.</em></p>
+
+<p>It doesn&rsquo;t matter how well optimized the code is if the code base isn&rsquo;t maintainable.
+If the code can&rsquo;t be refactored and improved, the software project is stuck in time &mdash;
+new features are difficult to add, performance can&rsquo;t be improved, and bugs will be harder to pinpoint.
+Upfront planning and design can greatly reduce the amount of code rewriting that is necessary,
+but its near impossible to get everything right the first time code is written in a significantly
+sized code base. I&rsquo;ve yet to work on a non trivial software project that was finished and
+perfect on the first iteration.</p>
+
+<p>Back when I was in college, the typical coding assignment involved writing a few hundred
+to a few thousand lines of code to solve some mind bending arbitrary assignment that
+the professor thought was more important than the other three programming assignments
+I had from my three other professors, but wouldn&rsquo;t explain what was so important about it.</p>
+
+<p>Anyway, the assignments were mostly automatically graded, and it was quite rare
+for the teaching assistant or professor to take a look at students' code to
+provide coding style feedback. After the solution to an assignment was submitted,
+the code for it would pretty much never be touched again.</p>
+
+<p>Since the assignments were written to facilitate the learning of specific computer science concepts, the source
+code for the assignment solutions were very rarely useful outside of the context of the class
+that it was presented in. There was pretty much always a better implementation for whatever data structure
+or algorithm that were being implemented in the assignments. The only reason to keep the
+source code was to be able to look back at it in several years and could go, &ldquo;Yep.. I wrote that wonderful piece of turd.&rdquo;</p>
+
+<p>I ended up getting better and better at solving these types of self contained
+assignments, but I never really learned how to write maintainable code from completing
+those assignments.</p>
+
+<p>Fast forward a few years, the largest code base I&rsquo;ve worked on has gone from
+being somewhere around 10,000 source lines of code (SLOC) in Java, a naturally verbose language,
+to the largest code base being a 900,000 SLOC service written in <em>Ruby</em>,
+a <a href="http://stackoverflow.com/a/4205396/1093160">duck-type-able</a> dynamic language that&rsquo;s known for its conciseness.
+That line count doesn&rsquo;t include comments or blank spaces, as you might expect from &ldquo;source lines,
+and that code base also only refers to one code base &mdash; it was one of many.
+It wasn&rsquo;t a code base that I could submit somewhere, forget about and never see again either. This was
+the real deal &mdash; industry programming, where things get reused.</p>
+
+<p>This code base was something that I had to stare at on a daily basis. Needless to say,
+I&rsquo;ve learned many lessons in having to work with a code base of that size, and I&rsquo;m writing
+this to help software engineers, including myself, to think about code maintainability to the same degree they might
+think about code correctness or performance, if not higher.</p>
+
+<h2>The Basics</h2>
+
+<p>Let&rsquo;s get the obvious software practices that happen to help code maintainability
+out of the way first. These should be familiar with anyone who&rsquo;s been coding for a while.</p>
+
+<h4>Don&rsquo;t Repeat Yourself</h4>
+
+<p>What do you do when you&rsquo;ve got a function duplicated 100 times over 100 different
+files, and you want to modify the behavior of that common code? Refactor the common code into one function somewhere,
+and have the code in those 100 files use that common code.</p>
+
+<p>This is important for maintenance so that if the behavior
+of the common code needs to be changed (and the interface is the same),
+it can be done in one single location, instead of once per location it is duplicated.</p>
+
+<p>This might seem too obvious to mention, but the convenience of copy paste seems to
+win quite often, since it&rsquo;s easier do than to refactor code, which might bring bugs.
+Copying and pasting code guarantees your own code won&rsquo;t affect anyone elses, but
+it causes maintenance headaches later on.</p>
+
+<p>Sometimes this isn&rsquo;t always a good thing, especially if the code refactoring involves
+metaprogramming or other language features that tend to make code less readable.</p>
+
+<h4>Eat Your Own Dog Food (Dogfooding)</h4>
+
+<p>If nobody has ever used your application before shipping it to customers, how can
+you be sure it&rsquo;s any good?</p>
+
+<p>Dogfooding is about using your own product whenever possible. If it&rsquo;s bad,
+hopefully the pain from using the product will be motivating enough to improve it.</p>
+
+<p>The term supposedly <a href="http://en.wikipedia.org/wiki/Eating_your_own_dog_food#Origin">originated in Microsoft</a>, and apparently they were trying to get the term changed to
+<a href="http://www.bizjournals.com/seattle/blog/techflash/2009/11/turning_dog_food_into_ice_cream_and_other_tidbits_from_microsofts_cio.html">icecreaming</a>.</p>
+
+<p>I&rsquo;ll be referring to it as dogfooding though, because that&rsquo;s what most people know it by,
+and it doesn&rsquo;t really make sense to dogfood icecream, because icecream is already delicious
+and is not dog food quality food, so it doesn&rsquo;t need to be dogfooded to be improved. Or in English,
+products that are already good (icecream) don&rsquo;t need to be improved.</p>
+
+<p>Dogfooding doesn&rsquo;t have to be limited to using something at the scale of products, though.
+Testing could be considered a form of dogfooding&hellip;</p>
+
+<h4>Write Unit Tests</h4>
+
+<p>How can you refactor and change code reliably if there are no checks in place to
+make sure the application is working as expected after the change?</p>
+
+<p>These are necessary to quickly catch errors in the business logic of your application.
+With dynamic languages, unit tests are also necessary to catch typos, missing method declarations,
+and type errors that would be caught in statically typed languages. By having a
+framework for quickly checking correctness, it&rsquo;ll be that much easier to reorganize your code, add
+features, fix bugs, and possibly splitting it into reusable libraries or services.</p>
+
+<p>Unit tests are really important in dynamic language code bases. Without
+a compiler to perform semantic analysis, the next safety net after unit tests are
+integration tests, and then it&rsquo;s your manual testers, then customers. Each step
+along the way is typically slower than the previous, with
+<a href="http://blogs.msdn.com/cfs-filesystemfile.ashx/__key/communityserver-blogs-components-weblogfiles/00-00-01-32-02-metablogapi/7317.image_5F00_0F65063B.png%20just%20ship%20it">having customers do your testing</a> generally much slower than running a unit test.</p>
+
+<h4>Document Your Code</h4>
+
+<p>Sometimes it&rsquo;s a lot easier to explain in words what your code does than
+it is to try to read the code itself, especially if your programming language is not
+particularly concise (more on this in part 3). A few comments here and there
+can greatly increase the understandability of your code.</p>
+
+<h4>Do Code Reviews and Design Reviews</h4>
+
+<p>So how do you go about figuring out what code needs to be better documented?</p>
+
+<p>Ever write a piece of software, come back to it later some time later,
+and have no idea how it works until you sit down and stare at it until your
+eyes bleed and you want to rewrite your entire code base from scratch? Me neither.
+But for those that this does happen to, it is probably time to dogfood your designs or your code to others.</p>
+
+<p>The writing courses I took in college made a point of having peer reviews for essays.
+Peer reviews exist because sometimes things that sound smart in your head do not
+read smart when written out on paper. Your peers can offer their own views
+on what you are writing that can strengthen your existing ideas. And sometimes,
+peer reviews are useful simply because you were too lazy to proof-read your essay
+on comparing book X about a topic only the professor cares about, to book Y about who knows what,
+mainly because you were busy trying to complete the three programming assignments from your three other professors.</p>
+
+<p>Code reviews were almost never part of the curriculum for any of my computer science
+classes, neither by peers nor the teaching staff. Code reviews by peers weren&rsquo;t allowed because they
+couldn&rsquo;t trust us not to cheat, and they couldn&rsquo;t trust us not to save solutions for future students during the next iteration of the course. Code reviews by teaching assistants or professors
+couldn&rsquo;t be done for everyone because of the numbers problem &mdash; it was too much work
+for a couple of people to review the code of thirty students while also coding
+automated testing systems for homework solutions, doing research,
+and preparing course material, exams, and lectures &mdash; so it was easier to just not
+do it for anyone. At least it was fair.</p>
+
+<p>Anyway, have someone else try to read your code. When you are programming, there
+is a significant amount of context that is in your short term memory that
+might not be obvious or apparent for someone else who didn&rsquo;t write the code.
+The process of coding is like storing info about how your code works in RAM,
+and for someone else reading it, they don&rsquo;t have the contents of your RAM &mdash; they have
+to reconstitute what was in your RAM into their own RAM by <a href="http://en.wikipedia.org/wiki/Lossy_data_conversion">lossily</a>
+interpreting it from your code. Good code results in equivalent RAM in both parties, and bad code is like trying to
+interpret a Picasso painting, where one person thinks it&rsquo;s a man&rsquo;s face looking to
+the side, and another thinks it&rsquo;s a woman&rsquo;s face looking towards the viewer, when it&rsquo;s really a picture of a plane.</p>
+
+<p>Okay, so it&rsquo;s not quite like that, but what I&rsquo;m trying to say is to dog-food the readability of your code, otherwise its going to be very hard for you to modify your code if you don&rsquo;t understand it.</p>
+
+<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Next Part: Service Oriented Architecture</em></a></p>
+]]></content>
+  </entry>
+  
+</feed>

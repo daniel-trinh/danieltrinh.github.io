@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Filtering Duplicate Messages in Twitch Chat // Daniel Trinh</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Daniel Trinh" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.b59b24ca1dd67b152e93f2a69051c7c2d590b7dbbb7ebee89f4e9787d40403ed.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Filtering Duplicate Messages in Twitch Chat"/>
+<meta name="twitter:description" content="I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.
+The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on Twitch.tv. It shows the filtering in action, in the middle of a burst of the WutFace spam, which you can see in the lower left of the above video."/>
+
+    <meta property="og:title" content="Filtering Duplicate Messages in Twitch Chat" />
+<meta property="og:description" content="I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.
+The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on Twitch.tv. It shows the filtering in action, in the middle of a burst of the WutFace spam, which you can see in the lower left of the above video." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://danieltrinh.com/posts/2016-07-12-filtering-duplicate-messages-in-twitch-chat/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-07-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-07-12T00:00:00+00:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="http://danieltrinh.com"><img class="app-header-avatar" src="/avatar.jpg" alt="Daniel Trinh" /></a>
+      <span class="app-header-title">Daniel Trinh</span>
+      <p>Generalist software engineer with an emphasis on backend.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/daniel-trinh" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="linkedin.com/in/daniel-trinh-31422926" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>My Linkedin</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+          <a href="/downloads/resume.pdf" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-link">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+<article class="post">
+  <header class="post-header">
+    <h3 class="post-title">Filtering Duplicate Messages in Twitch Chat</h3>
+    <div class="post-meta">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+        Jul 12, 2016
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+        4 min read
+      </div>
+    </div>
+  </header>
+  <div class="post-content">
+    <p>I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.</p>
+<p><a href="https://www.youtube.com/watch?v=i8sRO7_qvOY" title="Twitch Chat Filterer"><img src="http://i.imgur.com/m50Kii1.gif" alt="Twitch Chat Filterer"></a></p>
+<p>The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on <a href="https://www.twitch.tv/">Twitch.tv</a>. It shows the filtering in action, in the middle of a burst of the <code>WutFace</code> spam, which you can see in the lower left of the above video.</p>
+<h2 id="twitchtv-overview">Twitch.tv Overview</h2>
+<p>For the uninitiated, <a href="https://www.twitch.tv/">Twitch.tv</a> is a streaming video website that allows anyone to share live video with viewers over the internet, with twitch. The most popular use case by a wide margin for streaming players playing video games, although it is also sometimes used for sharing live music, where the video streamer might be playing an instrument (or instruments, if it&rsquo;s a band.</p>
+<p>Several thousand people can be watching the same video stream at the same time &ndash; it&rsquo;s not uncommon to see streams that have 100,000 simultaneous viewers. Since viewers who watch the same video stream are also put into the same chat room (there&rsquo;s no chat room splitting that happens automatically), the chat room messages can become incredibly difficult to parse.</p>
+<p>To (sort of) solve this problem, I wrote a simple CLI Twitch/IRC chat client that supports the ability to filter out duplicate messages within a sliding time window in realtime.</p>
+<h2 id="implementation-details">Implementation Details</h2>
+<p>Although this was built specifically for Twitch, it works with any chat that supports IRC as a protocol.</p>
+<p>The fully functional IRC client was written in Golang. The choice of Golang was purely out of my desire to learn the language. If I was to build something beyond for toy usage, I&rsquo;d probably write it as a Chrome extension, since native Twitch chat is in the browser, and it&rsquo;s where users are accustomed to chatting.</p>
+<p>I used <a href="https://github.com/gizak/termui">termui</a> for the UI. The usecase for termui is pretty niche &ndash; I&rsquo;d say it&rsquo;s useful for interfaces when a browser is out of the question, such as while SSHed onto a remote server. Unless performance is a problem or golang is absolutely necessary, <a href="https://github.com/yaronn/blessed-contrib">blessed-contrib</a> using JavaScript looks to be a better option for building CLI UIs. I&rsquo;d avoid building CLI UIs over browser based ones in general though &ndash; these frameworks for building CLI UIs is not like working with the DOM in the browser, and the kinds of UIs you can build using <code>termui</code> or <code>blessed-contrib</code> are limited in scope.</p>
+<p>There are the following widgets in this client:</p>
+<ol>
+<li>
+<p>Message Rate Monitor (Rate of messages over sliding window)</p>
+</li>
+<li>
+<p>Message Stats Monitor (Min, Max, Avg messages over sliding window)</p>
+</li>
+<li>
+<p>Duplicate Message Aggregator (List of messages sorted by number of occurrences over sliding window)</p>
+</li>
+</ol>
+<p>The trickiest implementation detail was the duplicate message aggregator. It involved maintaining a sorted list of <code>(message, count)</code> pairs in realtime as messages arrived, and then decrementing / removing the message from the sorted list of (message, count) pairs, while also preventing concurrent updates from malforming the sorted list counts.</p>
+<p>Despite the complexity, Golang made this process quite easy. Concurrent updates were handled by serializing all updates through a queueing channel, and goroutines with <code>time.Sleep(duration)</code> were used to decrement counts.</p>
+<h2 id="further-thoughts-on-golang">Further Thoughts on Golang</h2>
+<p>Golang was a bit of a pain at times &ndash; the lack of generics in the language shows. I had to duplicate methods like <code>math.Max</code> for <code>int</code> types, since the builtin <code>math.Max</code> only works with <code>float64</code>. Also, the extra overhead of thinking about when to pass a pointer to a struct vs just the struct got in the way of thinking about the higher level functionality of the application.</p>
+<p>On the flip side, I spent almost no time learning Golang and was able to build something functional almost immediately. This hasn&rsquo;t been the case with other languages I&rsquo;ve learned, such as <code>TypeScript</code> or <code>Scala</code>. The expediency experienced with Golang comes from two things &ndash; firstly, the amazing tooling that has gone into the language ecosystem, and secondly, the sheer simplicity of the language and lack of language features.</p>
+<p>I wouldn&rsquo;t use Golang as my first language choice for prototyping a product, but for system level programming, network intensive applications, or performance critical backends, Golang seems like the perfect choice for development. I&rsquo;ll stick to Python, Scala, or TypeScript for prototyping products quickly, and use Golang when the extra performance is necessary.</p>
+<h2 id="using-the-client">Using the Client</h2>
+<p>The source code and instructions for usage of the project described earlier can be found at my github page <a href="https://github.com/daniel-trinh/twitch_chat_filter">here</a>. All that is needed is a golang installation and a Twitch account.</p>
+
+  </div>
+  <div class="post-footer">
+    
+  </div>
+</article>
+
+    </main>
+  </body>
+</html>

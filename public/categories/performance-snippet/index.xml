@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>performance snippet on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/performance-snippet/</link>
+    <description>Recent content in performance snippet on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 07 Feb 2014 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/performance-snippet/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Numbers Every Software Engineer Should Know</title>
+      <link>http://danieltrinh.com/posts/2014-02-07-numbers-every-software-engineer-should-know/</link>
+      <pubDate>Fri, 07 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2014-02-07-numbers-every-software-engineer-should-know/</guid>
+      <description>This article is a collection of runtime and memory usage numbers that might be useful to keep in mind when building performance critical software.
+Big-O Absolute Numbers This chart shows how well or poorly certain algorithm complexities scale when n grows.
+Function | n=8 (2^3) | n=64 (2^6) | n=1024 (2^10) | n=2^32 (~ 4 billion) -----------|-----------|-------------|---------------|--------------------- log(n) | 3 | 6 | 10 | 32 n | 8 | 64 | 1024 | 4294967296 n*log(n) | 24 | 384 | 10240 | 1.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang project on Daniel Trinh</title>
+    <link>http://danieltrinh.com/categories/golang-project/</link>
+    <description>Recent content in golang project on Daniel Trinh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 12 Jul 2016 00:00:00 +0000</lastBuildDate><atom:link href="http://danieltrinh.com/categories/golang-project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Filtering Duplicate Messages in Twitch Chat</title>
+      <link>http://danieltrinh.com/posts/2016-07-12-filtering-duplicate-messages-in-twitch-chat/</link>
+      <pubDate>Tue, 12 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>http://danieltrinh.com/posts/2016-07-12-filtering-duplicate-messages-in-twitch-chat/</guid>
+      <description>I recently built this toy command line interface (CLI) app for fun. You can see a higher resolution video of it in action by clicking the image below.
+The video above is a snapshot of the CLI in action during the middle of a speed run of the Nintendo 64 game The Legend of Zelda: Ocarina of Time, hosted on Twitch.tv. It shows the filtering in action, in the middle of a burst of the WutFace spam, which you can see in the lower left of the above video.</description>
+    </item>
+    
+  </channel>
+</rss>

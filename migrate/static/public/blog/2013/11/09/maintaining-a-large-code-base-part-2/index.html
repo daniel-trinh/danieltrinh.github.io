@@ -1,0 +1,275 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Maintaining a Large Code Base, Part 2: Service Oriented Architecture - Daniel Trinh</title>
+	<meta name="author" content="Daniel Trinh">
+
+	
+	<meta name="description" content="Nov 9th, 2013 maintainability Maintaining a Large Code Base, Part 2: Service Oriented Architecture Previous Part: Backstory and the Basics How do &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Daniel Trinh" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://danieltrinh.com/blog/2013/11/09/maintaining-a-large-code-base-part-2/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-45587019-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<img src="http://www.gravatar.com/avatar/685bb9c0f2d690d3e4a910995a13f811?s=160" alt="Profile Picture" style="width: 160px;" />
+	
+</div>
+<hgroup>
+  <h1><a href="/">Daniel Trinh</a></h1>
+  
+</hgroup>
+<nav id="main-nav"><hgroup>
+  <h2>Articles</h2>
+  
+</hgroup>
+<ul class="main-navigation">
+  <li><a href="/blog/categories">Categories</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+<hgroup>
+  <h2 class="main-navigation">
+    <a href="/blog/categories/project/">Open Source Projects</a>
+  </h2>
+</hgroup>
+<ul>
+  <li>
+    <a href="/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/">Filtering Twitch Chat</a>
+  </li>
+  <li>
+    <a href="/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/">OCRemix RSS to Twitter</a></li>
+  <li>
+    <a href="/blog/2014/02/05/improving-scalariform/">Scalariform</a>
+  </li>
+</ul>
+
+<section class="aboutme">
+  <p>
+    Generalist Backend Software Engineer. This is my blog on tech related things.
+
+  </p>
+</section>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+			<a class="email" href="mailto:daniel.s.trinh@gmail.com" title="Email">Email</a>
+		
+		
+		
+		
+			<a class="github" href="https://github.com/daniel-trinh" title="GitHub">GitHub</a>
+		
+		
+		
+		
+			<a class="linkedin" href="http://www.linkedin.com/pub/daniel-trinh/26/229/314" title="LinkedIn">LinkedIn</a>
+		
+		
+		
+		
+		
+		
+		
+			<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-09T11:07:00-08:00" data-updated="true" itemprop="datePublished">Nov 9<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/maintainability/'>maintainability</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name">Maintaining a Large Code Base, Part 2: Service Oriented Architecture</h1>
+	<div class="entry-content" itemprop="articleBody"><p><a href="/blog/2013/11/05/maintaining-a-large-code-base-part-1/"><em>Previous Part: Backstory and the Basics</em></a></p>
+
+<p>How do you deal with a code base that&rsquo;s too large to handle? Try making it smaller &mdash;
+split it up into multiple smaller, separate code bases that communicate with
+each other through well defined interfaces. When done with services
+at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.</p>
+
+<h2>Service Oriented Architecture, AKA Don&rsquo;t Repeat Yourself for Servers</h2>
+
+<p>Twitter, Netflix, and Amazon all started out with monolithic, tightly coupled
+architectures in their infant years, and have all adopted the SOA approach as
+they&rsquo;ve grown.</p>
+
+<p>In Twitter&rsquo;s case, they started out with stuffing all functionality into single Ruby
+on Rails application, and later moved to the JVM, using Scala and Java, splitting
+their product into smaller services along the way.</p>
+
+<p>From an <a href="http://blog.redfin.com/devblog/2010/05/how_and_why_twitter_uses_scala.html">interview with Alex Payne, a former Twitter engineer:</a></p>
+
+<blockquote><p>In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
+it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
+you just include more plugins and libraries, shoving them all in to the server.
+The result is a giant ball of mud.</p>
+
+<p>So <em>anything that has to do heavy lifting in our stack is going to be an independent service.</em></p></blockquote>
+
+<p>They split one code base that handled the entirety of Twitter&rsquo;s functionality into several
+services, including a queuing service, a social graph store, a people search service,
+and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their
+services together. Their system has become much more reliable <a href="http://www.whatisfailwhale.info/">ever</a>
+<a href="https://blog.twitter.com/2013/new-tweets-per-second-record-and-how">since</a>.</p>
+
+<p>Netflix <a href="http://techblog.netflix.com/2012/06/netflix-operations-part-i-going.html">started off as a monolithic</a>
+Java application, and split their code base off into smaller services. The change
+also allowed them to split their engineering team into smaller teams on a per
+service basis. Engineers wanting to integrate their service with another service no longer had to search
+through mud to integrate with other features &mdash; they only had to be concerned
+about the interfaces.</p>
+
+<p>Amazon started doing SOA as early back as 2002. According to a
+<a href="https://plus.google.com/+RipRowan/posts/eVeouesvaVX">well known leaked rant by Steve Yegge</a>,
+Jeff Bezos (CEO of Amazon) sent out a mandate to all engineering teams, requiring all
+data and functionality to be exposed through services, with no hooks or backdoors for communicating
+between services. Everything was to be a stand-alone service with a well defined API, and every engineer would have to abide by this new rule, unless they wanted to be fired.</p>
+
+<p>Steve goes on to make a point that Bezos&#8217; reasoning for this was to be able
+to sell Amazon&rsquo;s internal platform for managing servers (hence the no hooks thing),
+now known to us today as Amazon Web Services (AWS), but I&rsquo;m sure he was aware of the code maintainability
+benefits of splitting products up, and how it leads to <a href="http://zurb.com/word/two-pizza-team">smaller self contained teams</a>.</p>
+
+<p>If you are still wondering why this works so well&hellip; Well, it&rsquo;s almost impossible for one engineer to
+understand every detail in a giant monolithic application. If an engineer
+doesn&rsquo;t know how some code works, the chances of them being able to reliably
+modify it are slim. By splitting up responsibilities into services, engineers
+can be assigned to work on specific services, limiting how much they need to know. So it helps in the division of labor in a larger software organization.</p>
+
+<p>As Steve mentions in his rant, it&rsquo;s also a good way of dogfooding services, which happens
+when the team behind one service has to integrate with the interface of another
+team&rsquo;s interface.</p>
+
+<p>The other obvious benefit of splitting things into strict independent services is
+the potential for open sourcing the services, just as <a href="http://twitter.github.io/">Twitter</a> and <a href="http://netflix.github.io/#repo">Netflix</a>
+have done. Open source means more contributors (if it&rsquo;s good enough for others to use) and
+more dogfooding. Or, if it&rsquo;s <em>really</em> good, you could sell the service, like Amazon has done
+with AWS.</p>
+
+<h2>Some Basic Service to Service Examples</h2>
+
+<p>An example of SOA that&rsquo;s perhaps more well known is the movement of
+generating GUIs from the server to the client, and having the server side code serve pure data
+over HTTP, websockets, or some other protocol. This is the idea behind
+the Javascript GUI frameworks such as Backbone.js and Angular.js. By building
+UI on top of an API that servers data, the API gets used and tested in the process
+of building the API. If the API is good enough, it can be opened to the public!
+Now if users don&rsquo;t like your GUI, they can build their own.</p>
+
+<p>That same API could also be <a href="http://spray.io/wjax/#/41">split into a separate</a> service that talks to other services that handle the actual business logic. To directly paraphrase from the link, the API layer would only handle authentication, request routing, serialization and deserialization of objects, and request caching.</p>
+
+<p>So what if you aren&rsquo;t building servers or applications that have to talk over the network? The same principle of splitting things into separate code bases and communicating through a common
+protocol can be applied to smaller scale programs as well.</p>
+
+<h2>The Future of IDEs</h2>
+
+<p>Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you&rsquo;ve ever thought to yourself,
+<em>&ldquo;man, I really like the IDE auto completion, incremental compilation, and refactoring tools,
+but I wish I could be using Emacs / Vim / Sublime Text / Microsoft Word for the text editing instead.&rdquo;</em>, it&rsquo;s technically possible to write an IDE that would let you do this, even if the aforementioned IDEs can&rsquo;t.</p>
+
+<p><a href="https://github.com/nsf/gocode">Gocode</a>,
+<a href="https://github.com/aemoncannon/ensime">Ensime</a>, and
+<a href="http://common-lisp.net/project/slime/">Slime</a> are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate
+over a protocol to any capable text editor &mdash; the daemon receives code from the editor and some commands, executes the commands on the specified code, and returns any necessary text deltas back to the text editor.</p>
+
+<p>Speaking of programming languages&hellip;</p>
+
+<p><a href="/blog/2014/01/26/maintaining-a-large-code-base-part-3/"><em>Next Part: Programming Languages</em></a></p>
+</div>
+
+</article>
+
+	
+
+</div>
+			</div>
+			<footer id="footer" class="inner"><p>
+  Copyright &copy; 2016 - Daniel Trinh -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+</footer>
+			
+
+
+
+
+
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

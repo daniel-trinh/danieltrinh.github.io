@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Maintaining a Large Code Base, Part 3: Programming Languages // Daniel Trinh</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Daniel Trinh" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.b59b24ca1dd67b152e93f2a69051c7c2d590b7dbbb7ebee89f4e9787d40403ed.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Maintaining a Large Code Base, Part 3: Programming Languages"/>
+<meta name="twitter:description" content="Previous Part: Service Oriented Architecture
+If you are lucky enough to be able to choose the programming language for a new project, this section might provide some insight on how it might impact the future of your code base.
+Choose Your Programming Languages Wisely This article focuses only on the technical details of programming languages and their effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling, or library support."/>
+
+    <meta property="og:title" content="Maintaining a Large Code Base, Part 3: Programming Languages" />
+<meta property="og:description" content="Previous Part: Service Oriented Architecture
+If you are lucky enough to be able to choose the programming language for a new project, this section might provide some insight on how it might impact the future of your code base.
+Choose Your Programming Languages Wisely This article focuses only on the technical details of programming languages and their effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling, or library support." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://danieltrinh.com/posts/2014-01-26-maintaining-a-large-code-base-part-3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2014-01-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2014-01-26T00:00:00+00:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="http://danieltrinh.com"><img class="app-header-avatar" src="/avatar.jpg" alt="Daniel Trinh" /></a>
+      <span class="app-header-title">Daniel Trinh</span>
+      <p>Generalist software engineer with an emphasis on backend.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/daniel-trinh" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="linkedin.com/in/daniel-trinh-31422926" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>My Linkedin</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+          <a href="/downloads/resume.pdf" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-link">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+<article class="post">
+  <header class="post-header">
+    <h3 class="post-title">Maintaining a Large Code Base, Part 3: Programming Languages</h3>
+    <div class="post-meta">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+        Jan 26, 2014
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+        17 min read
+      </div>
+    </div>
+  </header>
+  <div class="post-content">
+    <p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Previous Part: Service Oriented Architecture</em></a></p>
+<p>If you are lucky enough to be able to choose the programming language for a new project,
+this section might provide some insight on how it might impact the future of your code base.</p>
+<h2 id="choose-your-programming-languages-wisely">Choose Your Programming Languages Wisely</h2>
+<p>This article focuses only on the technical details of programming languages and their
+effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling,
+or library support. While those things are undoubtedly important, those things aren&rsquo;t necessarily intrinsic to a programming language, and they tend to change much more often than the topics I&rsquo;ll
+be discussing here.</p>
+<p>When I first started writing this section, it was titled &ldquo;Use a statically typed language.&rdquo;
+I then thought of Java with all of its verbosity, realized it&rsquo;s not quite that simple, and it would
+make more sense to just outline how certain language features impact code maintainability,
+and let you conclude yourself on what kind of language to pursue.</p>
+<p>Having said that, personally I prefer languages with static type systems over dynamic ones from a pure maintainability point of view, except perhaps in the case of languages like Java.</p>
+<p>Before I get started, let&rsquo;s define a few things.</p>
+<blockquote>
+<p>Compiled language - purely statically typed, type annotations are required,
+or must be able to be inferred at compile time
+(Scala, Java, Haskell, C++)</p>
+<p>Dynamic language - interpreted, no type annotations or they are optional
+(Clojure, Typed Clojure, Ruby, Groovy, Groovy 2.0, Python, JavaScript)</p>
+<p>Statically typed language - same as compiled language</p>
+</blockquote>
+<p>Typed Clojure and Groovy 2.0 both have optional type annotations for partial compile time
+type checking and performance improvements, but I am grouping them in the dynamic
+language group because they are optional, and they do not provide the same static
+analysis guarantees as pure statically typed languages, and hence are not as helpful in
+terms of maintainability (more on static analysis later). They are certainly easier
+to pick up than a full blown compiled languages with generics, though (more on this in the language complexity section).</p>
+<h3 id="conciseness">Conciseness</h3>
+<p>By conciseness I mean this: How much code is necessary to express a particular
+piece of business logic? How much of that code is intrinsic to
+describing that logic, and how much of it is necessary because of limitations
+in the language? Conciseness is important for maintainability because it means there&rsquo;s less
+code to read, and less code to refactor when it&rsquo;s necessary to do so.</p>
+<p>Here&rsquo;s an example comparing a basic class in Java with the same functionality (both in behavior and runtime performance) implemented in Scala that demonstrates what I mean:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Coffee</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> caffeinated<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> sugarCubes<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Coffee</span><span style="color:#f92672">(</span><span style="color:#66d9ef">boolean</span> caffeinated<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> sugarCubes<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">caffeinated</span> <span style="color:#f92672">=</span> caffeinated<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sugarCubes</span> <span style="color:#f92672">=</span> sugarCubes<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">getCaffeinated</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> caffeinated<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getSugarCubes</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> sugarCubes<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Coffee</span><span style="color:#f92672">(</span><span style="color:#66d9ef">val</span> caffeinated<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Boolean</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">val</span> sugarCubes<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>For comparison&rsquo;s sake, here&rsquo;s a Ruby example of something similar to the two examples
+above:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Coffee</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">attr_reader</span> <span style="color:#e6db74">:caffeinated</span>, <span style="color:#e6db74">:sugar_cubes</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">initialize</span>(caffeinated, sugar_cubes)
+</span></span><span style="display:flex;"><span>    @caffeinated <span style="color:#f92672">=</span> caffeinated
+</span></span><span style="display:flex;"><span>    @sugar_cubes <span style="color:#f92672">=</span> sugar_cubes
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><p>Dynamic languages tend to win in terms of conciseness, since there&rsquo;s no extra
+code necessary for specifying type information, although this isn&rsquo;t always the case.</p>
+<h3 id="language-complexity">Language Complexity</h3>
+<p>It doesn&rsquo;t really matter if code takes fewer lines of code if it&rsquo;s impossible to figure out what it does. Unlike conciseness, language complexity isn&rsquo;t quite as clear cut to define. So
+instead of trying to define it in an abstract sense, I&rsquo;ll just give you some examples.</p>
+<p>Scala is quite conciseness, but the type system is anything but simple.
+The type system is so involved that it is Turing Complete &ndash; it is so complex that
+it is possible to write algorithms such as <a href="http://apocalisp.wordpress.com/2010/06/08/type-level-programming-in-scala/">infinite loops</a> that only utilize the type system features; no for loops, while loops,
+or function recursion. The type system is so complex to the point that a simpler programming
+language to possibly become the next Scala is <a href="http://www.infoq.com/presentations/data-types-issues">in the works</a> by Scala&rsquo;s original designer.</p>
+<p>Here&rsquo;s one of the crazier function signatures in Scala, from the Scalaz library:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#66d9ef">implicit</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">CokleisliMAB</span><span style="color:#f92672">[</span><span style="color:#66d9ef">M</span>, <span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">](</span>k<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Cokleisli</span><span style="color:#f92672">[</span><span style="color:#66d9ef">M</span><span style="color:#f92672">[</span><span style="color:#66d9ef">_</span><span style="color:#f92672">][</span><span style="color:#66d9ef">_</span><span style="color:#f92672">]</span>, <span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">])</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">MAB</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Cokleisli</span><span style="color:#f92672">[</span><span style="color:#66d9ef">M</span><span style="color:#f92672">[</span><span style="color:#66d9ef">_</span><span style="color:#f92672">][</span><span style="color:#66d9ef">_</span><span style="color:#f92672">]</span>, <span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">][</span><span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">]</span>, <span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>It probably doesn&rsquo;t seem fair to show that signature for those unfamiliar with Scala, but I assure
+you, that kind of function signature is still daunting for seasoned Scala developers.</p>
+<p>Although without those complicated type features, code like this might not be possible in Scala:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#75715e">// Just Ints
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">)</span> map <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">}</span> sum 
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// =&gt; Int = 55
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Ints and Doubles
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Array</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">,</span><span style="color:#ae81ff">3.0</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">4.5</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">5.55</span><span style="color:#f92672">)</span> map <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">}</span> sum
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// =&gt; Double = 65.0525 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Just Strings
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Vector</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;c&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;d&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;e&#34;</span><span style="color:#f92672">)</span> map <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// =&gt;  Vector[String] = Vector(aa, bb, cc, dd, ee)
+</span></span></span></code></pre></div><p>The implementation of the <code>map</code> function in Scala is far from simple, though. Writing
+this sort of code is not something the average Scala developer can accomplish. In fact,
+I&rsquo;m not sure there&rsquo;s more than a handful of people who could write a collections library
+as powerful as the one in Scala &ndash; it took the creator of the language and a few helpers an entire year to get it to the point it is currently at.</p>
+<p>Ruby, on the other hand, has an incredibly simple implementation of the <code>map</code> method.
+It&rsquo;s just a few lines of code, within the <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a> module. To use it, all that is necessary is an implementation of the <code>each</code> function on the inheriting member, and that&rsquo;s it. Because of duck typing, there isn&rsquo;t much else that&rsquo;s needed.</p>
+<p>In contrast to both Scala and Ruby, <a href="http://golang.org/">Golang</a> is far from being concise, but it is well reported for being relatively quick to pick up and start coding, likely in large part due to its incredibly minimal type system. It has no form of generics, meaning it is impossible to write type safe collection methods that work with all types using just the language. Golang is packaged with it&rsquo;s own
+basic set of generic data structures (slices, maps, channels), but if you want to write
+your own priority queue that works with all types, you are out of luck. This means
+the language is easier to learn than a language like Scala, but also results in more code and code duplication.</p>
+<h3 id="syntactic-flexibility">Syntactic Flexibility</h3>
+<p>There&rsquo;s a reason why <a href="https://code.google.com/p/google-styleguide/" title="Google's style guides for various languages">Google</a>,
+<a href="http://twitter.github.io/effectivescala/" title="Twitter's style guide for Scala">Twitter</a>,
+and <a href="https://github.com/styleguide/ruby" title="Github's style guide for Ruby">Github</a> have coding style guidelines.</p>
+<p>Can you imagine if each letter of the English alphabet was in a different Unicode character?
+Here&rsquo;s some English that has had each letter of the alphabet mapped to a different character
+in Unicode:</p>
+<pre><code>Original text:
+I am Heavy Weapons Guy. And this... [grips Sasha] is my weapon. She weighs 150
+kilograms and fires $200 custom-tooled cartridges at 10,000 rounds per minute. 
+[leans in] It cost $400,000 to fire this weapon...for 12 seconds.
+
+Altered text:
+&quot;ᚋ ᣀᣌ ᚊᣄᣀᨇᨊ ᚙᣄᣀᣏᣎᣍᣒ ᚉᨐᨊ. ᚃᣍᣃ ᣓᣇᣈᣒ... [ᣆᣑᣈᣏᣒ ᚕᣀᣒᣇᣀ] ᣈᣒ ᣌᨊ ᨈᣄᣀᣏᣎᣍ. ᚕᣇᣄ ᨈᣄᣈᣆᣇᣒ 150
+ᣊᣈᣋᣎᣆᣑᣀᣌᣒ ᣀᣍᣃ ᣅᣈᣑᣄᣒ $200 ᣂᨐᣒᣓᣎᣌ-ᣓᣎᣎᣋᣄᣃ ᣂᣀᣑᣓᣑᣈᣃᣆᣄᣒ ᣀᣓ 10,000 ᣑᣎᨐᣍᣃᣒ ᣏᣄᣑ ᣌᣈᣍᨐᣓᣄ. 
+[ᣋᣄᣀᣍᣒ ᣈᣍ] ᚋᣓ ᣂᣎᣒᣓ $400,000 ᣓᣎ ᣅᣈᣑᣄ ᣓᣇᣈᣒ ᨈᣄᣀᣏᣎᣍ...ᣅᣎᣑ 12 ᣒᣄᣂᣎᣍᣃᣒ.
+
+Code for converting: https://gist.github.com/daniel-trinh/2b6d4b9c38e713148db4
+</code></pre>
+<p>While that is a bit of a contrived example, it&rsquo;s a taste of what programmers have to deal with
+in programming languages that have flexible syntax. Out of the times I&rsquo;ve talked about the new languages I&rsquo;ve been exploring (Clojure, Go, Scala), syntax is almost always the first thing my coworkers notice
+and talk about &ndash; this is because understanding syntax is the first step to being able to read the language. If it&rsquo;s different from what they&rsquo;re familiar with, it&rsquo;s just another barrier to learning it.</p>
+<p>Languages that are designed for building domain-specific languages tend to have more
+syntactic flexibility and lexical complexity. Languages like Ruby and Scala were designed
+in mind of supporting DSLs. Unfortunately, flexible syntax makes it harder for users to read code. For every syntax permutation that people use in a language, everyone who reads the language is going
+to have to be able to read those permutations. In terms of language design, I don&rsquo;t hear this topic talked about as often as some of the other topics in this article, but nevertheless I still see it as worth discussing.</p>
+<p>Here are some real examples demonstrating the flexibility of Ruby&rsquo;s and Scala&rsquo;s syntax.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ( ͡° ͜ʖ ͡°) do..end vs curly braces</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  Curly Braces</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">].</span>map { <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> x <span style="color:#f92672">*</span> x }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># do..end</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">].</span>map <span style="color:#66d9ef">do</span> <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> 
+</span></span><span style="display:flex;"><span>  x <span style="color:#f92672">*</span> x
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ( ͡° ͜ʖ ͡°) Optional periods</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Method calls without periods</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">].</span>map { <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> x<span style="color:#f92672">*</span>x } reduce (<span style="color:#e6db74">:+</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Method calls with periods</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">].</span>map { <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> x<span style="color:#f92672">*</span>x }<span style="color:#f92672">.</span>reduce (<span style="color:#e6db74">:+</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ( ͡° ͜ʖ ͡°) Different ways of defining functions</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Method method</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">square</span>(x) 
+</span></span><span style="display:flex;"><span> x <span style="color:#f92672">*</span> x
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Lambda method</span>
+</span></span><span style="display:flex;"><span>square <span style="color:#f92672">=</span> lambda { <span style="color:#f92672">|</span>n<span style="color:#f92672">|</span> n <span style="color:#f92672">*</span> n }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Proc method</span>
+</span></span><span style="display:flex;"><span>square <span style="color:#f92672">=</span> <span style="color:#66d9ef">Proc</span><span style="color:#f92672">.</span>new { <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> x <span style="color:#f92672">*</span> x }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ( ͡° ͜ʖ ͡°) Flexible method names</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Non Alpha-numeric method names</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">+</span><span style="color:#f92672">=</span>(new_value)
+</span></span><span style="display:flex;"><span>  @value <span style="color:#f92672">=</span> @value <span style="color:#f92672">+</span> new_value
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">end</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* ( ͡° ͜ʖ ͡°) Curly braces vs parenthesis */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Curly Braces
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span><span style="color:#ae81ff">5</span><span style="color:#f92672">,</span><span style="color:#ae81ff">6</span><span style="color:#f92672">).</span>map <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Parenthesis
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span><span style="color:#ae81ff">5</span><span style="color:#f92672">,</span><span style="color:#ae81ff">6</span><span style="color:#f92672">).</span>map<span style="color:#f92672">(</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Unnecessary Curly Braces .. and Parenthesis
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span><span style="color:#ae81ff">5</span><span style="color:#f92672">,</span><span style="color:#ae81ff">6</span><span style="color:#f92672">).</span>map<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">(</span> <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">}</span> <span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* ( ͡° ͜ʖ ͡°) Optional periods */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Method calls without periods
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span><span style="color:#ae81ff">5</span><span style="color:#f92672">)</span> map <span style="color:#f92672">(</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">)</span> sum
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Method calls with periods
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">List</span><span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">,</span><span style="color:#ae81ff">2</span><span style="color:#f92672">,</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span><span style="color:#ae81ff">4</span><span style="color:#f92672">,</span><span style="color:#ae81ff">5</span><span style="color:#f92672">).</span>map<span style="color:#f92672">(</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">)</span> sum
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* ( ͡° ͜ʖ ͡°) Different ways of defining &#34;functions&#34; */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Method
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> square<span style="color:#f92672">(</span>number<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span> <span style="color:#f92672">=</span> number <span style="color:#f92672">*</span> number
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">val</span> square<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Int</span> <span style="color:#66d9ef">=</span> <span style="color:#f92672">{</span> x <span style="color:#66d9ef">=&gt;</span> x <span style="color:#f92672">*</span> x <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* ( ͡° ͜ʖ ͡°) Flexible parameter newline formatting */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// One line
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> manyParams<span style="color:#f92672">(</span>a<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">,</span> b<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">,</span> c<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Several lines
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> manyParams<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>  a<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  b<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span><span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  c<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Int</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* ( ͡° ͜ʖ ͡°) Flexible naming */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Non Alpha-numeric method names
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> <span style="color:#f92672">+=[</span><span style="color:#66d9ef">T</span><span style="color:#f92672">](</span>newValue<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">T</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">List</span><span style="color:#f92672">[</span><span style="color:#66d9ef">T</span><span style="color:#f92672">]</span> <span style="color:#66d9ef">=</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  newValue <span style="color:#66d9ef">:</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">this.list</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Unicode method names 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> `(╯°□°）╯︵ ┻━┻`<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Unit</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  sys<span style="color:#f92672">.</span>exit<span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>And for comparison&rsquo;s sake, here&rsquo;s some Golang:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// ( ͡° ͜ʖ ͡°) Curly braces or parenthesis, no mix and matching
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Hello, 世界&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ( ͡° ͜ʖ ͡°) No optional periods
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">v</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Vertex</span>) <span style="color:#a6e22e">Abs</span>() <span style="color:#66d9ef">float64</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">math</span>.<span style="color:#a6e22e">Sqrt</span>(<span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">X</span><span style="color:#f92672">*</span><span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">X</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Y</span><span style="color:#f92672">*</span><span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Y</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ( ͡° ͜ʖ ͡°) Unicode naming, but no &#34;+=&#34; stuff
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#960050;background-color:#1e0010">世界</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Hello, 世界&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Those examples are just the tip of the iceberg, but they should give you a good idea
+of the kinds of syntax quirks I&rsquo;m talking about.</p>
+<p>Personally, I&rsquo;m not a fan of the Golang syntax, but there is something to be said about
+it&rsquo;s uniformity &ndash; once I&rsquo;ve learned how to read one person&rsquo;s Golang code, I can read pretty much all Golang code. This isn&rsquo;t necessarily true of Ruby or Scala.</p>
+<p>In some cases, newer languages have relied on the syntax of previously famous languages
+to gain popularity &ndash; Java&rsquo;s syntax similarity to C++ was no accident, it was an intentional
+design decision by James Gosling to lure programmers away from their familiar C++ homes. JavaScript
+<a href="http://en.wikipedia.org/wiki/ECMAScript#History">wasn&rsquo;t always named JavaScript</a>, but Brendan Eich
+decided it would help with gaining popularity. The syntax is also reminiscent of Java &ndash; it uses
+curly braces for scopes as well was semicolons for terminating sequences.</p>
+<p>The bottom line is that programmers don&rsquo;t want to learn a million different ways of reading
+the same code. If you&rsquo;re using a language with an auto formatter such as <a href="https://www.github.com/mdr/scalariform">Scala</a> or <a href="http://golang.org/cmd/gofmt/">Golang</a>, you&rsquo;re probably in the best boat &ndash; these formatters will format your code for you, enforcing a consistent style without having to spend time and energy trying to manually modify your code to be more readable (no more time wasted on syntax during code reviews). Ruby doesn&rsquo;t have a full fledged auto formatter, but it does have <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for telling you when your code is breaking style conventions.</p>
+<h3 id="static-analysis">Static Analysis</h3>
+<p>If there&rsquo;s anything that kills the maintainability of dynamic languages, it&rsquo;s the
+lack of type safety. I&rsquo;ve used Ruby to death, and while I love using it for small applications
+or building prototypes, it&rsquo;s not something I would choose if I had to work on a project
+with more than a few engineers or one that was more than a few thousand lines of code (or one that demanded performance, but that&rsquo;s another story).</p>
+<p>While I was working at RightScale, we had a massive 900,000 SLOC repository that contained way more
+business logic than it should have. The code base was a nightmare to maintain, and it had been that way for years. This was partially from the lack of time given to fix the problem, partially from having fifty engineers modifying the same code base, but also partly due to the nature of Ruby itself.</p>
+<p>At one point, we really needed to start deprecating old code to get a sense of what was still
+in use and what wasn&rsquo;t. In order to do this, one of our software architects proposed this solution:
+add a snippet (that I&rsquo;ll reference as) <code>dead_code</code> to any file that was thought to
+no longer be in use. The method <code>dead_code</code> was a monkey patch on the <code>Object</code> namespace that
+would log / email / sound the alarms whenever the code was utilized at runtime (since everything
+is an object in Ruby due to its Smalltalk influences, this works &ndash; don&rsquo;t try this in other languages).
+The idea was that if we ever got production error logs from the <code>dead_code</code> snippet, it meant that
+the piece of code we thought we could remove was in fact not removable.</p>
+<p>In another case, our infrastructure team was prototyping an idea of a &ldquo;code fence&rdquo;, which
+would log / email / sound the alarms whenever a set of files tagged with a certain method was called at runtime (in production). I&rsquo;ll reference this method as <code>code_fence(some_fence_group)</code>. We needed this in order to extract business logics into separate services for SOA services</p>
+<p>And here&rsquo;s what drives me crazy about the two solutions I outlined above &ndash; neither of those slow iterating approaches would have been necessary in a strongly typed static programming language. While they were clever and much easier than adding unit tests to every piece of code we could find after years of neglecting writing unit tests, it wouldn&rsquo;t have been such a problem if we had used a compiled language (we may have never even had enough of a product to get to this point if we used a compiled language, but let&rsquo;s leave that discussion for another time).</p>
+<p>Here is how the <code>dead_code</code> situation would have been solved in a strongly typed static programming language:</p>
+<pre><code>1. Remove the file or code you want to check from the repo, and compile.
+2. If there are any compile errors, it's being used. Stop using it. If it isn't, you're good.
+
+1a. Alternatively, use your IDE to tell you if its used anywhere.
+2a. If it is, stop using it. If it isn't, remove it.
+</code></pre>
+<p>That&rsquo;s all there is to it&hellip; unless your code to remove is API code that is called from a separate service, such as a Rails controller for a RESTful HTTP API. Then some logging is required in the API code layer, but at least in this case it&rsquo;s only the API code that needs logging, and not every possible file in your entire code base that you want to get rid of.</p>
+<p>For the <code>code_fence(some_fence_group)</code> situation, solving this is even easier than with the <code>dead_code</code>
+case:</p>
+<pre><code>1. Remove the set of code you want refactored into a separate service or library repository.
+2. Compile your newly divided two sets of code. 
+3. If it compiles, you're good. If it doesn't, fix the interfaces and GOTO #2.
+</code></pre>
+<p>You might be thinking at this point, &ldquo;dude.. unit tests? WTF!?&rdquo;, but I offer you this counter point: static analysis in a compiled language is tantamount to a proof of correctness in terms of interfaces. Unit tests are not proofs, they do not guarantee your code will work for every possible permutation. You literally get interface checking for free by just using a compiled language &ndash; in a language such as Ruby, to merely get a poor mans version of the same test coverage, you&rsquo;d have to write a unit test for every single new method written to get the level of fine grained error reporting that a compiler would give you.</p>
+<p>To drive my point home, that 900,000 SLOC Ruby application I mentioned was a Rails 2.3 application, running on a version of Ruby 1.8.7. Rails 2.3 was released in <em>2009</em>. It&rsquo;s still running on Rails 2.3 and Ruby 1.8.7, and it&rsquo;s <em>2014</em>. Ruby is up to version 2.1, and Rails is up to 4.0.2 as of me writing this. To be fair, some of the reasons for this is not purely related to the language, but it certainly would have helped with upgrading libraries and Ruby versions if the language was a compiled one.</p>
+<p>I should note that there are a few exceptions to this rule in the land of static typing, most notably
+pointers in C / C++ and other low level languages, and in Scala there is the <a href="http://www.scala-lang.org/api/current/index.html#scala.Dynamic">dynamic</a> feature. The important thing here is that these are exceptions, and typical code in these languages will find errors more often than not.</p>
+<h3 id="compile-times-and-unit-test-iteration-times">Compile Times and Unit Test Iteration Times</h3>
+<p>Slow compile times and slow unit tests slow down code iteration. Dynamic languages
+don&rsquo;t have a compile step, but they are not immune to this issue as they do not
+have a compile time static type checker, lexer, or parser to find these bugs. Unit tests are vital to fill in this gap&hellip; and they can be slow.</p>
+<p>That 900,000 line Ruby application I mentioned earlier took <em>five</em> minutes to run a single unit test, mostly due to having to load and initialize way too many gems and libraries. Needless to say, it was impossible to iterate quickly. Small bugs such as interface errors between <a href="http://www.ruby-doc.org/core-2.1.0/Symbol.html">strings and symbols</a> became more troublesome to debug than they should have been &ndash; for every mismatched <code>def .. end</code>, typo, type mismatch, or invalid argument bug I had in my code, it added five minutes to the development time of what I was working on. Unlike with static typing, dynamic languages will typically only find one of these bugs at a time due to their interpreted &ldquo;run one line at a time&rdquo; nature. If it was up to me, fixing the time to run unit tests would have been more important than anything else (except for production bugs that needed fixing).</p>
+<p>Conversely, on the other side of the language typing fence, I&rsquo;ve heard of 45 minute C++ build times &ndash; I can&rsquo;t possibly imagine trying to modify a code base that takes that long to compile. Luckily, I don&rsquo;t think it gets worse than C++, and most statically typed languages have much better compilation times than C++.</p>
+<p>Languages like Java, Scala or Golang don&rsquo;t quite have the compile time problem to the extent C++ does.
+They all have incremental compilers, which will only recompile code that has been changed
+(and any code that was using the changed code). Golang&rsquo;s compiler is likely one of the
+fastest for a statically typed language, and Scala is bordering on being as slow as C++
+without incremental compilation. One caveat with the JVM &ndash; it takes time to &ldquo;warm up&rdquo;;
+anything that requires restarting the JVM is going to add several seconds to the build process.</p>
+<p>If you haven&rsquo;t seen it, <a href="http://vimeo.com/36579366">Bret Victor&rsquo;s talk</a> makes the case for immediate feedback in much greater detail than I can in this article. Let&rsquo;s just say if it took a musician 5 minutes to hear a note once it&rsquo;s been played, there would be much fewer musicians in the world.</p>
+<h3 id="conclusion-and-next-up">Conclusion and Next Up</h3>
+<p>It used to be the case that it was common knowledge that statically typed languages were much more verbose than dynamically typed languages were. This hasn&rsquo;t always been true &ndash; concise compiled languages such as Haskell and ML have been around for a while now &ndash; but concise, strongly and statically typed languages such as Scala are only now starting to gain traction in the industry.</p>
+<p>So now our current options now seem to be these:</p>
+<blockquote>
+<p>Simple to learn, concise languages, but terrible for long term large scale
+application maintainability due to the lack of compile time static analysis
+(Ruby, Python, JavaScript)</p>
+<p>Simple to learn, verbose languages with okay long term maintainability, but might
+be a pain to refactor because of code duplication
+(Go, Java 7 and lower)</p>
+<p>Difficult to learn, but concise languages with good long term maintainability&hellip;
+as long as you can figure out what your code is doing.
+(Scala, Haskell)</p>
+</blockquote>
+<p>It remains to be seen if it&rsquo;s possible for a language to have all three qualities &ndash; simple to learn, concise, and good for long term maintainability.</p>
+<p>The next article in this series is still related to programming languages, but it&rsquo;s important enough
+to warrant it&rsquo;s own article.</p>
+<p><em>Coming Next: Limiting Shared Mutable State, Or Why You Should Learn Functional Programming</em></p>
+
+  </div>
+  <div class="post-footer">
+    
+  </div>
+</article>
+
+    </main>
+  </body>
+</html>

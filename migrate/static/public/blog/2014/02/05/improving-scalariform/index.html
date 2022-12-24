@@ -1,0 +1,511 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Improving Scalariform, The Scala Source Formatter - Daniel Trinh</title>
+	<meta name="author" content="Daniel Trinh">
+
+	
+	<meta name="description" content="Feb 5th, 2014 project, scala Improving Scalariform, the Scala Source Formatter Scalariform is a Scala source code formatter, originally written by &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Daniel Trinh" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://danieltrinh.com/blog/2014/02/05/improving-scalariform/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-45587019-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<img src="http://www.gravatar.com/avatar/685bb9c0f2d690d3e4a910995a13f811?s=160" alt="Profile Picture" style="width: 160px;" />
+	
+</div>
+<hgroup>
+  <h1><a href="/">Daniel Trinh</a></h1>
+  
+</hgroup>
+<nav id="main-nav"><hgroup>
+  <h2>Articles</h2>
+  
+</hgroup>
+<ul class="main-navigation">
+  <li><a href="/blog/categories">Categories</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+<hgroup>
+  <h2 class="main-navigation">
+    <a href="/blog/categories/project/">Open Source Projects</a>
+  </h2>
+</hgroup>
+<ul>
+  <li>
+    <a href="/blog/2016/07/12/filtering-duplicate-messages-in-twitch-chat/">Filtering Twitch Chat</a>
+  </li>
+  <li>
+    <a href="/blog/2014/02/06/converting-ocremixs-rss-to-a-twitter-feed/">OCRemix RSS to Twitter</a></li>
+  <li>
+    <a href="/blog/2014/02/05/improving-scalariform/">Scalariform</a>
+  </li>
+</ul>
+
+<section class="aboutme">
+  <p>
+    Generalist Backend Software Engineer. This is my blog on tech related things.
+
+  </p>
+</section>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+			<a class="email" href="mailto:daniel.s.trinh@gmail.com" title="Email">Email</a>
+		
+		
+		
+		
+			<a class="github" href="https://github.com/daniel-trinh" title="GitHub">GitHub</a>
+		
+		
+		
+		
+			<a class="linkedin" href="http://www.linkedin.com/pub/daniel-trinh/26/229/314" title="LinkedIn">LinkedIn</a>
+		
+		
+		
+		
+		
+		
+		
+			<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-05T23:26:00-08:00" data-updated="true" itemprop="datePublished">Feb 5<span>th</span>, 2014</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/project/'>project</a>, <a class='category' href='/blog/categories/scala/'>scala</a>
+
+</div>
+		
+	</div>
+
+	<h1 class="title" itemprop="name">Improving Scalariform, the Scala Source Formatter</h1>
+	<div class="entry-content" itemprop="articleBody"><p>Scalariform is a Scala source code formatter, originally written by <a href="http://github.com/mdr">Matt Russell</a> (big thanks to him for writing it).</p>
+
+<p>It&rsquo;s much easier to show you what this does than it is to try and explain it, so that&rsquo;s what I&rsquo;ll do.</p>
+
+<p>This is some poorly formatted code before running Scalariform:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'><span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'><span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'><span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'><span class="mi">0</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After running Scalariform:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty cool, right? Unfortunately, there haven&rsquo;t been very many updates to the official version of this super awesome project lately,
+so I decided to fork the project and start improving upon it myself. Since I use Scala quite often, I&rsquo;ve got some pretty strong motivation to work on improving it.</p>
+
+<p>Here&rsquo;s a quick summary of what I&rsquo;ve added to Scalariform <em>so far</em>:</p>
+
+<figure class='code'><figcaption><span>Previous Scalariform Formatting</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">showInput</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span>
+</span><span class='line'>  <span class="n">parent</span><span class="k">:</span> <span class="kt">Component</span> <span class="o">=</span> <span class="kc">null</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">message</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">title</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="n">uiString</span><span class="o">(</span><span class="s">&quot;OptionPane.inputDialogTitle&quot;</span><span class="o">),</span>
+</span><span class='line'>  <span class="n">messageType</span><span class="k">:</span> <span class="kt">Message.Value</span> <span class="o">=</span> <span class="nc">Message</span><span class="o">.</span><span class="nc">Question</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">icon</span><span class="k">:</span> <span class="kt">Icon</span> <span class="o">=</span> <span class="nc">EmptyIcon</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">entries</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Nil</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">initial</span><span class="k">:</span> <span class="kt">A</span>
+</span><span class='line'><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="k">class</span> <span class="nc">Cake</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">icingFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Vanilla</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">cakeFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Chocolate</span><span class="o">,</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">candles</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">layers</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">iceCream</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">False</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">o</span><span class="o">.</span><span class="n">manyArguments</span><span class="o">(</span><span class="n">abc</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcOne</span> <span class="k">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcTwo</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcThree</span> <span class="k">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFour</span> <span class="k">=</span> <span class="mi">4</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFive</span> <span class="k">=</span> <span class="mi">3</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Scalariform Formatting with My Changes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// Parameter names, types, and defaults are aligned into three separate columns</span>
+</span><span class='line'><span class="k">def</span> <span class="n">showInput</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span>
+</span><span class='line'>  <span class="n">parent</span><span class="k">:</span>      <span class="kt">Component</span>     <span class="o">=</span> <span class="kc">null</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">message</span><span class="k">:</span>     <span class="kt">Any</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">title</span><span class="k">:</span>       <span class="kt">String</span>        <span class="o">=</span> <span class="n">uiString</span><span class="o">(</span><span class="s">&quot;OptionPane.inputDialogTitle&quot;</span><span class="o">),</span>
+</span><span class='line'>  <span class="n">messageType</span><span class="k">:</span> <span class="kt">Message.Value</span> <span class="o">=</span> <span class="nc">Message</span><span class="o">.</span><span class="nc">Question</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">icon</span><span class="k">:</span>        <span class="kt">Icon</span>          <span class="o">=</span> <span class="nc">EmptyIcon</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">entries</span><span class="k">:</span>     <span class="kt">Seq</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>        <span class="k">=</span> <span class="nc">Nil</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">initial</span><span class="k">:</span>     <span class="kt">A</span>
+</span><span class='line'><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Two newlines will result in separate alignment groups </span>
+</span><span class='line'><span class="k">case</span> <span class="k">class</span> <span class="nc">Cake</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">icingFlavor</span><span class="k">:</span> <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Vanilla</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">cakeFlavor</span><span class="k">:</span>  <span class="kt">Flavor</span> <span class="o">=</span> <span class="nc">Chocolate</span><span class="o">,</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">candles</span><span class="k">:</span>  <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">layers</span><span class="k">:</span>   <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">iceCream</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="nc">False</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Same feature working with method calls</span>
+</span><span class='line'><span class="n">o</span><span class="o">.</span><span class="n">manyArguments</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">abc</span>    <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcOne</span> <span class="k">=</span> <span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcTwo</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcThree</span> <span class="k">=</span> <span class="mi">3</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFour</span>  <span class="k">=</span> <span class="mi">4</span><span class="o">,</span>
+</span><span class='line'>  <span class="n">abcFive</span>  <span class="k">=</span> <span class="mi">3</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And here&rsquo;s how to use my version:</p>
+
+<figure class='code'><figcaption><span>Scalariform Formatting with My Changes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="c1">// Add this to .../project/plugins.sbt</span>
+</span><span class='line'><span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Sonatype OSS Snapshots&quot;</span> <span class="n">at</span> <span class="s">&quot;https://oss.sonatype.org/content/repositories/snapshots&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">&quot;com.danieltrinh&quot;</span> <span class="o">%</span> <span class="s">&quot;sbt-scalariform&quot;</span> <span class="o">%</span> <span class="s">&quot;1.3.0-SNAPSHOT&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>See the <a href="https://github.com/daniel-trinh/sbt-scalariform">plugin</a> for how to configure formatting options, and the <a href="https://github.com/daniel-trinh/scalariform">Scalariform readme</a>
+for available formatting options.</p>
+
+<p>Since this is an ongoing project, there will be more updates to come.</p>
+
+<!-- 
+The rest of this article goes into great detail about my motivation to work on Scalariform,
+the importance of auto-formatters in general, and some of the design dilemmas of working on Scalariform.
+
+Before I get into what I've improved, I'll go over some reasons why Scalariform
+is important.
+
+## The Importance of Auto-Formatting
+[Many](https://code.google.com/p/google-styleguide/ "Google's style guides for various languages") [companies](http://twitter.github.io/effectivescala/ "Twitter's style guide for Scala") [have](https://github.com/styleguide/ruby "Github's style guide for Ruby") coding style guidelines for a reason. [I wrote about this](/blog/2014/01/26/maintaining-a-large-code-base-part-3/) in great detail in my article about programming languages and code bases. My general conclusion is that having many ways of visualizing and formatting source code
+is not a good thing -- the more ways to format the code, the more ways a reader of the
+code will have to learn to read the code to understand it. 
+
+The following code example is perfectly valid scala code... but it's not at all readable.
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+The output from running Scalariform for this result is the same as the previous example:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">Coffee</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">sugarCubes</span> <span class="k">=</span> <span class="mi">20</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">isCaffeinated</span> <span class="k">=</span> <span class="kc">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">energyBoost</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">caffeinated</span><span class="o">)</span>
+</span><span class='line'>      <span class="mi">100</span> <span class="o">*</span> <span class="n">sugarCubes</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="mi">0</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+Having something that will take care of the formatting for me is great &#8211; spending time thinking about formatting, manually formatting code, and spending time
+on code reviews about formatting is not a very productive use of time when there are actual business product related problems to solve, and especially since it&#8217;s a problem that can be solved forever by using an auto-formatter along the lines of Scalariform or gofmt.
+
+#### Formatting Ubiquity
+
+Having an auto formatter to enforce a consistent style in a code base is important, because
+once the maintainers of that code base have become accustomed to that style, they won&#8217;t have to &#8220;readjust&#8221; their eyes to get used to. If the auto formatter for a programming language is nearly ubiquitous amongst those who use it, such as with Golang&#8217;s [gofmt](http://research.swtch.com/gofmt), then even better &#8211; users across the language will be able to read anyone&#8217;s elses code that also uses the formatter.
+
+While auto formatters such as Scalariform can&#8217;t check everything that is in a styleguide
+(it won&#8217;t automatically reformat your imperative, state-mutating code into a functional style automatically), it will take care of the visual aesthetics formatting problem for you.
+
+
+#### Scalariform Dillemas 
+Scalariform has many configuration options, which goes against the design philosophy
+of having one canonical representation so that everyone can quickly get accustomed to the same formatting. It also happens to significantly complicate the actual Scalariform formatting code. With Scalariform, there is one
+global shared state &#8211; the output source code. More configuration options means
+more potentials to clash, and more special cases.
+
+Unfortunately, Scala programmers come from many different backgrounds, and there isn&#8217;t
+a global consensus on what formatting styles programmers prefer. 
+
+When I was gathering feedback for new Scalariform features, I posted an informal poll on Reddit, to gather feedback about 3 different formatting styles:
+
+<figure class='code'><figcaption><span>Style One</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="n">bb</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+<figure class='code'><figcaption><span>Style Two</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>  <span class="n">a</span><span class="k">:</span>   <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="n">bb</span><span class="k">:</span>  <span class="kt">String</span>  <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+<figure class='code'><figcaption><span>Style Three</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">class</span> <span class="nc">definition</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span>     <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'>   <span class="n">bb</span><span class="k">:</span> <span class="kt">String</span>  <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>  <span class="n">ccc</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+I was half-expecting everyone to say they prefered `Style Two`, but of course that wasn&#8217;t the case. `Style One` was the most popular choice. `Style Two` was the second most popular,
+and `Style Three` was by far the least &#8211; not a single person said they preferred this one (although a few said they didn&#8217;t mind any of the options).
+
+I also concluded that a strong contributing factor on which style people prefer is
+strongly related to just what they&#8217;re used to reading &#8211; Golang&#8217;s gofmt happens to format
+code in something similar to `Style Two`, and happens to be used by roughly 70% of all golang projects. If this really is the main factor, then it doesn&#8217;t really make sense
+to  &#8211;>
+
+</div>
+
+</article>
+
+	
+
+</div>
+			</div>
+			<footer id="footer" class="inner"><p>
+  Copyright &copy; 2016 - Daniel Trinh -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+</footer>
+			
+
+
+
+
+
+
+
+
+
+
+
+		</div>
+	</div>
+</body>
+</html>

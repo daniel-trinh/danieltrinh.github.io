@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: java | Daniel Trinh]]></title>
+  <link href="http://danieltrinh.com/blog/categories/java/atom.xml" rel="self"/>
+  <link href="http://danieltrinh.com/"/>
+  <updated>2016-07-19T12:50:47-07:00</updated>
+  <id>http://danieltrinh.com/</id>
+  <author>
+    <name><![CDATA[Daniel Trinh]]></name>
+    <email><![CDATA[daniel.s.trinh@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Maintaining a Large Code Base, Part 3: Programming Languages]]></title>
+    <link href="http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3/"/>
+    <updated>2014-01-26T20:58:00-08:00</updated>
+    <id>http://danieltrinh.com/blog/2014/01/26/maintaining-a-large-code-base-part-3</id>
+    <content type="html"><![CDATA[<p><a href="/blog/2013/11/09/maintaining-a-large-code-base-part-2/"><em>Previous Part: Service Oriented Architecture</em></a></p>
+
+<p>If you are lucky enough to be able to choose the programming language for a new project,
+this section might provide some insight on how it might impact the future of your code base.</p>
+
+<h2>Choose Your Programming Languages Wisely</h2>
+
+<p>This article focuses only on the technical details of programming languages and their
+effects on maintainability. It won&rsquo;t be covering topics such as a language&rsquo;s popularity, tooling,
+or library support. While those things are undoubtedly important, those things aren&rsquo;t necessarily intrinsic to a programming language, and they tend to change much more often than the topics I&rsquo;ll
+be discussing here.</p>
+
+<p>When I first started writing this section, it was titled &ldquo;Use a statically typed language.&rdquo;
+I then thought of Java with all of its verbosity, realized it&rsquo;s not quite that simple, and it would
+make more sense to just outline how certain language features impact code maintainability,
+and let you conclude yourself on what kind of language to pursue.</p>
+
+<p>Having said that, personally I prefer languages with static type systems over dynamic ones from a pure maintainability point of view, except perhaps in the case of languages like Java.</p>
+
+<p>Before I get started, let&rsquo;s define a few things.</p>
+
+<blockquote><p>Compiled language &ndash; purely statically typed, type annotations are required,
+or must be able to be inferred at compile time
+(Scala, Java, Haskell, C++)</p>
+
+<p>Dynamic language &ndash; interpreted, no type annotations or they are optional
+(Clojure, Typed Clojure, Ruby, Groovy, Groovy 2.0, Python, JavaScript)</p>
+
+<p>Statically typed language &ndash; same as compiled language</p></blockquote>
+
+<p>Typed Clojure and Groovy 2.0 both have optional type annotations for partial compile time
+type checking and performance improvements, but I am grouping them in the dynamic
+language group because they are optional, and they do not provide the same static
+analysis guarantees as pure statically typed languages, and hence are not as helpful in
+terms of maintainability (more on static analysis later). They are certainly easier
+to pick up than a full blown compiled languages with generics, though (more on this in the language complexity section).</p>
+
+<h3>Conciseness</h3>
+
+<p>By conciseness I mean this: How much code is necessary to express a particular
+piece of business logic? How much of that code is intrinsic to
+describing that logic, and how much of it is necessary because of limitations
+in the language? Conciseness is important for maintainability because it means there&rsquo;s less
+code to read, and less code to refactor when it&rsquo;s necessary to do so.</p>
+
+<p>Here&rsquo;s an example comparing a basic class in Java with the same functionality (both in behavior and runtime performance) implemented in Scala that demonstrates what I mean:</p>
+
+<p>```java Java class
+public class Coffee {</p>
+
+<pre><code>private final boolean caffeinated;
+private final int sugarCubes;
+
+public Coffee(boolean caffeinated, int sugarCubes) {
+    this.caffeinated = caffeinated;
+    this.sugarCubes = sugarCubes;
+}
+public boolean getCaffeinated() {
+    return caffeinated;
+}
+public int getSugarCubes() {
+    return sugarCubes;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><code>scala Scala class
+class Coffee(val caffeinated: Boolean, val sugarCubes: Int)
+</code></p>
+
+<p>For comparison&rsquo;s sake, here&rsquo;s a Ruby example of something similar to the two examples
+above:</p>
+
+<p>```ruby Ruby
+class Coffee
+  attr_reader :caffeinated, :sugar_cubes</p>
+
+<p>  def initialize(caffeinated, sugar_cubes)</p>
+
+<pre><code>@caffeinated = caffeinated
+@sugar_cubes = sugar_cubes
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Dynamic languages tend to win in terms of conciseness, since there&rsquo;s no extra
+code necessary for specifying type information, although this isn&rsquo;t always the case.</p>
+
+<h3>Language Complexity</h3>
+
+<p>It doesn&rsquo;t really matter if code takes fewer lines of code if it&rsquo;s impossible to figure out what it does. Unlike conciseness, language complexity isn&rsquo;t quite as clear cut to define. So
+instead of trying to define it in an abstract sense, I&rsquo;ll just give you some examples.</p>
+
+<p>Scala is quite conciseness, but the type system is anything but simple.
+The type system is so involved that it is Turing Complete &mdash; it is so complex that
+it is possible to write algorithms such as <a href="http://apocalisp.wordpress.com/2010/06/08/type-level-programming-in-scala/">infinite loops</a> that only utilize the type system features; no for loops, while loops,
+or function recursion. The type system is so complex to the point that a simpler programming
+language to possibly become the next Scala is <a href="http://www.infoq.com/presentations/data-types-issues">in the works</a> by Scala&rsquo;s original designer.</p>
+
+<p>Here&rsquo;s one of the crazier function signatures in Scala, from the Scalaz library:</p>
+
+<p><code>scala
+implicit def CokleisliMAB[M, A, B](k: Cokleisli[M[_][_], A, B]): MAB[Cokleisli[M[_][_], A, B][A, B], A, B]
+</code></p>
+
+<p>It probably doesn&rsquo;t seem fair to show that signature for those unfamiliar with Scala, but I assure
+you, that kind of function signature is still daunting for seasoned Scala developers.</p>
+
+<p>Although without those complicated type features, code like this might not be possible in Scala:</p>
+
+<p>```scala
+// Just Ints
+List(1, 2, 3, 4, 5) map { x => x * x } sum
+// => Int = 55</p>
+
+<p>// Ints and Doubles
+Array(1, 2 ,3.0, 4.5, 5.55) map { x => x * x } sum
+// => Double = 65.0525</p>
+
+<p>// Just Strings
+Vector(&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;e&rdquo;) map { x => x * 2 }
+// =>  Vector[String] = Vector(aa, bb, cc, dd, ee)
+```</p>
+
+<p>The implementation of the <code>map</code> function in Scala is far from simple, though. Writing
+this sort of code is not something the average Scala developer can accomplish. In fact,
+I&rsquo;m not sure there&rsquo;s more than a handful of people who could write a collections library
+as powerful as the one in Scala &mdash; it took the creator of the language and a few helpers an entire year to get it to the point it is currently at.</p>
+
+<p>Ruby, on the other hand, has an incredibly simple implementation of the <code>map</code> method.
+It&rsquo;s just a few lines of code, within the <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a> module. To use it, all that is necessary is an implementation of the <code>each</code> function on the inheriting member, and that&rsquo;s it. Because of duck typing, there isn&rsquo;t much else that&rsquo;s needed.</p>
+
+<p>In contrast to both Scala and Ruby, <a href="http://golang.org/">Golang</a> is far from being concise, but it is well reported for being relatively quick to pick up and start coding, likely in large part due to its incredibly minimal type system. It has no form of generics, meaning it is impossible to write type safe collection methods that work with all types using just the language. Golang is packaged with it&rsquo;s own
+basic set of generic data structures (slices, maps, channels), but if you want to write
+your own priority queue that works with all types, you are out of luck. This means
+the language is easier to learn than a language like Scala, but also results in more code and code duplication.</p>
+
+<h3>Syntactic Flexibility</h3>
+
+<p>There&rsquo;s a reason why <a href="https://code.google.com/p/google-styleguide/" title="Google's style guides for various languages">Google</a>,
+<a href="http://twitter.github.io/effectivescala/" title="Twitter's style guide for Scala">Twitter</a>,
+and <a href="https://github.com/styleguide/ruby" title="Github's style guide for Ruby">Github</a> have coding style guidelines.</p>
+
+<p>Can you imagine if each letter of the English alphabet was in a different Unicode character?
+Here&rsquo;s some English that has had each letter of the alphabet mapped to a different character
+in Unicode:</p>
+
+<pre><code>Original text:
+I am Heavy Weapons Guy. And this... [grips Sasha] is my weapon. She weighs 150
+kilograms and fires $200 custom-tooled cartridges at 10,000 rounds per minute. 
+[leans in] It cost $400,000 to fire this weapon...for 12 seconds.
+
+Altered text:
+"ᚋ ᣀᣌ ᚊᣄᣀᨇᨊ ᚙᣄᣀᣏᣎᣍᣒ ᚉᨐᨊ. ᚃᣍᣃ ᣓᣇᣈᣒ... [ᣆᣑᣈᣏᣒ ᚕᣀᣒᣇᣀ] ᣈᣒ ᣌᨊ ᨈᣄᣀᣏᣎᣍ. ᚕᣇᣄ ᨈᣄᣈᣆᣇᣒ 150
+ᣊᣈᣋᣎᣆᣑᣀᣌᣒ ᣀᣍᣃ ᣅᣈᣑᣄᣒ $200 ᣂᨐᣒᣓᣎᣌ-ᣓᣎᣎᣋᣄᣃ ᣂᣀᣑᣓᣑᣈᣃᣆᣄᣒ ᣀᣓ 10,000 ᣑᣎᨐᣍᣃᣒ ᣏᣄᣑ ᣌᣈᣍᨐᣓᣄ. 
+[ᣋᣄᣀᣍᣒ ᣈᣍ] ᚋᣓ ᣂᣎᣒᣓ $400,000 ᣓᣎ ᣅᣈᣑᣄ ᣓᣇᣈᣒ ᨈᣄᣀᣏᣎᣍ...ᣅᣎᣑ 12 ᣒᣄᣂᣎᣍᣃᣒ.
+
+Code for converting: https://gist.github.com/daniel-trinh/2b6d4b9c38e713148db4
+</code></pre>
+
+<p>While that is a bit of a contrived example, it&rsquo;s a taste of what programmers have to deal with
+in programming languages that have flexible syntax. Out of the times I&rsquo;ve talked about the new languages I&rsquo;ve been exploring (Clojure, Go, Scala), syntax is almost always the first thing my coworkers notice
+and talk about &mdash; this is because understanding syntax is the first step to being able to read the language. If it&rsquo;s different from what they&rsquo;re familiar with, it&rsquo;s just another barrier to learning it.</p>
+
+<p>Languages that are designed for building domain-specific languages tend to have more
+syntactic flexibility and lexical complexity. Languages like Ruby and Scala were designed
+in mind of supporting DSLs. Unfortunately, flexible syntax makes it harder for users to read code. For every syntax permutation that people use in a language, everyone who reads the language is going
+to have to be able to read those permutations. In terms of language design, I don&rsquo;t hear this topic talked about as often as some of the other topics in this article, but nevertheless I still see it as worth discussing.</p>
+
+<p>Here are some real examples demonstrating the flexibility of Ruby&rsquo;s and Scala&rsquo;s syntax.</p>
+
+<p>```ruby Ruby</p>
+
+<h1>( ͡° ͜ʖ ͡°) do..end vs curly braces</h1>
+
+<h1>Curly Braces</h1>
+
+<p>[1,2,3,4,5].map { |x| x * x }</p>
+
+<h1>do..end</h1>
+
+<p>[1,2,3,4,5].map do |x|
+  x * x
+end</p>
+
+<h1>( ͡° ͜ʖ ͡°) Optional periods</h1>
+
+<h1>Method calls without periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x } reduce (:+)</p>
+
+<h1>Method calls with periods</h1>
+
+<p>[1,2,3,4,5].map { |x| x*x }.reduce (:+)</p>
+
+<h1>( ͡° ͜ʖ ͡°) Different ways of defining functions</h1>
+
+<h1>Method method</h1>
+
+<p>def square(x)
+ x * x
+end</p>
+
+<h1>Lambda method</h1>
+
+<p>square = lambda { |n| n * n }</p>
+
+<h1>Proc method</h1>
+
+<p>square = Proc.new { |x| x * x }</p>
+
+<h1>( ͡° ͜ʖ ͡°) Flexible method names</h1>
+
+<h1>Non Alpha-numeric method names</h1>
+
+<p>def +=(new_value)
+  @value = @value + new_value
+end
+```</p>
+
+<p>```scala Scala</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Curly braces vs parenthesis </em>/</p>
+
+<p>// Curly Braces
+List(1,2,3,4,5,6).map { x => x * x }</p>
+
+<p>// Parenthesis
+List(1,2,3,4,5,6).map( x => x * x )</p>
+
+<p>// Unnecessary Curly Braces .. and Parenthesis
+List(1,2,3,4,5,6).map(
+  {</p>
+
+<pre><code>{
+  ( { x =&gt; x * x } )
+}
+</code></pre>
+
+<p>  }
+)</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Optional periods </em>/</p>
+
+<p>// Method calls without periods
+List(1,2,3,4,5) map ( x => x * x ) sum</p>
+
+<p>// Method calls with periods
+List(1,2,3,4,5).map( x => x * x ) sum</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Different ways of defining &ldquo;functions&rdquo; </em>/</p>
+
+<p>// Method
+def square(number: Int): Int = number * number</p>
+
+<p>// Function
+val square: Int => Int = { x => x * x }</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible parameter newline formatting </em>/</p>
+
+<p>// One line
+def manyParams(a: Int, b: Int, c: Int): Int</p>
+
+<p>// Several lines
+def manyParams(
+  a: Int,
+  b: Int,
+  c: Int
+): Int</p>
+
+<p>/<em> ( ͡° ͜ʖ ͡°) Flexible naming </em>/</p>
+
+<p>// Non Alpha-numeric method names
+def +=<a href="newValue:%20T">T</a>: List[T] = {
+  newValue :: this.list
+}</p>
+
+<p>// Unicode method names
+def <code>(╯°□°）╯︵ ┻━┻</code>: Unit = {
+  sys.exit(1)
+}
+```</p>
+
+<p>And for comparison&rsquo;s sake, here&rsquo;s some Golang:</p>
+
+<p>```go Golang
+// ( ͡° ͜ʖ ͡°) Curly braces or parenthesis, no mix and matching
+func main() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) No optional periods
+func (v *Vertex) Abs() float64 {</p>
+
+<pre><code>return math.Sqrt(v.X*v.X + v.Y*v.Y)
+</code></pre>
+
+<p>}</p>
+
+<p>// ( ͡° ͜ʖ ͡°) Unicode naming, but no &ldquo;+=&rdquo; stuff
+func 世界() {
+  fmt.Println(&ldquo;Hello, 世界&rdquo;)
+}
+```</p>
+
+<p>Those examples are just the tip of the iceberg, but they should give you a good idea
+of the kinds of syntax quirks I&rsquo;m talking about.</p>
+
+<p>Personally, I&rsquo;m not a fan of the Golang syntax, but there is something to be said about
+it&rsquo;s uniformity &mdash; once I&rsquo;ve learned how to read one person&rsquo;s Golang code, I can read pretty much all Golang code. This isn&rsquo;t necessarily true of Ruby or Scala.</p>
+
+<p>In some cases, newer languages have relied on the syntax of previously famous languages
+to gain popularity &mdash; Java&rsquo;s syntax similarity to C++ was no accident, it was an intentional
+design decision by James Gosling to lure programmers away from their familiar C++ homes. JavaScript
+<a href="http://en.wikipedia.org/wiki/ECMAScript#History">wasn&rsquo;t always named JavaScript</a>, but Brendan Eich
+decided it would help with gaining popularity. The syntax is also reminiscent of Java &mdash; it uses
+curly braces for scopes as well was semicolons for terminating sequences.</p>
+
+<p>The bottom line is that programmers don&rsquo;t want to learn a million different ways of reading
+the same code. If you&rsquo;re using a language with an auto formatter such as <a href="https://www.github.com/mdr/scalariform">Scala</a> or <a href="http://golang.org/cmd/gofmt/">Golang</a>, you&rsquo;re probably in the best boat &mdash; these formatters will format your code for you, enforcing a consistent style without having to spend time and energy trying to manually modify your code to be more readable (no more time wasted on syntax during code reviews). Ruby doesn&rsquo;t have a full fledged auto formatter, but it does have <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for telling you when your code is breaking style conventions.</p>
+
+<h3>Static Analysis</h3>
+
+<p>If there&rsquo;s anything that kills the maintainability of dynamic languages, it&rsquo;s the
+lack of type safety. I&rsquo;ve used Ruby to death, and while I love using it for small applications
+or building prototypes, it&rsquo;s not something I would choose if I had to work on a project
+with more than a few engineers or one that was more than a few thousand lines of code (or one that demanded performance, but that&rsquo;s another story).</p>
+
+<p>While I was working at RightScale, we had a massive 900,000 SLOC repository that contained way more
+business logic than it should have. The code base was a nightmare to maintain, and it had been that way for years. This was partially from the lack of time given to fix the problem, partially from having fifty engineers modifying the same code base, but also partly due to the nature of Ruby itself.</p>
+
+<p>At one point, we really needed to start deprecating old code to get a sense of what was still
+in use and what wasn&rsquo;t. In order to do this, one of our software architects proposed this solution:
+add a snippet (that I&rsquo;ll reference as) <code>dead_code</code> to any file that was thought to
+no longer be in use. The method <code>dead_code</code> was a monkey patch on the <code>Object</code> namespace that
+would log / email / sound the alarms whenever the code was utilized at runtime (since everything
+is an object in Ruby due to its Smalltalk influences, this works &mdash; don&rsquo;t try this in other languages).
+The idea was that if we ever got production error logs from the <code>dead_code</code> snippet, it meant that
+the piece of code we thought we could remove was in fact not removable.</p>
+
+<p>In another case, our infrastructure team was prototyping an idea of a &ldquo;code fence&rdquo;, which
+would log / email / sound the alarms whenever a set of files tagged with a certain method was called at runtime (in production). I&rsquo;ll reference this method as <code>code_fence(some_fence_group)</code>. We needed this in order to extract business logics into separate services for SOA services</p>
+
+<p>And here&rsquo;s what drives me crazy about the two solutions I outlined above &mdash; neither of those slow iterating approaches would have been necessary in a strongly typed static programming language. While they were clever and much easier than adding unit tests to every piece of code we could find after years of neglecting writing unit tests, it wouldn&rsquo;t have been such a problem if we had used a compiled language (we may have never even had enough of a product to get to this point if we used a compiled language, but let&rsquo;s leave that discussion for another time).</p>
+
+<p>Here is how the <code>dead_code</code> situation would have been solved in a strongly typed static programming language:</p>
+
+<pre><code>1. Remove the file or code you want to check from the repo, and compile.
+2. If there are any compile errors, it's being used. Stop using it. If it isn't, you're good.
+
+1a. Alternatively, use your IDE to tell you if its used anywhere.
+2a. If it is, stop using it. If it isn't, remove it.
+</code></pre>
+
+<p>That&rsquo;s all there is to it&hellip; unless your code to remove is API code that is called from a separate service, such as a Rails controller for a RESTful HTTP API. Then some logging is required in the API code layer, but at least in this case it&rsquo;s only the API code that needs logging, and not every possible file in your entire code base that you want to get rid of.</p>
+
+<p>For the <code>code_fence(some_fence_group)</code> situation, solving this is even easier than with the <code>dead_code</code>
+case:</p>
+
+<pre><code>1. Remove the set of code you want refactored into a separate service or library repository.
+2. Compile your newly divided two sets of code. 
+3. If it compiles, you're good. If it doesn't, fix the interfaces and GOTO #2.
+</code></pre>
+
+<p>You might be thinking at this point, &ldquo;dude.. unit tests? WTF!?&rdquo;, but I offer you this counter point: static analysis in a compiled language is tantamount to a proof of correctness in terms of interfaces. Unit tests are not proofs, they do not guarantee your code will work for every possible permutation. You literally get interface checking for free by just using a compiled language &mdash; in a language such as Ruby, to merely get a poor mans version of the same test coverage, you&rsquo;d have to write a unit test for every single new method written to get the level of fine grained error reporting that a compiler would give you.</p>
+
+<p>To drive my point home, that 900,000 SLOC Ruby application I mentioned was a Rails 2.3 application, running on a version of Ruby 1.8.7. Rails 2.3 was released in <em>2009</em>. It&rsquo;s still running on Rails 2.3 and Ruby 1.8.7, and it&rsquo;s <em>2014</em>. Ruby is up to version 2.1, and Rails is up to 4.0.2 as of me writing this. To be fair, some of the reasons for this is not purely related to the language, but it certainly would have helped with upgrading libraries and Ruby versions if the language was a compiled one.</p>
+
+<p>I should note that there are a few exceptions to this rule in the land of static typing, most notably
+pointers in C / C++ and other low level languages, and in Scala there is the <a href="http://www.scala-lang.org/api/current/index.html#scala.Dynamic">dynamic</a> feature. The important thing here is that these are exceptions, and typical code in these languages will find errors more often than not.</p>
+
+<h3>Compile Times and Unit Test Iteration Times</h3>
+
+<p>Slow compile times and slow unit tests slow down code iteration. Dynamic languages
+don&rsquo;t have a compile step, but they are not immune to this issue as they do not
+have a compile time static type checker, lexer, or parser to find these bugs. Unit tests are vital to fill in this gap&hellip; and they can be slow.</p>
+
+<p>That 900,000 line Ruby application I mentioned earlier took <em>five</em> minutes to run a single unit test, mostly due to having to load and initialize way too many gems and libraries. Needless to say, it was impossible to iterate quickly. Small bugs such as interface errors between <a href="http://www.ruby-doc.org/core-2.1.0/Symbol.html">strings and symbols</a> became more troublesome to debug than they should have been &mdash; for every mismatched <code>def .. end</code>, typo, type mismatch, or invalid argument bug I had in my code, it added five minutes to the development time of what I was working on. Unlike with static typing, dynamic languages will typically only find one of these bugs at a time due to their interpreted &ldquo;run one line at a time&rdquo; nature. If it was up to me, fixing the time to run unit tests would have been more important than anything else (except for production bugs that needed fixing).</p>
+
+<p>Conversely, on the other side of the language typing fence, I&rsquo;ve heard of 45 minute C++ build times &mdash; I can&rsquo;t possibly imagine trying to modify a code base that takes that long to compile. Luckily, I don&rsquo;t think it gets worse than C++, and most statically typed languages have much better compilation times than C++.</p>
+
+<p>Languages like Java, Scala or Golang don&rsquo;t quite have the compile time problem to the extent C++ does.
+They all have incremental compilers, which will only recompile code that has been changed
+(and any code that was using the changed code). Golang&rsquo;s compiler is likely one of the
+fastest for a statically typed language, and Scala is bordering on being as slow as C++
+without incremental compilation. One caveat with the JVM &mdash; it takes time to &ldquo;warm up&rdquo;;
+anything that requires restarting the JVM is going to add several seconds to the build process.</p>
+
+<p>If you haven&rsquo;t seen it, <a href="http://vimeo.com/36579366">Bret Victor&rsquo;s talk</a> makes the case for immediate feedback in much greater detail than I can in this article. Let&rsquo;s just say if it took a musician 5 minutes to hear a note once it&rsquo;s been played, there would be much fewer musicians in the world.</p>
+
+<h3>Conclusion and Next Up</h3>
+
+<p>It used to be the case that it was common knowledge that statically typed languages were much more verbose than dynamically typed languages were. This hasn&rsquo;t always been true &mdash; concise compiled languages such as Haskell and ML have been around for a while now &mdash; but concise, strongly and statically typed languages such as Scala are only now starting to gain traction in the industry.</p>
+
+<p>So now our current options now seem to be these:</p>
+
+<blockquote><p>Simple to learn, concise languages, but terrible for long term large scale
+   application maintainability due to the lack of compile time static analysis
+   (Ruby, Python, JavaScript)</p>
+
+<p>Simple to learn, verbose languages with okay long term maintainability, but might
+be a pain to refactor because of code duplication
+   (Go, Java 7 and lower)</p>
+
+<p>Difficult to learn, but concise languages with good long term maintainability&hellip;
+as long as you can figure out what your code is doing.
+   (Scala, Haskell)</p></blockquote>
+
+<p>It remains to be seen if it&rsquo;s possible for a language to have all three qualities &mdash; simple to learn, concise, and good for long term maintainability.</p>
+
+<p>The next article in this series is still related to programming languages, but it&rsquo;s important enough
+to warrant it&rsquo;s own article.</p>
+
+<p><em>Coming Next: Limiting Shared Mutable State, Or Why You Should Learn Functional Programming</em></p>
+]]></content>
+  </entry>
+  
+</feed>

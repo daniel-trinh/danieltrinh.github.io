@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Converting the OverClocked Remix RSS to a Twitter Feed // Daniel Trinh</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Daniel Trinh" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.b59b24ca1dd67b152e93f2a69051c7c2d590b7dbbb7ebee89f4e9787d40403ed.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Converting the OverClocked Remix RSS to a Twitter Feed"/>
+<meta name="twitter:description" content="OverClocked Remix (OCRemix) is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.
+This post is about a server daemon project I wrote a year ago &ndash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at @newOCRemixes on Twitter."/>
+
+    <meta property="og:title" content="Converting the OverClocked Remix RSS to a Twitter Feed" />
+<meta property="og:description" content="OverClocked Remix (OCRemix) is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.
+This post is about a server daemon project I wrote a year ago &ndash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at @newOCRemixes on Twitter." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://danieltrinh.com/posts/2014-02-06-converting-ocremixs-rss-to-a-twitter-feed/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2014-02-06T00:00:00+00:00" />
+<meta property="article:modified_time" content="2014-02-06T00:00:00+00:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="http://danieltrinh.com"><img class="app-header-avatar" src="/avatar.jpg" alt="Daniel Trinh" /></a>
+      <span class="app-header-title">Daniel Trinh</span>
+      <p>Generalist software engineer with an emphasis on backend.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/daniel-trinh" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="linkedin.com/in/daniel-trinh-31422926" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>My Linkedin</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+          <a href="/downloads/resume.pdf" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-link">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+<article class="post">
+  <header class="post-header">
+    <h3 class="post-title">Converting the OverClocked Remix RSS to a Twitter Feed</h3>
+    <div class="post-meta">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+        Feb 6, 2014
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+        8 min read
+      </div>
+    </div>
+  </header>
+  <div class="post-content">
+    <p><a href="http://ocremix.org">OverClocked Remix (OCRemix)</a> is a website dedicated to serving high quality remixes of music from video games. The RSS feed is occasionally updated with the latest ten new songs that are posted on the site.</p>
+<p>This post is about a server daemon project I wrote a year ago &ndash; it polls the RSS feed of OCRemix periodically, and converts new results to a Twitter feed. The results can be seen at <a href="https://twitter.com/newOCRemixes">@newOCRemixes</a> on Twitter. It&rsquo;s been running on Heroku 24/7 for the past year without any problems. Source code is <a href="http://github.com/daniel-trinh/ocremix">here</a>.</p>
+<p>The rest of this post goes into the design and development of this project, so if that doesn&rsquo;t sound interesting to you, now is a good time to hop off this train.</p>
+<h2 id="motivation-and-design">Motivation and design</h2>
+<p>I&rsquo;ve been listening to music off of OCRemix ever since 2002. The way I used
+to find new songs was to repeatedly visit their website, look for new songs,
+and then click through three or four links for every new song that was posted.</p>
+<p>I got tired of checking the website, only to end up finding out there were no new songs,
+or finding out there are ten new songs, and having to click 30 times to hear all of them.</p>
+<p>So I set out to figure out how to make it much, much easier to hear new songs and download
+them if I liked them.</p>
+<h4 id="existing-ocremix-feeds">Existing OCRemix Feeds</h4>
+<p>OCRemix has it&rsquo;s <a href="https://twitter.com/ocremix">own Twitter feed</a>, which they will use
+to post new remixes, but it&rsquo;s not exclusive to providing just new songs:</p>
+<figure class="center"><img src="/images/ocremix/official_unrelated.png"
+         alt="Official OCRemix Twitter Feed picture" width="500" height="450"/><figcaption>
+            <h4>Official OCRemix Twitter Feed</h4>
+        </figcaption>
+</figure>
+
+<p>Twitter happens to have this nice feature that they call <a href="https://dev.twitter.com/docs/cards">cards</a>. Cards are essentially a feature that detect certain types of URLs, and display information within the tweet that would only be accessible from visiting the URL. One of the
+supported card types are Youtube links, which will embed a Youtube video into a Tweet
+whenever a Youtube link is detected.</p>
+<p>Sometimes the links to new songs include a Youtube link to the remix for easy listening&hellip;</p>
+<figure class="center"><img src="/images/ocremix/official_link.png"
+         alt="Official OCRemix Twitter Feed picture, embedded Youtube" width="400" height="450"/><figcaption>
+            <h4>Official OCRemix Twitter Feed -- Embedded Youtube</h4>
+        </figcaption>
+</figure>
+
+<p>and sometimes they don&rsquo;t:</p>
+<figure class="center"><img src="/images/ocremix/official_no_link.png"
+         alt="Official OCRemix Twitter Feed picture, no Youtube" width="400" height="450"/><figcaption>
+            <h4>Official OCRemix Twitter Feed -- no Embedded Youtube</h4>
+        </figcaption>
+</figure>
+
+<p>They also have their own <a href="https://www.youtube.com/channel/UC8Wh7qpPGJm3K1eZ6DHjpKA">Youtube channel</a>
+where new songs are posted, but similarly to their Twitter feed, it is not exclusive to new songs.</p>
+<h4 id="my-ocremix-feed">My OCRemix Feed</h4>
+<p>Since I was already using Twitter as a news feed, I chose that as my target platform for
+receiving new song notifications. The following is a list of some of the things I wanted
+out of my Twitter feed system.</p>
+<blockquote>
+<ul>
+<li>
+<p>Only new songs should be posted &ndash; no reposts.</p>
+</li>
+<li>
+<p>Only songs should be posted &ndash; nothing else but new OCRemix songs.</p>
+</li>
+<li>
+<p>Every single song must contain a link to the Youtube song link.</p>
+</li>
+<li>
+<p>Show the video game, remixer, and composer the song is remixed from,
+if it fits in 140 characters along with the Youtube link.</p>
+</li>
+<li>
+<p>This system should not require any input from me (automated).</p>
+</li>
+<li>
+<p>If something is broken, I should be notified of the breakage.</p>
+</li>
+</ul>
+</blockquote>
+<p>Initially, I wanted to implement direct download links within each Tweet in order to simplify the process of downloading the mp3 for new songs. However, because ocremix.org is non-profit and receives advertising money from the main website to pay for bandwidth, I chose to just link to their site to download out of politeness.</p>
+<p>This is what the final version of my implementation looks like:</p>
+<figure class="center"><img src="/images/ocremix/my_version.png"
+         alt="My Unofficial Twitter Feed picture" width="500" height="550"/><figcaption>
+            <h4>My Unofficial Twitter Feed</h4>
+        </figcaption>
+</figure>
+
+<p>Assuming this information fits into the 140 character limit, each one of these song tweets is composed of the following:</p>
+<pre><code>songId     - Integer, official remix number (currently at 2827 at the time of writing). 
+title      - Song title, given to the song by the remixers.
+remixers   - The remix artists that created the remix.
+composers  - The original artists that created the original song.
+youtubeUrl - Link to the remix on Youtube.
+writeupUrl - Official OCRemix link with remix information and a download link.
+</code></pre>
+<h2 id="programming-details">Programming Details</h2>
+<p>The actual project was implemented using Scala. The main libraries used were
+Dispatch for OAuth and talking with Twitter&rsquo;s API, and <a href="akka.io">Akka</a> for the periodic
+polling of the RSS feed.</p>
+<h4 id="fitting-info-into-a-tweet">Fitting Info into a Tweet</h4>
+<p>Trying to detect whether or not a Tweet will fit in 140 characters is tricky, especially
+if there are URLs in the Tweet. Twitter will automatically shorten URLs for you &ndash; the caveat
+is that the length of the shortened URL is what counts to the 140 character limit,
+and not the size of the original URL.</p>
+<p>So how do you figure out what the shortened URL size will be?
+Twitter happens to have a <a href="https://dev.twitter.com/docs/api/1.1/get/help/configuration">configuration API</a> that will tell you the current length
+of URLs (https links are one character longer than http). Since this number can
+change, it can&rsquo;t be hardcoded into the system. It&rsquo;s also not a number that is likely
+to change often.</p>
+<p>To take this varying URL length into consideration, the previously known shortened URL length is cached in memory for quick usage. I poll the configuration API
+every 24 hours to check for and update the URL length cache if necessary.</p>
+<p>This polling is done using Akka&rsquo;s scheduler:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#66d9ef">val</span> twitterConfigUpdaterSchedule <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">MySystem</span><span style="color:#f92672">().</span>scheduler<span style="color:#f92672">.</span>schedule<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>  initialDelay <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> seconds<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  frequency    <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">1</span> day<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  receiver     <span style="color:#66d9ef">=</span> configUpdater<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// If I was writing this again, I probably wouldn&#39;t use a &#34;doit&#34; message
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// for initiating an update.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  message      <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;doit&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>Sometimes there&rsquo;s just too much information to include in 140 characters. Going back
+to my design goal of making it easy to hear new songs, the Youtube link is the
+most important thing to include in the Tweet.</p>
+<p>Here&rsquo;s a shortened version of the code that figures out what to put into a tweet:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#75715e">// The youtube URL is in every possible one of these.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">lazy</span> <span style="color:#66d9ef">val</span> v0 <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Tweet</span><span style="color:#f92672">(</span>songId<span style="color:#f92672">,</span> title<span style="color:#f92672">,</span> remixers<span style="color:#f92672">,</span> composers<span style="color:#f92672">,</span> youtubeUrl<span style="color:#f92672">,</span> writeupUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">lazy</span> <span style="color:#66d9ef">val</span> v1 <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Tweet</span><span style="color:#f92672">(</span>songId<span style="color:#f92672">,</span> title<span style="color:#f92672">,</span> remixers<span style="color:#f92672">,</span> youtubeUrl<span style="color:#f92672">,</span> writeupUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">lazy</span> <span style="color:#66d9ef">val</span> v2 <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Tweet</span><span style="color:#f92672">(</span>songId<span style="color:#f92672">,</span> title<span style="color:#f92672">,</span> youtubeUrl<span style="color:#f92672">,</span> writeupUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">lazy</span> <span style="color:#66d9ef">val</span> v3 <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Tweet</span><span style="color:#f92672">(</span>songId<span style="color:#f92672">,</span> title<span style="color:#f92672">,</span> youtubeUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">lazy</span> <span style="color:#66d9ef">val</span> v4 <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Tweet</span><span style="color:#f92672">(</span>songId<span style="color:#f92672">,</span> youtubeUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Start with the longest possible, then slowly go to the shortest.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>v0<span style="color:#f92672">.</span>isTweetable<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  v0
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>v1<span style="color:#f92672">.</span>isTweetable<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  v1
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>v2<span style="color:#f92672">.</span>isTweetable<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  v2
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>v3<span style="color:#f92672">.</span>isTweetable<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  v3
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>  v4
+</span></span></code></pre></div><p>Unless Twitter plans on upping the shortened URL length to ~135 characters,
+or the ids start incrementing in several orders of magnitude per new remix,
+the smallest tweet content (<code>songId</code>,<code>youtubeUrl</code>) is good enough.</p>
+<p><em>There&rsquo;s a reason songId is included in all of the possibilities as well, more on that later.</em></p>
+<h4 id="receiving-error-notifications">Receiving Error Notifications</h4>
+<p>In order to make sure I received a notification whenever something breaks, every single
+method that could cause an error returns an <code>Either[_, String]</code>, where
+the <code>Right</code> case stores the successful result, and the <code>Left</code> case stores a string explaining what went wrong. Whenever a method is completed
+with the <code>Left</code> case, a direct message is sent to my own personal Twitter handle,
+with information about the failure.</p>
+<p>Here&rsquo;s what error messages look like when they reach my Twitter inbox:</p>
+<figure class="center"><img src="/images/ocremix/error_messages.png"
+         alt="Error Messages in my Twitter Inbox" width="600" height="450"/><figcaption>
+            <h4>All in one place</h4>
+        </figcaption>
+</figure>
+
+<p>Some examples of methods that might fail that I want to be
+alerted about if they do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>  <span style="color:#75715e">// Sends a private message to someone on Twitter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">def</span> directMessage<span style="color:#f92672">(</span>user<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">TwitterHandle</span><span style="color:#f92672">,</span> message<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Future</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Either</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span>,<span style="color:#66d9ef">String</span><span style="color:#f92672">]]</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Tweets a new post
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">def</span> statusesUpdate<span style="color:#f92672">(</span>tweet<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Tweetable</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Future</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Either</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span>,<span style="color:#66d9ef">String</span><span style="color:#f92672">]]</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Retrieves the last few Tweets from a user&#39;s timeline
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">def</span> userTimeline<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>    userId<span style="color:#66d9ef">:</span>     <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>    screenName<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>    count<span style="color:#66d9ef">:</span>      <span style="color:#66d9ef">Int</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Future</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Either</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span>,<span style="color:#66d9ef">String</span><span style="color:#f92672">]]</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Retrieves configuration information about Twitter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">def</span> helpConfiguration<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Future</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Either</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span>, <span style="color:#66d9ef">TwitterConfiguration</span><span style="color:#f92672">]]</span>
+</span></span></code></pre></div><p>(In retrospect, just using Future[String] would have been enough, since it
+stores the exception information in case of failure&hellip; but keep in mind I <em>did</em> write this code as a novice just as I started learning Scala).</p>
+<h4 id="polling-and-parsing-the-rss-feed">Polling and Parsing the RSS Feed</h4>
+<p>There&rsquo;s nothing particularly fancy about this part &ndash; it mostly consists of
+periodically polling <a href="http://ocremix.org/feeds/ten20/">OCRemix&rsquo;s RSS</a> and
+parsing out new songs to post on Twitter.</p>
+<p>Here&rsquo;s the code that schedules an RSS polling check every half hour:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#66d9ef">val</span> rssPollerSchedule <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">MySystem</span><span style="color:#f92672">().</span>scheduler<span style="color:#f92672">.</span>schedule<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>  initialDelay <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">0</span> seconds<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  frequency    <span style="color:#66d9ef">=</span> <span style="color:#ae81ff">30</span> minutes<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  receiver     <span style="color:#66d9ef">=</span> rssPoller<span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>  message      <span style="color:#66d9ef">=</span> <span style="color:#e6db74">&#34;doit&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>In order to figure out whether or not a song is new, I send a request to Twitter&rsquo;s API to retrieve the <code>@newOCRemixes</code> Twitter Timeline, check the last Tweet&rsquo;s <code>songId</code>, and make sure any new song I post happens
+to have a songId greater than the one on the timeline.</p>
+<h4 id="things-to-improve">Things to Improve</h4>
+<p>All of this <em>mostly</em> works. There are a few problems that were more complicated
+to solve than the time I wanted to spend on this.</p>
+<p>One of these problems happens to be that the RSS feed
+only stores the 10 latest new songs &ndash; if there&rsquo;s ever more than 10 songs posted
+within a 30 minute interval, any songs prior to the last 10 will not get posted.
+This has only happened once since I&rsquo;ve launched this project, but there&rsquo;s not
+much that can be done about it, short of asking for the OCRemix owners to not post
+so many songs at once, or up the number on their RSS feed.. or polling the website
+itself, and parsing the song URLs from raw HTML.</p>
+<p>Another problem (that hasn&rsquo;t actually been much trouble so far) is that the error
+message reporting is dependent on Twitter&rsquo;s API working. If there&rsquo;s a problem with
+the <code>directMessage</code> call to send me a message on errors, I won&rsquo;t be notified. I could have solved this by setting up a secondary notification system such as email, but errors happen so rarely that it wasn&rsquo;t worth the trouble.</p>
+<p>The third and last problem that I&rsquo;ve run into is actually not one I can do much about. The Twitter card feature for Youtube videos sometimes won&rsquo;t work &ndash; a few Tweets just won&rsquo;t embed a Youtube video into the post, even if there&rsquo;s a valid Youtube URL in the message.</p>
+<p>Having said that, I&rsquo;m pretty happy with the results &ndash; it&rsquo;s been working without a hitch for the last year since it&rsquo;s been deployed.</p>
+
+  </div>
+  <div class="post-footer">
+    
+  </div>
+</article>
+
+    </main>
+  </body>
+</html>
