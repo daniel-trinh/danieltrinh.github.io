@@ -1,7 +1,7 @@
 ---
 categories: maintainability
 comments: true
-date: "2013-11-09T00:00:00Z"
+date: '2013-11-09T00:00:00Z'
 title: 'Maintaining a Large Code Base, Part 2: Service Oriented Architecture'
 ---
 
@@ -12,7 +12,7 @@ split it up into multiple smaller, separate code bases that communicate with
 each other through well defined interfaces. When done with services
 at the server level, this is typically known as Service Oriented Architecture (SOA). SOA is just about applying the practices of code decoupling, clear interfaces, and code reuse at the scale of servers.
 
-## Service Oriented Architecture, AKA Don't Repeat Yourself for Servers
+#### Service Oriented Architecture, AKA Don't Repeat Yourself for Servers
 
 Twitter, Netflix, and Amazon all started out with monolithic, tightly coupled
 architectures in their infant years, and have all adopted the SOA approach as
@@ -24,17 +24,17 @@ their product into smaller services along the way.
 
 From an [interview with Alex Payne, a former Twitter engineer:](http://blog.redfin.com/devblog/2010/05/how_and_why_twitter_uses_scala.html)
 
->In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
->it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
->you just include more plugins and libraries, shoving them all in to the server.
->The result is a giant ball of mud.
+> In the enterprise world, a service-oriented architecture is not new, but in Web 2.0
+> it is crazy new science. With PHP or Ruby on Rails, when you need more functionality,
+> you just include more plugins and libraries, shoving them all in to the server.
+> The result is a giant ball of mud.
 >
->So *anything that has to do heavy lifting in our stack is going to be an independent service.*
+> So _anything that has to do heavy lifting in our stack is going to be an independent service._
 
 They split one code base that handled the entirety of Twitter's functionality into several
 services, including a queuing service, a social graph store, a people search service,
-and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their 
-services together. Their system has become much more reliable [ever](http://www.whatisfailwhale.info/) 
+and a tweet streaming service, using Thrift (common RPC network protocol library) to tie their
+services together. Their system has become much more reliable [ever](http://www.whatisfailwhale.info/)
 [since](https://blog.twitter.com/2013/new-tweets-per-second-record-and-how).
 
 Netflix [started off as a monolithic](http://techblog.netflix.com/2012/06/netflix-operations-part-i-going.html)
@@ -71,7 +71,7 @@ have done. Open source means more contributors (if it's good enough for others t
 more dogfooding. Or, if it's _really_ good, you could sell the service, like Amazon has done
 with AWS.
 
-## Some Basic Service to Service Examples
+#### Some Basic Service to Service Examples
 
 An example of SOA that's perhaps more well known is the movement of
 generating GUIs from the server to the client, and having the server side code serve pure data
@@ -86,15 +86,15 @@ That same API could also be [split into a separate](http://spray.io/wjax/#/41) s
 So what if you aren't building servers or applications that have to talk over the network? The same principle of splitting things into separate code bases and communicating through a common
 protocol can be applied to smaller scale programs as well.
 
-## The Future of IDEs
+#### The Future of IDEs
 
-Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you've ever thought to yourself, 
-_"man, I really like the IDE auto completion, incremental compilation, and refactoring tools, 
+Ever used an IDE such as Eclipse, Intellij Idea, or Visual Studio? If you've ever thought to yourself,
+_"man, I really like the IDE auto completion, incremental compilation, and refactoring tools,
 but I wish I could be using Emacs / Vim / Sublime Text / Microsoft Word for the text editing instead."_, it's technically possible to write an IDE that would let you do this, even if the aforementioned IDEs can't.
 
-[Gocode](https://github.com/nsf/gocode), 
-[Ensime](https://github.com/aemoncannon/ensime), and 
-[Slime](http://common-lisp.net/project/slime/) are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate 
+[Gocode](https://github.com/nsf/gocode),
+[Ensime](https://github.com/aemoncannon/ensime), and
+[Slime](http://common-lisp.net/project/slime/) are IDE daemons for the Golang, Scala, and Common Lisp programming languages, respectively. They communicate
 over a protocol to any capable text editor -- the daemon receives code from the editor and some commands, executes the commands on the specified code, and returns any necessary text deltas back to the text editor.
 
 Speaking of programming languages...

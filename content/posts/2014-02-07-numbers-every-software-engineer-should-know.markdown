@@ -1,14 +1,14 @@
 ---
 categories: performance snippet
 comments: true
-date: "2014-02-07T00:00:00Z"
+date: '2014-02-07T00:00:00Z'
 title: Numbers Every Software Engineer Should Know
 ---
 
 This article is a collection of runtime and memory usage numbers that
 might be useful to keep in mind when building performance critical software.
 
-## Big-O Absolute Numbers
+#### Big-O Absolute Numbers
 
 This chart shows how well or poorly certain algorithm complexities scale
 when `n` grows.
@@ -24,9 +24,9 @@ when `n` grows.
     2^n        | 256       | 1.844...E19 | -             | -
     n!         | 40320     | 1.268...E89 | -             | -
 
-## Runtime Performance Numbers
+#### Runtime Performance Numbers
 
-#### Big-O Runtime Performance Numbers
+##### Big-O Runtime Performance Numbers
 
 This chart shows how well or poorly certain algorithm complexities scale when `n` grows,
 in the context of CPU runtime. Exponentials and factorial algorithms clearly
@@ -48,7 +48,7 @@ do not scale to values of `n` of any significant size.
     ms      = 1,000 µs
     forever = way way longer than the lifetime of the universe of 13.798 billion years
 
-#### Latency Numbers
+##### Latency Numbers
 
 This chart shows the round trip latency for certain computing actions.
 
@@ -73,9 +73,9 @@ This chart shows the round trip latency for certain computing actions.
     + Originally by Peter Norvig: http://norvig.com/21-days.html#answers
     + Retrieved from Jonas Bonér: https://gist.github.com/jboner/2841832
 
-## Memory and Storage Numbers
+#### Memory and Storage Numbers
 
-#### Big-O Storage size
+##### Big-O Storage size
 
 This chart shows how well or poorly certain algorithm complexities scale when `n` grows,
 in the context of memory and storage.
@@ -100,7 +100,7 @@ in the context of memory and storage.
     exabyte = 1024 petabytes, or 1 million computers with 1 terabyte HDs
     ...     = there isn't enough room on earth to store the required computers.
 
-#### Powers of Two Table
+##### Powers of Two Table
 
 This chart shows how much memory is required to store bits in powers of two. For example, it takes
 4GB of memory to store 2^32 bits in memory, and would require 16GB of memory to store

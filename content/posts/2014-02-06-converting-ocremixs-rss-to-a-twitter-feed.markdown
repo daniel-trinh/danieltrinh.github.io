@@ -1,7 +1,7 @@
 ---
 categories: scala project
 comments: true
-date: "2014-02-06T00:00:00Z"
+date: '2014-02-06T00:00:00Z'
 title: Converting the OverClocked Remix RSS to a Twitter Feed
 ---
 
@@ -11,7 +11,7 @@ This post is about a server daemon project I wrote a year ago -- it polls the RS
 
 The rest of this post goes into the design and development of this project, so if that doesn't sound interesting to you, now is a good time to hop off this train.
 
-## Motivation and design
+#### Motivation and design
 
 I've been listening to music off of OCRemix ever since 2002. The way I used
 to find new songs was to repeatedly visit their website, look for new songs,
@@ -51,18 +51,18 @@ Since I was already using Twitter as a news feed, I chose that as my target plat
 receiving new song notifications. The following is a list of some of the things I wanted
 out of my Twitter feed system.
 
-> * Only new songs should be posted -- no reposts.
-> 
-> * Only songs should be posted -- nothing else but new OCRemix songs.
-> 
-> * Every single song must contain a link to the Youtube song link.
-> 
-> * Show the video game, remixer, and composer the song is remixed from,
->    if it fits in 140 characters along with the Youtube link.
-> 
-> * This system should not require any input from me (automated).
-> 
-> * If something is broken, I should be notified of the breakage.
+> - Only new songs should be posted -- no reposts.
+>
+> - Only songs should be posted -- nothing else but new OCRemix songs.
+>
+> - Every single song must contain a link to the Youtube song link.
+>
+> - Show the video game, remixer, and composer the song is remixed from,
+>   if it fits in 140 characters along with the Youtube link.
+>
+> - This system should not require any input from me (automated).
+>
+> - If something is broken, I should be notified of the breakage.
 
 Initially, I wanted to implement direct download links within each Tweet in order to simplify the process of downloading the mp3 for new songs. However, because ocremix.org is non-profit and receives advertising money from the main website to pay for bandwidth, I chose to just link to their site to download out of politeness.
 
@@ -72,21 +72,20 @@ This is what the final version of my implementation looks like:
 
 Assuming this information fits into the 140 character limit, each one of these song tweets is composed of the following:
 
-    songId     - Integer, official remix number (currently at 2827 at the time of writing). 
+    songId     - Integer, official remix number (currently at 2827 at the time of writing).
     title      - Song title, given to the song by the remixers.
     remixers   - The remix artists that created the remix.
     composers  - The original artists that created the original song.
     youtubeUrl - Link to the remix on Youtube.
     writeupUrl - Official OCRemix link with remix information and a download link.
 
-
-## Programming Details
+#### Programming Details
 
 The actual project was implemented using Scala. The main libraries used were
 Dispatch for OAuth and talking with Twitter's API, and [Akka](akka.io) for the periodic
 polling of the RSS feed.
 
-#### Fitting Info into a Tweet
+##### Fitting Info into a Tweet
 
 Trying to detect whether or not a Tweet will fit in 140 characters is tricky, especially
 if there are URLs in the Tweet. Twitter will automatically shorten URLs for you -- the caveat
@@ -100,7 +99,7 @@ change, it can't be hardcoded into the system. It's also not a number that is li
 to change often.
 
 To take this varying URL length into consideration, the previously known shortened URL length is cached in memory for quick usage. I poll the configuration API
-every 24 hours to check for and update the URL length cache if necessary. 
+every 24 hours to check for and update the URL length cache if necessary.
 
 This polling is done using Akka's scheduler:
 
@@ -148,7 +147,7 @@ the smallest tweet content (`songId`,`youtubeUrl`) is good enough.
 
 _There's a reason songId is included in all of the possibilities as well, more on that later._
 
-#### Receiving Error Notifications
+##### Receiving Error Notifications
 
 In order to make sure I received a notification whenever something breaks, every single
 method that could cause an error returns an `Either[_, String]`, where
@@ -166,17 +165,17 @@ alerted about if they do:
 ```scala
   // Sends a private message to someone on Twitter
   def directMessage(user: TwitterHandle, message: String): Future[Either[String,String]]
-  
+
   // Tweets a new post
   def statusesUpdate(tweet: Tweetable): Future[Either[String,String]]
-  
+
   // Retrieves the last few Tweets from a user's timeline
   def userTimeline(
     userId:     String,
     screenName: String,
     count:      Int
   ): Future[Either[String,String]]
-  
+
   // Retrieves configuration information about Twitter
   def helpConfiguration: Future[Either[String, TwitterConfiguration]]
 ```
@@ -184,7 +183,7 @@ alerted about if they do:
 (In retrospect, just using Future[String] would have been enough, since it
 stores the exception information in case of failure... but keep in mind I _did_ write this code as a novice just as I started learning Scala).
 
-#### Polling and Parsing the RSS Feed
+##### Polling and Parsing the RSS Feed
 
 There's nothing particularly fancy about this part -- it mostly consists of
 periodically polling [OCRemix's RSS](http://ocremix.org/feeds/ten20/) and
@@ -204,7 +203,7 @@ val rssPollerSchedule = MySystem().scheduler.schedule(
 In order to figure out whether or not a song is new, I send a request to Twitter's API to retrieve the `@newOCRemixes` Twitter Timeline, check the last Tweet's `songId`, and make sure any new song I post happens
 to have a songId greater than the one on the timeline.
 
-#### Things to Improve
+##### Things to Improve
 
 All of this _mostly_ works. There are a few problems that were more complicated
 to solve than the time I wanted to spend on this.
@@ -213,7 +212,7 @@ One of these problems happens to be that the RSS feed
 only stores the 10 latest new songs -- if there's ever more than 10 songs posted
 within a 30 minute interval, any songs prior to the last 10 will not get posted.
 This has only happened once since I've launched this project, but there's not
-much that can be done about it, short of asking for the OCRemix owners to not post 
+much that can be done about it, short of asking for the OCRemix owners to not post
 so many songs at once, or up the number on their RSS feed.. or polling the website
 itself, and parsing the song URLs from raw HTML.
 

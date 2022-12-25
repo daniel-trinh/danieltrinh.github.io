@@ -1,13 +1,13 @@
 ---
 categories: maintainability
 comments: true
-date: "2013-11-05T00:00:00Z"
+date: '2013-11-05T00:00:00Z'
 title: 'Maintaining a Large Code Base, Part 1: Backstory and the Basics'
 ---
 
 What's one of the most important quality of good software?
 
-*It's maintainable.*
+_It's maintainable._
 
 It doesn't matter how well optimized the code is if the code base isn't maintainable.
 If the code can't be refactored and improved, the software project is stuck in time --
@@ -39,7 +39,7 @@ those assignments.
 
 Fast forward a few years, the largest code base I've worked on has gone from
 being somewhere around 10,000 source lines of code (SLOC) in Java, a naturally verbose language,
-to the largest code base being a 900,000 SLOC service written in *Ruby*,
+to the largest code base being a 900,000 SLOC service written in _Ruby_,
 a [duck-type-able](http://stackoverflow.com/a/4205396/1093160) dynamic language that's known for its conciseness.
 That line count doesn't include comments or blank spaces, as you might expect from "source lines,
 and that code base also only refers to one code base -- it was one of many.
@@ -51,12 +51,13 @@ I've learned many lessons in having to work with a code base of that size, and I
 this to help software engineers, including myself, to think about code maintainability to the same degree they might
 think about code correctness or performance, if not higher.
 
-## The Basics
+#### The Basics
 
 Let's get the obvious software practices that happen to help code maintainability
 out of the way first. These should be familiar with anyone who's been coding for a while.
 
-#### Don't Repeat Yourself
+##### Don't Repeat Yourself
+
 What do you do when you've got a function duplicated 100 times over 100 different
 files, and you want to modify the behavior of that common code? Refactor the common code into one function somewhere,
 and have the code in those 100 files use that common code.
@@ -73,7 +74,8 @@ it causes maintenance headaches later on.
 Sometimes this isn't always a good thing, especially if the code refactoring involves
 metaprogramming or other language features that tend to make code less readable.
 
-#### Eat Your Own Dog Food (Dogfooding)
+##### Eat Your Own Dog Food (Dogfooding)
+
 If nobody has ever used your application before shipping it to customers, how can
 you be sure it's any good?
 
@@ -91,7 +93,8 @@ products that are already good (icecream) don't need to be improved.
 Dogfooding doesn't have to be limited to using something at the scale of products, though.
 Testing could be considered a form of dogfooding...
 
-#### Write Unit Tests
+##### Write Unit Tests
+
 How can you refactor and change code reliably if there are no checks in place to
 make sure the application is working as expected after the change?
 
@@ -107,13 +110,15 @@ integration tests, and then it's your manual testers, then customers. Each step
 along the way is typically slower than the previous, with
 [having customers do your testing](http://blogs.msdn.com/cfs-filesystemfile.ashx/__key/communityserver-blogs-components-weblogfiles/00-00-01-32-02-metablogapi/7317.image_5F00_0F65063B.png just ship it) generally much slower than running a unit test.
 
-#### Document Your Code
+##### Document Your Code
+
 Sometimes it's a lot easier to explain in words what your code does than
 it is to try to read the code itself, especially if your programming language is not
 particularly concise (more on this in part 3). A few comments here and there
 can greatly increase the understandability of your code.
 
-#### Do Code Reviews and Design Reviews
+##### Do Code Reviews and Design Reviews
+
 So how do you go about figuring out what code needs to be better documented?
 
 Ever write a piece of software, come back to it later some time later,

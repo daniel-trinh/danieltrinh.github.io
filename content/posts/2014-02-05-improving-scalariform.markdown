@@ -1,7 +1,7 @@
 ---
 categories: scala project
 comments: true
-date: "2014-02-05T00:00:00Z"
+date: '2014-02-05T00:00:00Z'
 published: true
 title: Improving Scalariform, The Scala Source Formatter
 ---
@@ -18,7 +18,7 @@ val sugarCubes = 20
 val isCaffeinated = false
 
 def energyBoost = {
-if (caffeinated) 
+if (caffeinated)
 100 * sugarCubes
 else
 0
@@ -27,13 +27,14 @@ else
 ```
 
 After running Scalariform:
+
 ```scala
 class Coffee {
   val sugarCubes = 20
   val isCaffeinated = false
 
   def energyBoost = {
-    if (caffeinated) 
+    if (caffeinated)
       100 * sugarCubes
     else
       0
@@ -60,7 +61,7 @@ def showInput[A](
 case class Cake(
   icingFlavor: Flavor = Vanilla,
   cakeFlavor: Flavor = Chocolate,
-  
+
   candles: Int = 1,
   layers: Int = 3,
   iceCream: Boolean = False
@@ -88,11 +89,11 @@ def showInput[A](
   initial:     A
 ): Option[A]
 
-// Two newlines will result in separate alignment groups 
+// Two newlines will result in separate alignment groups
 case class Cake(
   icingFlavor: Flavor = Vanilla,
   cakeFlavor:  Flavor = Chocolate,
-  
+
   candles:  Int     = 1,
   layers:   Int     = 3,
   iceCream: Boolean = False
@@ -123,7 +124,7 @@ for available formatting options.
 
 Since this is an ongoing project, there will be more updates to come.
 
-<!-- 
+<!--
 The rest of this article goes into great detail about my motivation to work on Scalariform,
 the importance of auto-formatters in general, and some of the design dilemmas of working on Scalariform.
 
@@ -133,7 +134,7 @@ is important.
 ## The Importance of Auto-Formatting
 [Many](https://code.google.com/p/google-styleguide/ "Google's style guides for various languages") [companies](http://twitter.github.io/effectivescala/ "Twitter's style guide for Scala") [have](https://github.com/styleguide/ruby "Github's style guide for Ruby") coding style guidelines for a reason. [I wrote about this](/blog/2014/01/26/maintaining-a-large-code-base-part-3/) in great detail in my article about programming languages and code bases. My general conclusion is that having many ways of visualizing and formatting source code
 is not a good thing -- the more ways to format the code, the more ways a reader of the
-code will have to learn to read the code to understand it. 
+code will have to learn to read the code to understand it.
 
 The following code example is perfectly valid scala code... but it's not at all readable.
 
@@ -143,7 +144,7 @@ class Coffee {
   val isCaffeinated = false
 
   def energyBoost = {
-    if (caffeinated) 
+    if (caffeinated)
       100 * sugarCubes
     else
       0
@@ -158,7 +159,7 @@ class Coffee {
   val isCaffeinated = false
 
   def energyBoost = {
-    if (caffeinated) 
+    if (caffeinated)
       100 * sugarCubes
     else
       0
@@ -169,7 +170,7 @@ class Coffee {
 Having something that will take care of the formatting for me is great -- spending time thinking about formatting, manually formatting code, and spending time
 on code reviews about formatting is not a very productive use of time when there are actual business product related problems to solve, and especially since it's a problem that can be solved forever by using an auto-formatter along the lines of Scalariform or gofmt.
 
-#### Formatting Ubiquity
+###### Formatting Ubiquity
 
 Having an auto formatter to enforce a consistent style in a code base is important, because
 once the maintainers of that code base have become accustomed to that style, they won't have to "readjust" their eyes to get used to. If the auto formatter for a programming language is nearly ubiquitous amongst those who use it, such as with Golang's [gofmt](http://research.swtch.com/gofmt), then even better -- users across the language will be able to read anyone's elses code that also uses the formatter.
@@ -178,14 +179,14 @@ While auto formatters such as Scalariform can't check everything that is in a st
 (it won't automatically reformat your imperative, state-mutating code into a functional style automatically), it will take care of the visual aesthetics formatting problem for you.
 
 
-#### Scalariform Dillemas 
+###### Scalariform Dillemas
 Scalariform has many configuration options, which goes against the design philosophy
 of having one canonical representation so that everyone can quickly get accustomed to the same formatting. It also happens to significantly complicate the actual Scalariform formatting code. With Scalariform, there is one
 global shared state -- the output source code. More configuration options means
 more potentials to clash, and more special cases.
 
 Unfortunately, Scala programmers come from many different backgrounds, and there isn't
-a global consensus on what formatting styles programmers prefer. 
+a global consensus on what formatting styles programmers prefer.
 
 When I was gathering feedback for new Scalariform features, I posted an informal poll on Reddit, to gather feedback about 3 different formatting styles:
 
