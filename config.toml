@@ -18,11 +18,6 @@ theme = 'm10c'
     url = "linkedin.com/in/daniel-trinh-31422926"
 
     [[params.social]]
-    icon = "email"
-    name = "My Email"
-    url = "mailto:me.danieltrinh@gmail.com"
-
-    [[params.social]]
     icon = "resume"
     name = "My Resume"
     url = "/downloads/resume.pdf"
